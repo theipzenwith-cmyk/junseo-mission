@@ -11,14 +11,14 @@
 
 body{
 margin:0;
-background:#000;
+background:black;
 color:white;
 font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto;
+text-align:center;
 }
 
 .header{
-padding:60px 20px 30px;
-text-align:center;
+padding-top:60px;
 }
 
 .title{
@@ -33,25 +33,29 @@ color:#aaa;
 }
 
 .container{
-padding:25px;
+padding:30px 20px;
 }
 
 .card{
-
-height:140px;
-border-radius:22px;
 
 display:flex;
 align-items:center;
 justify-content:center;
 
-color:white;
-font-size:22px;
+height:140px;
+
+border-radius:26px;
+
+font-size:24px;
 font-weight:700;
+
+color:white;
 
 text-decoration:none;
 
-box-shadow:0 8px 20px rgba(0,0,0,0.6);
+margin-bottom:20px;
+
+box-shadow:0 10px 25px rgba(0,0,0,0.4);
 
 }
 
@@ -77,9 +81,10 @@ transform:scale(0.97);
 
 </div>
 
+
 <div class="container">
 
-<a id="visionCard" class="card" href="vision.html">
+<a class="card" href="vision.html">
 시력 테스트 👀
 </a>
 
@@ -89,20 +94,31 @@ transform:scale(0.97);
 
 </div>
 
+
 <script>
 
 const colors = [
+
 "#ff6b6b",
 "#4dabf7",
 "#38d9a9",
 "#ffd43b",
 "#9775fa",
-"#ffa94d"
+"#ffa94d",
+"#ff8787",
+"#69db7c"
+
 ];
+
+const cards = document.querySelectorAll(".card");
+
+cards.forEach(card => {
 
 const randomColor = colors[Math.floor(Math.random()*colors.length)];
 
-document.getElementById("visionCard").style.background = randomColor;
+card.style.background = randomColor;
+
+});
 
 </script>
 
