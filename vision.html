@@ -5,41 +5,52 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
-<title>시력 숫자 놀이</title>
+<title>시력 테스트</title>
 
 <style>
 
 body{
 margin:0;
+background:white;
 font-family:Arial, sans-serif;
 text-align:center;
-background:#ffffff;
 }
 
-h1{
+.title{
+margin-top:40px;
+font-size:28px;
+font-weight:bold;
+}
+
+.board{
 margin-top:60px;
 }
 
-.number{
-font-size:120px;
+.line{
+margin:15px 0;
 font-weight:bold;
 color:black;
-margin-top:100px;
 }
 
+.l1{font-size:90px;}
+.l2{font-size:70px;}
+.l3{font-size:55px;}
+.l4{font-size:40px;}
+.l5{font-size:28px;}
+
 button{
-margin-top:80px;
+margin-top:60px;
 font-size:20px;
-padding:15px 40px;
+padding:14px 30px;
 border:none;
-border-radius:10px;
-background:#4a7cff;
+border-radius:8px;
+background:black;
 color:white;
 cursor:pointer;
 }
 
-button:active{
-background:#355de0;
+button:hover{
+background:#333;
 }
 
 </style>
@@ -48,36 +59,47 @@ background:#355de0;
 
 <body>
 
-<h1>시력 숫자 게임</h1>
+<div class="title">
+시력 테스트
+</div>
 
-<div class="number" id="number">5</div>
+<div class="board">
 
-<button onclick="nextNumber()">다음 숫자</button>
+<div class="line l1" id="n1">8</div>
+<div class="line l2" id="n2">3 5</div>
+<div class="line l3" id="n3">7 2 9</div>
+<div class="line l4" id="n4">4 6 1 8</div>
+<div class="line l5" id="n5">2 5 7 3 9</div>
+
+</div>
+
+<button onclick="newTest()">다음 검사</button>
 
 <script>
 
-let size = 120;
-
-function nextNumber(){
-
-const random = Math.floor(Math.random()*9)+1;
-
-size -= 10;
-
-if(size < 40){
-size = 120;
+function rand(){
+return Math.floor(Math.random()*9)+1;
 }
 
-const el = document.getElementById("number");
+function newTest(){
 
-el.innerText = random;
-el.style.fontSize = size + "px";
-el.style.color = "black";
+document.getElementById("n1").innerText = rand();
+
+document.getElementById("n2").innerText =
+rand()+" "+rand();
+
+document.getElementById("n3").innerText =
+rand()+" "+rand()+" "+rand();
+
+document.getElementById("n4").innerText =
+rand()+" "+rand()+" "+rand()+" "+rand();
+
+document.getElementById("n5").innerText =
+rand()+" "+rand()+" "+rand()+" "+rand()+" "+rand();
 
 }
 
 </script>
 
 </body>
-
 </html>
