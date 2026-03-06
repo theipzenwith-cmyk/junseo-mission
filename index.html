@@ -1,6 +1,5 @@
 <!DOCTYPE html>
 <html lang="ko">
-
 <head>
 
 <meta charset="UTF-8">
@@ -12,26 +11,57 @@
 
 body{
 margin:0;
-padding:0;
-font-family:Arial, sans-serif;
-background:#ffffff;
+font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto;
+background:#f2f2f2;
+}
+
+.header{
+padding:40px 20px 20px 20px;
 text-align:center;
 }
 
-.container{
-padding:60px 20px;
+.title{
+font-size:36px;
+font-weight:800;
 }
 
-h1{
-font-size:40px;
-margin-bottom:20px;
-color:#000;
+.subtitle{
+margin-top:10px;
+font-size:18px;
+color:#666;
 }
 
-p{
+.grid{
+
+display:grid;
+grid-template-columns:1fr 1fr;
+gap:16px;
+padding:20px;
+
+}
+
+.card{
+
+height:120px;
+border-radius:20px;
+color:white;
 font-size:20px;
-color:#555;
+font-weight:700;
+display:flex;
+align-items:center;
+justify-content:center;
+text-decoration:none;
+
+box-shadow:0 6px 15px rgba(0,0,0,0.15);
+
 }
+
+.blue{background:linear-gradient(135deg,#6da8ff,#3c6df0);}
+.orange{background:linear-gradient(135deg,#ffb36d,#ff7a3c);}
+.green{background:linear-gradient(135deg,#8fd694,#4bbf73);}
+.purple{background:linear-gradient(135deg,#a98fff,#6a5cff);}
+.red{background:linear-gradient(135deg,#ff8a8a,#ff4d4d);}
+.yellow{background:linear-gradient(135deg,#ffd86d,#ffb33c);}
 
 </style>
 
@@ -39,17 +69,38 @@ color:#555;
 
 <body>
 
-<div class="container">
+<div class="header">
 
-<h1>준서 놀이터</h1>
+<div class="title">준서 놀이터</div>
 
-<p>게임을 준비중입니다 🙂</p>
-  <br><br>
+<div class="subtitle">재미있는 두뇌 게임 🎮</div>
 
-<a href="vision.html">
-<button style="font-size:20px;padding:15px 30px;">
-시력 게임 시작
-</button>
+</div>
+
+<div class="grid">
+
+<a class="card blue" href="vision.html">
+시력 테스트 👀
+</a>
+
+<a class="card orange" href="#">
+기억력 게임 🧠
+</a>
+
+<a class="card green" href="#">
+숫자 찾기 🔢
+</a>
+
+<a class="card purple" href="#">
+색깔 맞추기 🎨
+</a>
+
+<a class="card red" href="#">
+집중력 테스트 ⚡
+</a>
+
+<a class="card yellow" href="#">
+두뇌 퀴즈 ❓
 </a>
 
 </div>
