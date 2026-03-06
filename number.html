@@ -1,0 +1,582 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>숫자 풍선 팡</title>
+<style>
+  *{
+    box-sizing:border-box;
+    -webkit-tap-highlight-color:transparent;
+  }
+
+  body{
+    margin:0;
+    font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,sans-serif;
+    background:linear-gradient(180deg,#0f172a 0%, #111827 100%);
+    color:white;
+    overflow:hidden;
+  }
+
+  .topbar{
+    position:fixed;
+    top:0;
+    left:0;
+    right:0;
+    z-index:10;
+    padding:16px 14px 12px;
+    background:rgba(0,0,0,0.28);
+    backdrop-filter:blur(8px);
+  }
+
+  .title{
+    font-size:26px;
+    font-weight:900;
+    text-align:center;
+    margin-bottom:10px;
+  }
+
+  .info{
+    display:flex;
+    gap:8px;
+    justify-content:center;
+    flex-wrap:wrap;
+  }
+
+  .pill{
+    background:rgba(255,255,255,0.12);
+    border:1px solid rgba(255,255,255,0.12);
+    border-radius:999px;
+    padding:8px 14px;
+    font-size:15px;
+    font-weight:700;
+  }
+
+  .targetBox{
+    margin-top:10px;
+    text-align:center;
+  }
+
+  .targetLabel{
+    font-size:16px;
+    color:#cbd5e1;
+    margin-bottom:6px;
+  }
+
+  .targetNumber{
+    display:inline-flex;
+    align-items:center;
+    justify-content:center;
+    width:82px;
+    height:82px;
+    border-radius:50%;
+    background:linear-gradient(180deg,#f59e0b,#f97316);
+    color:white;
+    font-size:42px;
+    font-weight:900;
+    box-shadow:0 10px 30px rgba(249,115,22,0.35);
+  }
+
+  #gameArea{
+    position:relative;
+    width:100vw;
+    height:100vh;
+    padding-top:190px;
+    overflow:hidden;
+  }
+
+  .balloon{
+    position:absolute;
+    width:82px;
+    height:98px;
+    border:none;
+    cursor:pointer;
+    user-select:none;
+    transform-origin:center;
+    animation:floatUpDown 2.4s ease-in-out infinite;
+    background:none;
+    padding:0;
+  }
+
+  .balloonBody{
+    width:82px;
+    height:82px;
+    border-radius:50%;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    font-size:34px;
+    font-weight:900;
+    color:#fff;
+    box-shadow:
+      inset -8px -10px 0 rgba(0,0,0,0.08),
+      inset 10px 10px 0 rgba(255,255,255,0.16),
+      0 10px 20px rgba(0,0,0,0.22);
+    position:relative;
+  }
+
+  .balloonBody::after{
+    content:"";
+    position:absolute;
+    right:16px;
+    top:14px;
+    width:14px;
+    height:20px;
+    border-radius:50%;
+    background:rgba(255,255,255,0.28);
+    transform:rotate(20deg);
+  }
+
+  .tail{
+    width:0;
+    height:0;
+    border-left:8px solid transparent;
+    border-right:8px solid transparent;
+    border-top:14px solid rgba(255,255,255,0.9);
+    margin: -4px auto 0;
+    filter:drop-shadow(0 2px 1px rgba(0,0,0,0.15));
+  }
+
+  .string{
+    width:2px;
+    height:14px;
+    background:rgba(255,255,255,0.8);
+    margin:0 auto;
+    border-radius:2px;
+  }
+
+  .wrong{
+    animation:shake 0.28s linear 1;
+  }
+
+  .pop{
+    animation:pop 0.26s ease-out forwards !important;
+    pointer-events:none;
+  }
+
+  .particle{
+    position:absolute;
+    width:12px;
+    height:12px;
+    border-radius:50%;
+    pointer-events:none;
+    animation:burst 0.5s ease-out forwards;
+  }
+
+  .centerModal{
+    position:fixed;
+    inset:0;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    z-index:20;
+    background:rgba(0,0,0,0.48);
+    padding:24px;
+  }
+
+  .panel{
+    width:min(92vw,420px);
+    background:#111827;
+    border:1px solid rgba(255,255,255,0.08);
+    border-radius:28px;
+    padding:24px 20px;
+    text-align:center;
+    box-shadow:0 20px 60px rgba(0,0,0,0.45);
+  }
+
+  .panel h2{
+    margin:0 0 10px;
+    font-size:28px;
+  }
+
+  .panel p{
+    margin:0;
+    color:#d1d5db;
+    line-height:1.55;
+    font-size:16px;
+  }
+
+  .bigGuide{
+    margin:18px 0 12px;
+    font-size:18px;
+    font-weight:800;
+    color:#fde68a;
+  }
+
+  .startBtn, .homeBtn{
+    margin-top:18px;
+    width:100%;
+    border:none;
+    border-radius:18px;
+    padding:16px 18px;
+    font-size:20px;
+    font-weight:900;
+    cursor:pointer;
+  }
+
+  .startBtn{
+    background:#22c55e;
+    color:white;
+  }
+
+  .homeBtn{
+    background:#374151;
+    color:white;
+  }
+
+  .toast{
+    position:fixed;
+    left:50%;
+    bottom:24px;
+    transform:translateX(-50%);
+    background:rgba(0,0,0,0.72);
+    color:#fff;
+    padding:12px 16px;
+    border-radius:999px;
+    font-weight:800;
+    z-index:30;
+    font-size:16px;
+    opacity:0;
+    pointer-events:none;
+    transition:opacity .2s ease;
+  }
+
+  .toast.show{
+    opacity:1;
+  }
+
+  @keyframes floatUpDown{
+    0%{ transform:translateY(0px); }
+    50%{ transform:translateY(-8px); }
+    100%{ transform:translateY(0px); }
+  }
+
+  @keyframes shake{
+    0%{ transform:translateX(0); }
+    25%{ transform:translateX(-6px); }
+    50%{ transform:translateX(6px); }
+    75%{ transform:translateX(-4px); }
+    100%{ transform:translateX(0); }
+  }
+
+  @keyframes pop{
+    0%{ transform:scale(1); opacity:1; }
+    40%{ transform:scale(1.15); opacity:1; }
+    100%{ transform:scale(0.1); opacity:0; }
+  }
+
+  @keyframes burst{
+    from{
+      transform:translate(0,0) scale(1);
+      opacity:1;
+    }
+    to{
+      transform:translate(var(--dx), var(--dy)) scale(0.3);
+      opacity:0;
+    }
+  }
+</style>
+</head>
+<body>
+
+<div class="topbar">
+  <div class="title">숫자 풍선 팡!</div>
+  <div class="info">
+    <div class="pill">단계 <span id="level">1</span></div>
+    <div class="pill">점수 <span id="score">0</span></div>
+    <div class="pill">남은 시간 <span id="time">20</span>초</div>
+    <div class="pill">남은 정답 <span id="remain">0</span>개</div>
+  </div>
+
+  <div class="targetBox">
+    <div class="targetLabel">이 숫자를 모두 찾아 터뜨리세요</div>
+    <div class="targetNumber" id="targetNumber">3</div>
+  </div>
+</div>
+
+<div id="gameArea"></div>
+
+<div class="centerModal" id="startModal">
+  <div class="panel">
+    <h2>같은 숫자를 찾아요</h2>
+    <p>
+      위에 있는 목표 숫자와 같은 풍선을 빠르게 찾아 터뜨리세요.<br>
+      맞으면 숫자를 읽어주고, 틀리면 다시 도전!
+    </p>
+    <div class="bigGuide">예: 위에 4가 나오면 4 풍선을 모두 누르기</div>
+    <button class="startBtn" id="startBtn">시작하기</button>
+    <button class="homeBtn" onclick="location.href='index.html'">홈으로</button>
+  </div>
+</div>
+
+<div class="centerModal" id="resultModal" style="display:none;">
+  <div class="panel">
+    <h2 id="resultTitle">성공!</h2>
+    <p id="resultText">잘했어요!</p>
+    <button class="startBtn" id="nextBtn">다음 단계</button>
+    <button class="homeBtn" onclick="location.reload()">처음부터 다시</button>
+  </div>
+</div>
+
+<div class="toast" id="toast">다시!</div>
+
+<script>
+  const gameArea = document.getElementById("gameArea");
+  const targetNumberEl = document.getElementById("targetNumber");
+  const scoreEl = document.getElementById("score");
+  const timeEl = document.getElementById("time");
+  const remainEl = document.getElementById("remain");
+  const levelEl = document.getElementById("level");
+  const startModal = document.getElementById("startModal");
+  const resultModal = document.getElementById("resultModal");
+  const resultTitle = document.getElementById("resultTitle");
+  const resultText = document.getElementById("resultText");
+  const nextBtn = document.getElementById("nextBtn");
+  const toast = document.getElementById("toast");
+
+  const numberWords = {
+    1:"하나", 2:"둘", 3:"셋", 4:"넷", 5:"다섯",
+    6:"여섯", 7:"일곱", 8:"여덟", 9:"아홉"
+  };
+
+  const colors = [
+    "#ef4444","#f97316","#f59e0b","#10b981",
+    "#06b6d4","#3b82f6","#8b5cf6","#ec4899"
+  ];
+
+  let level = 1;
+  let score = 0;
+  let target = 1;
+  let remain = 0;
+  let timer = null;
+  let timeLeft = 20;
+  let playing = false;
+
+  function speak(text){
+    if(!("speechSynthesis" in window)) return;
+    window.speechSynthesis.cancel();
+    const utter = new SpeechSynthesisUtterance(text);
+    utter.lang = "ko-KR";
+    utter.rate = 0.92;
+    utter.pitch = 1.0;
+    window.speechSynthesis.speak(utter);
+  }
+
+  function showToast(text){
+    toast.textContent = text;
+    toast.classList.add("show");
+    clearTimeout(showToast._timer);
+    showToast._timer = setTimeout(() => {
+      toast.classList.remove("show");
+    }, 700);
+  }
+
+  function randomInt(min, max){
+    return Math.floor(Math.random() * (max - min + 1)) + min;
+  }
+
+  function shuffle(arr){
+    for(let i = arr.length - 1; i > 0; i--){
+      const j = Math.floor(Math.random() * (i + 1));
+      [arr[i], arr[j]] = [arr[j], arr[i]];
+    }
+    return arr;
+  }
+
+  function getRangeByLevel(){
+    if(level <= 2) return 3;
+    if(level <= 4) return 5;
+    if(level <= 6) return 7;
+    return 9;
+  }
+
+  function createParticles(x, y, color){
+    for(let i=0; i<8; i++){
+      const p = document.createElement("div");
+      p.className = "particle";
+      p.style.left = x + "px";
+      p.style.top = y + "px";
+      p.style.background = color;
+      p.style.setProperty("--dx", `${randomInt(-45,45)}px`);
+      p.style.setProperty("--dy", `${randomInt(-45,45)}px`);
+      document.body.appendChild(p);
+      setTimeout(() => p.remove(), 520);
+    }
+  }
+
+  function clearBalloons(){
+    gameArea.innerHTML = "";
+  }
+
+  function createBalloon(num, x, y){
+    const balloon = document.createElement("button");
+    balloon.className = "balloon";
+    balloon.style.left = x + "px";
+    balloon.style.top = y + "px";
+    balloon.style.animationDuration = `${2 + Math.random() * 1.6}s`;
+
+    const color = colors[randomInt(0, colors.length - 1)];
+
+    balloon.innerHTML = `
+      <div class="balloonBody" style="background:${color}">
+        ${num}
+      </div>
+      <div class="tail"></div>
+      <div class="string"></div>
+    `;
+
+    balloon.addEventListener("click", () => {
+      if(!playing) return;
+
+      if(Number(num) === target){
+        const rect = balloon.getBoundingClientRect();
+        const cx = rect.left + rect.width / 2;
+        const cy = rect.top + rect.height / 2;
+
+        balloon.classList.add("pop");
+        createParticles(cx, cy, color);
+        speak(numberWords[num] || String(num));
+
+        setTimeout(() => balloon.remove(), 240);
+
+        score += 10;
+        remain -= 1;
+        scoreEl.textContent = score;
+        remainEl.textContent = remain;
+
+        if(remain <= 0){
+          endRound(true);
+        }
+      }else{
+        balloon.classList.remove("wrong");
+        void balloon.offsetWidth;
+        balloon.classList.add("wrong");
+        showToast("다시!");
+        speak("다시");
+      }
+    });
+
+    return balloon;
+  }
+
+  function buildRound(){
+    clearBalloons();
+
+    const maxNum = getRangeByLevel();
+    target = randomInt(1, maxNum);
+    targetNumberEl.textContent = target;
+
+    const totalBalloons = Math.min(12 + level * 2, 24);
+    const targetCount = Math.min(3 + Math.floor(level / 2), 7);
+
+    remain = targetCount;
+    remainEl.textContent = remain;
+    levelEl.textContent = level;
+
+    const nums = [];
+
+    for(let i=0; i<targetCount; i++) nums.push(target);
+
+    while(nums.length < totalBalloons){
+      let n = randomInt(1, maxNum);
+      nums.push(n);
+    }
+
+    shuffle(nums);
+
+    const placed = [];
+    const areaTop = 200;
+    const areaBottom = window.innerHeight - 120;
+    const areaRight = window.innerWidth - 92;
+
+    nums.forEach((num) => {
+      let x, y, safe = false, tries = 0;
+
+      while(!safe && tries < 200){
+        x = randomInt(10, Math.max(10, areaRight));
+        y = randomInt(areaTop, Math.max(areaTop + 10, areaBottom));
+        safe = true;
+
+        for(const pos of placed){
+          const dx = pos.x - x;
+          const dy = pos.y - y;
+          if(Math.sqrt(dx*dx + dy*dy) < 78){
+            safe = false;
+            break;
+          }
+        }
+        tries++;
+      }
+
+      placed.push({x, y});
+      gameArea.appendChild(createBalloon(num, x, y));
+    });
+
+    timeLeft = Math.max(10, 20 - Math.floor(level / 2));
+    timeEl.textContent = timeLeft;
+  }
+
+  function startTimer(){
+    clearInterval(timer);
+    timer = setInterval(() => {
+      timeLeft--;
+      timeEl.textContent = timeLeft;
+
+      if(timeLeft <= 0){
+        endRound(false);
+      }
+    }, 1000);
+  }
+
+  function startRound(){
+    playing = true;
+    buildRound();
+    startTimer();
+
+    setTimeout(() => {
+      speak(`${target}`);
+    }, 350);
+  }
+
+  function endRound(success){
+    playing = false;
+    clearInterval(timer);
+
+    if(success){
+      resultTitle.textContent = "성공!";
+      resultText.textContent = `${target}를 모두 찾았어요! 점수는 ${score}점이에요.`;
+      nextBtn.textContent = "다음 단계";
+      nextBtn.onclick = () => {
+        resultModal.style.display = "none";
+        level++;
+        startRound();
+      };
+    }else{
+      resultTitle.textContent = "시간 종료!";
+      resultText.textContent = `이번 단계는 아쉬워요. 다시 해볼까요? 현재 점수는 ${score}점이에요.`;
+      nextBtn.textContent = "다시 하기";
+      nextBtn.onclick = () => {
+        resultModal.style.display = "none";
+        startRound();
+      };
+    }
+
+    resultModal.style.display = "flex";
+  }
+
+  document.getElementById("startBtn").addEventListener("click", () => {
+    startModal.style.display = "none";
+    level = 1;
+    score = 0;
+    scoreEl.textContent = score;
+    startRound();
+  });
+
+  window.addEventListener("resize", () => {
+    if(playing){
+      buildRound();
+    }
+  });
+</script>
+</body>
+</html>
