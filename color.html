@@ -14,7 +14,7 @@ margin:0;
 height:100vh;
 font-family:-apple-system,BlinkMacSystemFont,"Segoe UI";
 color:white;
-transition:background 0.35s;
+transition:background 0.4s;
 }
 
 /* 중앙 텍스트 */
@@ -29,7 +29,7 @@ transform:translate(-50%,-50%);
 
 text-align:center;
 
-font-size:48px;
+font-size:52px;
 font-weight:700;
 
 cursor:pointer;
@@ -37,8 +37,8 @@ cursor:pointer;
 }
 
 .en{
-font-size:32px;
-margin-top:10px;
+font-size:34px;
+margin-top:12px;
 opacity:0.9;
 }
 
@@ -99,17 +99,9 @@ animation:bounce 0.35s ease;
 
 @keyframes bounce{
 
-0%{
-transform:translate(-50%,-50%) scale(0.9);
-}
-
-50%{
-transform:translate(-50%,-50%) scale(1.08);
-}
-
-100%{
-transform:translate(-50%,-50%) scale(1);
-}
+0%{transform:translate(-50%,-50%) scale(0.9);}
+50%{transform:translate(-50%,-50%) scale(1.08);}
+100%{transform:translate(-50%,-50%) scale(1);}
 
 }
 
@@ -133,21 +125,49 @@ transform:translate(-50%,-50%) scale(1);
 
 <script>
 
-/* 색 목록 */
+/* 컬러 목록 (35개) */
 
 const colors = [
 
-{ko:"빨간색",en:"red",color:"#ff6b6b"},
-{ko:"파란색",en:"blue",color:"#339af0"},
-{ko:"노란색",en:"yellow",color:"#ffd43b"},
-{ko:"초록색",en:"green",color:"#51cf66"},
-{ko:"보라색",en:"purple",color:"#845ef7"},
-{ko:"주황색",en:"orange",color:"#ff922b"},
-{ko:"분홍색",en:"pink",color:"#ff6b9d"}
+{ko:"빨간색",en:"red",color:"#ff3b30"},
+{ko:"파란색",en:"blue",color:"#007aff"},
+{ko:"노란색",en:"yellow",color:"#ffcc00"},
+{ko:"초록색",en:"green",color:"#34c759"},
+{ko:"보라색",en:"purple",color:"#af52de"},
+{ko:"주황색",en:"orange",color:"#ff9500"},
+{ko:"분홍색",en:"pink",color:"#ff2d55"},
+{ko:"하늘색",en:"sky blue",color:"#5ac8fa"},
+{ko:"민트색",en:"mint",color:"#2dd4bf"},
+{ko:"라임색",en:"lime",color:"#a3e635"},
+{ko:"연두색",en:"light green",color:"#9ef01a"},
+{ko:"자홍색",en:"magenta",color:"#ff00ff"},
+{ko:"남색",en:"navy",color:"#001f3f"},
+{ko:"청록색",en:"teal",color:"#008080"},
+{ko:"연보라",en:"lavender",color:"#b57edc"},
+{ko:"연핑크",en:"light pink",color:"#ffb6c1"},
+{ko:"살구색",en:"apricot",color:"#fbceb1"},
+{ko:"베이지",en:"beige",color:"#f5f5dc"},
+{ko:"아이보리",en:"ivory",color:"#fffff0"},
+{ko:"금색",en:"gold",color:"#ffd700"},
+{ko:"은색",en:"silver",color:"#c0c0c0"},
+{ko:"갈색",en:"brown",color:"#8b4513"},
+{ko:"초콜릿색",en:"chocolate",color:"#7b3f00"},
+{ko:"와인색",en:"wine",color:"#722f37"},
+{ko:"버건디",en:"burgundy",color:"#800020"},
+{ko:"코랄",en:"coral",color:"#ff7f50"},
+{ko:"터키색",en:"turquoise",color:"#40e0d0"},
+{ko:"에메랄드",en:"emerald",color:"#50c878"},
+{ko:"올리브",en:"olive",color:"#808000"},
+{ko:"차콜",en:"charcoal",color:"#36454f"},
+{ko:"연회색",en:"light gray",color:"#d3d3d3"},
+{ko:"진회색",en:"dark gray",color:"#555555"},
+{ko:"검은색",en:"black",color:"#111111"},
+{ko:"흰색",en:"white",color:"#f9f9f9"},
+{ko:"연하늘색",en:"baby blue",color:"#bde0fe"}
 
 ];
 
-/* 시작 랜덤 */
+/* 랜덤 시작 */
 
 let index = Math.floor(Math.random()*colors.length);
 
@@ -155,16 +175,17 @@ let index = Math.floor(Math.random()*colors.length);
 
 const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
 
-/* 효과음 함수 */
+/* 랜덤 효과음 */
 
 function playSound(){
 
 const sounds = [
 
-{freq:600,time:0.15},   // 뽕
-{freq:900,time:0.12},   // 뾰로
-{freq:700,time:0.2},    // 띠링
-{freq:500,time:0.18}    // 팅
+{freq:600,time:0.15},
+{freq:900,time:0.12},
+{freq:700,time:0.2},
+{freq:500,time:0.18},
+{freq:750,time:0.16}
 
 ];
 
@@ -176,7 +197,7 @@ const gain = audioCtx.createGain();
 osc.type="sine";
 osc.frequency.value=s.freq;
 
-gain.gain.value=0.2;
+gain.gain.value=0.25;
 
 osc.connect(gain);
 gain.connect(audioCtx.destination);
@@ -189,7 +210,7 @@ osc.stop();
 
 }
 
-/* 화면 렌더 */
+/* 렌더 */
 
 function render(){
 
@@ -208,7 +229,7 @@ center.classList.remove("bounce");
 void center.offsetWidth;
 center.classList.add("bounce");
 
-/* 랜덤 효과음 */
+/* 효과음 */
 
 playSound();
 
