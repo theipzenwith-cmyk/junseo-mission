@@ -1,382 +1,100 @@
 <!DOCTYPE html>
 <html lang="ko">
 <head>
-
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>준서 놀이터</title>
 
-<title>준서 미션 놀이터</title>
-
-<style id="site-style">
+<style>
 
 body{
 margin:0;
-font-family:-apple-system,BlinkMacSystemFont,Segoe UI;
-background:#0f172a;
-color:white;
+font-family:Arial, sans-serif;
+background:#f5f7fb;
+text-align:center;
 }
 
 header{
-padding:24px;
-font-size:34px;
-font-weight:700;
+padding:40px 20px 10px;
+font-size:32px;
+font-weight:bold;
 }
 
-.grid{
-display:grid;
-grid-template-columns:1fr 1fr;
-gap:20px;
+.sub{
+color:#666;
+margin-bottom:30px;
+}
+
+.container{
+max-width:500px;
+margin:auto;
 padding:20px;
 }
 
-.card{
-border-radius:24px;
-padding:24px;
-height:200px;
-display:flex;
-align-items:flex-end;
-font-size:26px;
-font-weight:700;
-cursor:pointer;
-}
-
-.add{
-border:3px dashed rgba(255,255,255,0.2);
-border-radius:24px;
-display:flex;
-align-items:center;
-justify-content:center;
-font-size:60px;
-cursor:pointer;
-height:200px;
-}
-
-.modal{
-position:fixed;
-top:0;
-left:0;
-width:100%;
-height:100%;
-background:black;
-display:none;
-flex-direction:column;
-}
-
-.topbar{
-display:flex;
-justify-content:space-between;
-padding:16px;
-background:#111;
-}
-
-.topbar button{
-background:#333;
-border:none;
-color:white;
-padding:10px 14px;
-border-radius:8px;
-cursor:pointer;
-font-size:16px;
-}
-
-iframe{
-flex:1;
-border:none;
+.game{
+display:block;
 background:white;
+padding:25px;
+margin:15px 0;
+border-radius:20px;
+font-size:20px;
+font-weight:bold;
+text-decoration:none;
+color:#000;
+box-shadow:0 6px 15px rgba(0,0,0,0.1);
+transition:0.2s;
 }
 
-.editor{
-padding:20px;
-background:#111;
-display:none;
-flex-direction:column;
-gap:12px;
+.game:hover{
+transform:scale(1.03);
 }
 
-.editor input,
-.editor textarea{
-width:100%;
-padding:12px;
-border-radius:8px;
-border:none;
-font-size:16px;
+.icon{
+font-size:30px;
+margin-bottom:8px;
 }
 
-.save{
-background:#2563eb;
-color:white;
-border:none;
-padding:12px;
-border-radius:10px;
-cursor:pointer;
-font-size:16px;
-}
-
-.siteBtn{
-position:fixed;
-bottom:24px;
-right:24px;
-background:#22c55e;
-padding:14px 18px;
-border:none;
-border-radius:12px;
-color:white;
-font-size:16px;
-cursor:pointer;
-}
-
-.siteEditor{
-position:fixed;
-top:0;
-left:0;
-width:100%;
-height:100%;
-background:black;
-display:none;
-flex-direction:column;
-padding:20px;
-}
-
-.siteEditor textarea{
-flex:1;
-background:#111;
-color:white;
-border:none;
-padding:20px;
-font-family:monospace;
-font-size:14px;
-}
-
-@media (max-width:700px){
-
-.grid{
-grid-template-columns:1fr;
-}
-
-.card{
-height:220px;
-font-size:28px;
-}
-
-.add{
-height:220px;
-font-size:70px;
-}
-
+.footer{
+margin-top:40px;
+font-size:13px;
+color:#888;
 }
 
 </style>
-
 </head>
 
 <body>
 
-<header id="site-title">준서 미션 놀이터</header>
+<header>
+준서 놀이터
+</header>
 
-<div id="grid" class="grid"></div>
-
-<div id="modal" class="modal">
-
-<div class="topbar">
-
-<button onclick="closeGame()">✕</button>
-
-<div>
-<button onclick="editMission()">편집</button>
-<button onclick="deleteMission()">삭제</button>
+<div class="sub">
+아이와 함께 즐기는 두뇌 놀이
 </div>
 
-</div>
+<div class="container">
 
-<iframe id="game"></iframe>
+<a href="vision.html" class="game">
+<div class="icon">👀</div>
+시력 숫자 놀이
+</a>
 
-<div id="editor" class="editor">
+<a href="memory.html" class="game">
+<div class="icon">🧠</div>
+기억력 게임
+</a>
 
-<input id="titleInput" placeholder="미션 제목">
-
-<textarea id="codeInput" rows="12" placeholder="게임 HTML 코드"></textarea>
-
-<button class="save" onclick="saveEdit()">저장</button>
-
-</div>
+<a href="number.html" class="game">
+<div class="icon">🔢</div>
+숫자 찾기
+</a>
 
 </div>
 
-<button class="siteBtn" onclick="openSiteEditor()">⚙ 사이트 수정</button>
-
-<div id="siteEditor" class="siteEditor">
-
-<h2>사이트 설정</h2>
-
-<label>사이트 제목</label>
-<input id="siteTitleInput">
-
-<label>CSS 스타일</label>
-<textarea id="styleInput"></textarea>
-
-<button class="save" onclick="saveSite()">저장</button>
-
+<div class="footer">
+아이와 함께 재미있게 놀아보세요 🙂
 </div>
-
-<script>
-
-const colors=[
-"#3b82f6",
-"#22c55e",
-"#f97316",
-"#8b5cf6",
-"#06b6d4",
-"#f59e0b"
-]
-
-let missions=JSON.parse(localStorage.getItem("missions")||"[]")
-let currentIndex=null
-
-function randomColor(){
-return colors[Math.floor(Math.random()*colors.length)]
-}
-
-function render(){
-
-const grid=document.getElementById("grid")
-grid.innerHTML=""
-
-missions.forEach((m,i)=>{
-
-const card=document.createElement("div")
-
-card.className="card"
-card.style.background=m.color
-card.innerText=m.title
-
-card.onclick=()=>openGame(i)
-
-grid.appendChild(card)
-
-})
-
-const add=document.createElement("div")
-
-add.className="add"
-add.innerText="+"
-
-add.onclick=addMission
-
-grid.appendChild(add)
-
-}
-
-function addMission(){
-
-const title=prompt("미션 제목")
-
-if(!title)return
-
-const code=prompt("게임 HTML 코드")
-
-if(!code)return
-
-missions.push({
-title:title,
-code:code,
-color:randomColor()
-})
-
-save()
-render()
-
-}
-
-function openGame(i){
-
-currentIndex=i
-
-document.getElementById("modal").style.display="flex"
-
-document.getElementById("game").srcdoc=missions[i].code
-
-}
-
-function closeGame(){
-
-document.getElementById("modal").style.display="none"
-document.getElementById("editor").style.display="none"
-document.getElementById("game").style.display="block"
-
-}
-
-function editMission(){
-
-const m=missions[currentIndex]
-
-document.getElementById("editor").style.display="flex"
-document.getElementById("game").style.display="none"
-
-document.getElementById("titleInput").value=m.title
-document.getElementById("codeInput").value=m.code
-
-}
-
-function saveEdit(){
-
-missions[currentIndex].title=document.getElementById("titleInput").value
-missions[currentIndex].code=document.getElementById("codeInput").value
-
-save()
-render()
-
-document.getElementById("editor").style.display="none"
-document.getElementById("game").style.display="block"
-
-}
-
-function deleteMission(){
-
-if(confirm("삭제할까요?")){
-
-missions.splice(currentIndex,1)
-
-save()
-closeGame()
-render()
-
-}
-
-}
-
-function save(){
-
-localStorage.setItem("missions",JSON.stringify(missions))
-
-}
-
-function openSiteEditor(){
-
-document.getElementById("siteEditor").style.display="flex"
-
-document.getElementById("siteTitleInput").value=
-document.getElementById("site-title").innerText
-
-document.getElementById("styleInput").value=
-document.getElementById("site-style").innerHTML
-
-}
-
-function saveSite(){
-
-document.getElementById("site-title").innerText=
-document.getElementById("siteTitleInput").value
-
-document.getElementById("site-style").innerHTML=
-document.getElementById("styleInput").value
-
-document.getElementById("siteEditor").style.display="none"
-
-}
-
-render()
-
-</script>
 
 </body>
 </html>
