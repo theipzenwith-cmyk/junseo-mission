@@ -1,0 +1,87 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+<title>색깔 미션</title>
+
+<style>
+
+body{
+margin:0;
+height:100vh;
+display:flex;
+align-items:center;
+justify-content:center;
+font-family:-apple-system,BlinkMacSystemFont,"Segoe UI";
+color:white;
+text-align:center;
+}
+
+.center{
+font-size:42px;
+font-weight:700;
+line-height:1.4;
+}
+
+.en{
+font-size:28px;
+opacity:0.9;
+}
+
+</style>
+
+</head>
+
+<body onclick="nextColor()">
+
+<div class="center">
+
+<div id="ko"></div>
+<div id="en" class="en"></div>
+
+</div>
+
+<script>
+
+const colors = [
+
+{ko:"분홍색",en:"pink",color:"#ff6b9d"},
+{ko:"파란색",en:"blue",color:"#339af0"},
+{ko:"초록색",en:"green",color:"#51cf66"},
+{ko:"노란색",en:"yellow",color:"#ffd43b"},
+{ko:"보라색",en:"purple",color:"#845ef7"},
+{ko:"주황색",en:"orange",color:"#ff922b"},
+{ko:"빨간색",en:"red",color:"#ff6b6b"}
+
+]
+
+function speak(text){
+
+const msg = new SpeechSynthesisUtterance(text)
+msg.lang="ko-KR"
+speechSynthesis.speak(msg)
+
+}
+
+function nextColor(){
+
+const c = colors[Math.floor(Math.random()*colors.length)]
+
+document.body.style.background = c.color
+
+document.getElementById("ko").innerText = c.ko
+document.getElementById("en").innerText = c.en
+
+speak(c.ko + ", " + c.en)
+
+}
+
+nextColor()
+
+</script>
+
+</body>
+</html>
