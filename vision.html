@@ -1,0 +1,83 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+<title>시력 숫자 놀이</title>
+
+<style>
+
+body{
+margin:0;
+font-family:Arial, sans-serif;
+text-align:center;
+background:#ffffff;
+}
+
+h1{
+margin-top:60px;
+}
+
+.number{
+font-size:120px;
+font-weight:bold;
+color:black;
+margin-top:100px;
+}
+
+button{
+margin-top:80px;
+font-size:20px;
+padding:15px 40px;
+border:none;
+border-radius:10px;
+background:#4a7cff;
+color:white;
+cursor:pointer;
+}
+
+button:active{
+background:#355de0;
+}
+
+</style>
+
+</head>
+
+<body>
+
+<h1>시력 숫자 게임</h1>
+
+<div class="number" id="number">5</div>
+
+<button onclick="nextNumber()">다음 숫자</button>
+
+<script>
+
+let size = 120;
+
+function nextNumber(){
+
+const random = Math.floor(Math.random()*9)+1;
+
+size -= 10;
+
+if(size < 40){
+size = 120;
+}
+
+const el = document.getElementById("number");
+
+el.innerText = random;
+el.style.fontSize = size + "px";
+el.style.color = "black";
+
+}
+
+</script>
+
+</body>
+
+</html>
