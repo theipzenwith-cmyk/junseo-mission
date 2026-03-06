@@ -16,52 +16,49 @@ background:#f2f2f2;
 }
 
 .header{
-padding:40px 20px 20px 20px;
+padding:50px 20px 20px;
 text-align:center;
 }
 
 .title{
-font-size:36px;
+font-size:34px;
 font-weight:800;
 }
 
 .subtitle{
-margin-top:10px;
+margin-top:8px;
 font-size:18px;
 color:#666;
 }
 
-.grid{
-
-display:grid;
-grid-template-columns:1fr 1fr;
-gap:16px;
-padding:20px;
-
+.container{
+padding:25px;
 }
 
 .card{
 
-height:120px;
-border-radius:20px;
-color:white;
-font-size:20px;
-font-weight:700;
+height:140px;
+border-radius:22px;
+
+background:linear-gradient(135deg,#6da8ff,#3c6df0);
+
 display:flex;
 align-items:center;
 justify-content:center;
+
+color:white;
+font-size:22px;
+font-weight:700;
+
 text-decoration:none;
 
-box-shadow:0 6px 15px rgba(0,0,0,0.15);
+box-shadow:0 8px 20px rgba(0,0,0,0.15);
 
 }
 
-.blue{background:linear-gradient(135deg,#6da8ff,#3c6df0);}
-.orange{background:linear-gradient(135deg,#ffb36d,#ff7a3c);}
-.green{background:linear-gradient(135deg,#8fd694,#4bbf73);}
-.purple{background:linear-gradient(135deg,#a98fff,#6a5cff);}
-.red{background:linear-gradient(135deg,#ff8a8a,#ff4d4d);}
-.yellow{background:linear-gradient(135deg,#ffd86d,#ffb33c);}
+.card:active{
+transform:scale(0.97);
+}
 
 </style>
 
@@ -71,40 +68,24 @@ box-shadow:0 6px 15px rgba(0,0,0,0.15);
 
 <div class="header">
 
-<div class="title">준서 놀이터</div>
+<div class="title">
+준서 놀이터
+</div>
 
-<div class="subtitle">재미있는 두뇌 게임 🎮</div>
+<div class="subtitle">
+재미있는 두뇌 게임 🎮
+</div>
 
 </div>
 
-<div class="grid">
 
-<a class="card blue" href="vision.html">
+<div class="container">
+
+<a class="card" href="vision.html">
 시력 테스트 👀
-</a>
-
-<a class="card orange" href="#">
-기억력 게임 🧠
-</a>
-
-<a class="card green" href="#">
-숫자 찾기 🔢
-</a>
-
-<a class="card purple" href="#">
-색깔 맞추기 🎨
-</a>
-
-<a class="card red" href="#">
-집중력 테스트 ⚡
-</a>
-
-<a class="card yellow" href="#">
-두뇌 퀴즈 ❓
 </a>
 
 </div>
 
 </body>
-
 </html>
