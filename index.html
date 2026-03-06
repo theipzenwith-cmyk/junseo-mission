@@ -41,8 +41,6 @@ padding:25px;
 height:140px;
 border-radius:22px;
 
-background:#1c1c1e;
-
 display:flex;
 align-items:center;
 justify-content:center;
@@ -54,8 +52,6 @@ font-weight:700;
 text-decoration:none;
 
 box-shadow:0 8px 20px rgba(0,0,0,0.6);
-
-border:1px solid #333;
 
 }
 
@@ -83,11 +79,28 @@ transform:scale(0.97);
 
 <div class="container">
 
-<a class="card" href="vision.html">
+<a id="visionCard" class="card" href="vision.html">
 시력 테스트 👀
 </a>
 
 </div>
+
+<script>
+
+const colors = [
+"#ff6b6b",
+"#4dabf7",
+"#38d9a9",
+"#ffd43b",
+"#9775fa",
+"#ffa94d"
+];
+
+const randomColor = colors[Math.floor(Math.random()*colors.length)];
+
+document.getElementById("visionCard").style.background = randomColor;
+
+</script>
 
 </body>
 
