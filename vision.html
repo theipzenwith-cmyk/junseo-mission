@@ -30,6 +30,7 @@ margin-top:60px;
 margin:15px 0;
 font-weight:bold;
 color:black;
+cursor:pointer;
 }
 
 .l1{font-size:90px;}
@@ -65,11 +66,11 @@ background:#333;
 
 <div class="board">
 
-<div class="line l1" id="n1">8</div>
-<div class="line l2" id="n2">3 5</div>
-<div class="line l3" id="n3">7 2 9</div>
-<div class="line l4" id="n4">4 6 1 8</div>
-<div class="line l5" id="n5">2 5 7 3 9</div>
+<div class="line l1" onclick="clickNumber(this)">8</div>
+<div class="line l2" onclick="clickNumber(this)">3 5</div>
+<div class="line l3" onclick="clickNumber(this)">7 2 9</div>
+<div class="line l4" onclick="clickNumber(this)">4 6 1 8</div>
+<div class="line l5" onclick="clickNumber(this)">2 5 7 3 9</div>
 
 </div>
 
@@ -77,29 +78,56 @@ background:#333;
 
 <script>
 
+const emojis = ["😀","🐶","🍎","🚗","⭐","🐱","🍌","🎈","🍕"];
+
 function rand(){
 return Math.floor(Math.random()*9)+1;
 }
 
 function newTest(){
 
-document.getElementById("n1").innerText = rand();
+const lines = document.querySelectorAll(".line");
 
-document.getElementById("n2").innerText =
-rand()+" "+rand();
+lines[0].innerText = rand();
 
-document.getElementById("n3").innerText =
-rand()+" "+rand()+" "+rand();
+lines[1].innerText = rand()+" "+rand();
 
-document.getElementById("n4").innerText =
-rand()+" "+rand()+" "+rand()+" "+rand();
+lines[2].innerText = rand()+" "+rand()+" "+rand();
 
-document.getElementById("n5").innerText =
-rand()+" "+rand()+" "+rand()+" "+rand()+" "+rand();
+lines[3].innerText = rand()+" "+rand()+" "+rand()+" "+rand();
+
+lines[4].innerText = rand()+" "+rand()+" "+rand()+" "+rand()+" "+rand();
+
+}
+
+function speak(text){
+
+const msg = new SpeechSynthesisUtterance(text);
+msg.lang = "ko-KR";
+speechSynthesis.speak(msg);
+
+}
+
+function clickNumber(el){
+
+const number = el.innerText.replace(/ /g,"");
+
+speak(number);
+
+let emojiLine = "";
+
+for(let i=0;i<number.length;i++){
+
+emojiLine += emojis[Math.floor(Math.random()*emojis.length)]+" ";
+
+}
+
+el.innerText = emojiLine;
 
 }
 
 </script>
 
 </body>
+
 </html>
