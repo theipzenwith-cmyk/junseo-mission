@@ -3,360 +3,411 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
 <title>숫자 찾기 게임</title>
 
 <style>
+
 body{
-  margin:0;
-  background:#071a3a;
-  font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,sans-serif;
-  color:white;
-  text-align:center;
-  overflow:hidden;
+margin:0;
+background:#071a3a;
+font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto;
+color:white;
+text-align:center;
+overflow:hidden;
 }
+
+/* 홈 버튼 */
 
 .home{
-  position:absolute;
-  top:20px;
-  left:20px;
-  width:50px;
-  height:50px;
-  border-radius:50%;
-  background:rgba(255,255,255,.14);
-  display:flex;
-  align-items:center;
-  justify-content:center;
-  font-size:24px;
-  cursor:pointer;
-  z-index:20;
-  backdrop-filter:blur(8px);
+
+position:absolute;
+top:20px;
+left:20px;
+
+width:48px;
+height:48px;
+
+border-radius:50%;
+background:rgba(255,255,255,.15);
+
+display:flex;
+align-items:center;
+justify-content:center;
+
+font-size:24px;
+cursor:pointer;
+
+z-index:10;
+
 }
+
+/* 제목 */
 
 .title{
-  margin-top:40px;
-  font-size:34px;
-  font-weight:800;
+margin-top:40px;
+font-size:34px;
+font-weight:800;
 }
+
+/* 미션 */
 
 .mission{
-  margin-top:10px;
-  font-size:28px;
-  color:#ffd166;
-  font-weight:800;
-  padding:0 18px;
+margin-top:10px;
+font-size:28px;
+color:#ffd166;
+font-weight:700;
 }
 
-.stageText{
-  margin-top:8px;
-  font-size:16px;
-  color:rgba(255,255,255,.72);
-  font-weight:600;
+.stage{
+margin-top:6px;
+font-size:15px;
+opacity:.8;
 }
+
+/* 게임 영역 */
 
 #game{
-  position:relative;
-  width:100vw;
-  height:82vh;
-  overflow:hidden;
+position:relative;
+width:100vw;
+height:80vh;
 }
+
+/* 시작 버튼 */
+
+.startBtn{
+
+position:absolute;
+bottom:40px;
+left:50%;
+
+transform:translateX(-50%);
+
+background:#ffd166;
+color:#000;
+
+padding:16px 28px;
+
+border-radius:30px;
+
+font-weight:800;
+font-size:18px;
+
+cursor:pointer;
+
+box-shadow:0 6px 20px rgba(0,0,0,.35);
+
+}
+
+/* 숫자 원 */
 
 .ball{
-  position:absolute;
-  border-radius:50%;
-  display:flex;
-  align-items:center;
-  justify-content:center;
-  font-weight:800;
-  color:white;
-  cursor:pointer;
-  user-select:none;
-  box-shadow:
-    0 10px 24px rgba(0,0,0,.32),
-    inset 0 10px 14px rgba(255,255,255,.14);
-  transform-origin:center;
+
+position:absolute;
+
+border-radius:50%;
+
+display:flex;
+align-items:center;
+justify-content:center;
+
+font-weight:800;
+color:white;
+
+cursor:pointer;
+
+box-shadow:
+0 10px 24px rgba(0,0,0,.35),
+inset 0 10px 14px rgba(255,255,255,.15);
+
 }
 
-.ball::before{
-  content:"";
-  position:absolute;
-  top:14%;
-  left:20%;
-  width:22%;
-  height:22%;
-  border-radius:50%;
-  background:rgba(255,255,255,.18);
-  filter:blur(1px);
-}
-
-.ball:active{
-  transform:scale(.94);
-}
+/* 터짐 */
 
 .pop{
-  animation:pop .22s forwards;
+animation:pop .25s forwards;
 }
 
 @keyframes pop{
-  0%{transform:scale(1);}
-  45%{transform:scale(1.18);}
-  100%{transform:scale(0);opacity:0;}
+
+0%{transform:scale(1)}
+40%{transform:scale(1.3)}
+100%{transform:scale(0);opacity:0}
+
 }
+
 </style>
+
 </head>
+
 <body>
 
 <div class="home" onclick="location.href='index.html'">✕</div>
 
 <div class="title">숫자 찾기 게임</div>
+
 <div class="mission" id="mission"></div>
-<div class="stageText" id="stageText"></div>
+<div class="stage" id="stageText"></div>
 
 <div id="game"></div>
 
+<div id="startBtn" class="startBtn">시작하기</div>
+
 <script>
-const game = document.getElementById("game");
-const mission = document.getElementById("mission");
-const stageText = document.getElementById("stageText");
 
-let balls = [];
-let stage = 1;
-let target = 0;
-let previousTarget = null;
-let isTransitioning = false;
+const game=document.getElementById("game")
+const mission=document.getElementById("mission")
+const stageText=document.getElementById("stageText")
+const startBtn=document.getElementById("startBtn")
 
-const stageCount = [5, 7, 10, 15, 20, 25, 30];
-const stageMaxNumber = [9, 12, 20, 30, 50, 70, 99];
+let balls=[]
+let stage=1
+let target=0
+let previousTarget=null
 
-const colors = [
-  "#ff595e", "#ff924c", "#ffca3a",
-  "#8ac926", "#52b788", "#1982c4", "#6a4c93"
-];
+let tiltX=0
+let tiltY=0
 
-const popSound = new Audio("https://assets.mixkit.co/sfx/preview/mixkit-balloon-pop-1980.mp3");
+const stageCount=[5,7,10,15,20,25,30]
+
+const colors=[
+"#ff595e","#ff924c","#ffca3a",
+"#8ac926","#52b788","#1982c4","#6a4c93"
+]
+
+const popSound=new Audio("https://assets.mixkit.co/sfx/preview/mixkit-balloon-pop-1980.mp3")
+
+/* 음성 */
 
 function speak(text){
-  if(!("speechSynthesis" in window)) return;
-  const msg = new SpeechSynthesisUtterance(text);
-  msg.lang = "ko-KR";
-  msg.rate = 0.95;
-  window.speechSynthesis.cancel();
-  window.speechSynthesis.speak(msg);
+
+const msg=new SpeechSynthesisUtterance(text)
+
+msg.lang="ko-KR"
+
+speechSynthesis.cancel()
+speechSynthesis.speak(msg)
+
 }
 
-function pickUniqueNumbers(total, max){
-  const nums = [];
-  while(nums.length < total){
-    const n = Math.floor(Math.random() * max) + 1;
-    if(!nums.includes(n)) nums.push(n);
-  }
-  return nums;
+/* 자이로 시작 */
+
+function enableGyro(){
+
+window.addEventListener("deviceorientation",(e)=>{
+
+tiltX=e.gamma*0.05
+tiltY=e.beta*0.05
+
+})
+
 }
+
+/* 시작 버튼 */
+
+startBtn.onclick=async()=>{
+
+startBtn.style.display="none"
+
+/* 아이폰 센서 권한 */
+
+if(typeof DeviceOrientationEvent.requestPermission==="function"){
+
+const permission=await DeviceOrientationEvent.requestPermission()
+
+if(permission==="granted") enableGyro()
+
+}else{
+
+enableGyro()
+
+}
+
+startStage()
+
+}
+
+/* 숫자 생성 */
+
+function uniqueNumbers(total){
+
+const nums=[]
+
+while(nums.length<total){
+
+let n=Math.floor(Math.random()*99)+1
+
+if(!nums.includes(n)) nums.push(n)
+
+}
+
+return nums
+
+}
+
+/* 목표 숫자 */
 
 function pickTarget(nums){
-  let next;
-  do{
-    next = nums[Math.floor(Math.random() * nums.length)];
-  }while(nums.length > 1 && next === previousTarget);
 
-  previousTarget = next;
-  return next;
+let t
+
+do{
+
+t=nums[Math.floor(Math.random()*nums.length)]
+
+}while(t===previousTarget)
+
+previousTarget=t
+
+return t
+
 }
 
-function getBallSize(currentStage){
-  if(currentStage === 1) return 102;
-  if(currentStage === 2) return 94;
-  if(currentStage === 3) return 84;
-  if(currentStage === 4) return 74;
-  if(currentStage === 5) return 64;
-  if(currentStage === 6) return 58;
-  return 52;
-}
+/* 단계 시작 */
 
 function startStage(){
-  isTransitioning = false;
-  game.innerHTML = "";
-  balls = [];
 
-  const total = stageCount[stage - 1];
-  const maxNum = stageMaxNumber[stage - 1];
-  const size = getBallSize(stage);
+game.innerHTML=""
+balls=[]
 
-  const nums = pickUniqueNumbers(total, maxNum);
-  target = pickTarget(nums);
+let total=stageCount[stage-1]
 
-  mission.textContent = `${target}를 빠르게 찾으시오`;
-  stageText.textContent = `${stage}단계 · 원 ${total}개`;
+let nums=uniqueNumbers(total)
 
-  speak(`${target}를 빠르게 찾으시오`);
+target=pickTarget(nums)
 
-  nums.forEach(num => spawnBall(num, size));
+mission.innerText=target+"를 빠르게 찾으시오"
+
+stageText.innerText=stage+"단계 · "+total+"개"
+
+speak(target+"를 빠르게 찾으시오")
+
+let size=100-stage*7
+if(size<40)size=40
+
+nums.forEach(n=>spawn(n,size))
+
 }
 
-function isOverlapping(x, y, size){
-  for(const b of balls){
-    const ax = x + size / 2;
-    const ay = y + size / 2;
-    const bx = b.x + b.size / 2;
-    const by = b.y + b.size / 2;
-    const dx = ax - bx;
-    const dy = ay - by;
-    const dist = Math.sqrt(dx * dx + dy * dy);
-    const minDist = (size + b.size) / 2 + 8;
-    if(dist < minDist) return true;
-  }
-  return false;
+/* 생성 */
+
+function spawn(num,size){
+
+let el=document.createElement("div")
+
+el.className="ball"
+
+el.innerText=num
+
+el.style.width=size+"px"
+el.style.height=size+"px"
+
+el.style.fontSize=size/3+"px"
+
+el.style.background=colors[Math.floor(Math.random()*colors.length)]
+
+let x=Math.random()*(window.innerWidth-size)
+let y=Math.random()*(window.innerHeight-200)
+
+let vx=(Math.random()-.5)*0.3
+let vy=(Math.random()-.5)*0.3
+
+el.style.left=x+"px"
+el.style.top=y+"px"
+
+game.appendChild(el)
+
+let obj={el,x,y,vx,vy,size,num}
+
+el.onclick=()=>{
+
+if(num===target){
+
+popSound.currentTime=0
+popSound.play()
+
+el.classList.add("pop")
+
+setTimeout(()=>el.remove(),200)
+
+stage++
+
+if(stage>stageCount.length) stage=1
+
+setTimeout(startStage,500)
+
 }
 
-function findSpawnPosition(size){
-  const areaTop = 120;
-  const bottomPadding = 24;
-  const maxX = window.innerWidth - size;
-  const maxY = window.innerHeight - areaTop - bottomPadding - size;
-
-  let x = 0;
-  let y = 0;
-
-  for(let i = 0; i < 500; i++){
-    x = Math.random() * Math.max(10, maxX);
-    y = areaTop + Math.random() * Math.max(10, maxY);
-    if(!isOverlapping(x, y, size)){
-      return { x, y };
-    }
-  }
-
-  return { x, y };
 }
 
-function spawnBall(num, size){
-  const el = document.createElement("div");
-  el.className = "ball";
-  el.textContent = num;
-  el.style.width = size + "px";
-  el.style.height = size + "px";
-  el.style.fontSize = Math.max(22, size * 0.34) + "px";
-  el.style.background = colors[Math.floor(Math.random() * colors.length)];
+balls.push(obj)
 
-  const pos = findSpawnPosition(size);
-  const x = pos.x;
-  const y = pos.y;
-
-  const vx = (Math.random() - 0.5) * 0.32;
-  const vy = (Math.random() - 0.5) * 0.32;
-  const phase = Math.random() * Math.PI * 2;
-
-  el.style.left = x + "px";
-  el.style.top = y + "px";
-  game.appendChild(el);
-
-  const obj = { el, x, y, vx, vy, size, num, phase };
-
-  el.onclick = () => {
-    if(isTransitioning) return;
-    if(num !== target) return;
-
-    isTransitioning = true;
-
-    popSound.currentTime = 0;
-    popSound.play().catch(() => {});
-    el.classList.add("pop");
-
-    setTimeout(() => {
-      el.remove();
-    }, 180);
-
-    stage++;
-    if(stage > 7) stage = 1;
-
-    setTimeout(() => {
-      startStage();
-    }, 420);
-  };
-
-  balls.push(obj);
 }
 
-function update(time){
-  const width = window.innerWidth;
-  const height = window.innerHeight;
+/* 움직임 */
 
-  for(const b of balls){
-    const organicX = Math.sin(time * 0.001 + b.phase) * 0.10;
-    const organicY = Math.cos(time * 0.0012 + b.phase * 1.17) * 0.10;
+function update(){
 
-    b.x += b.vx + organicX;
-    b.y += b.vy + organicY;
+for(let b of balls){
 
-    if(b.x < 0){
-      b.x = 0;
-      b.vx *= -1;
-    }
-    if(b.x + b.size > width){
-      b.x = width - b.size;
-      b.vx *= -1;
-    }
-    if(b.y < 0){
-      b.y = 0;
-      b.vy *= -1;
-    }
-    if(b.y + b.size > height){
-      b.y = height - b.size;
-      b.vy *= -1;
-    }
-  }
+b.x+=b.vx+tiltX
+b.y+=b.vy+tiltY
 
-  for(let i = 0; i < balls.length; i++){
-    for(let j = i + 1; j < balls.length; j++){
-      const a = balls[i];
-      const b = balls[j];
+if(b.x<0||b.x+b.size>window.innerWidth) b.vx*=-1
+if(b.y<0||b.y+b.size>window.innerHeight) b.vy*=-1
 
-      const ax = a.x + a.size / 2;
-      const ay = a.y + a.size / 2;
-      const bx = b.x + b.size / 2;
-      const by = b.y + b.size / 2;
-
-      let dx = bx - ax;
-      let dy = by - ay;
-      let dist = Math.sqrt(dx * dx + dy * dy);
-
-      const minDist = (a.size + b.size) / 2 + 4;
-
-      if(dist === 0){
-        dx = 0.1;
-        dy = 0.1;
-        dist = 0.14;
-      }
-
-      if(dist < minDist){
-        const nx = dx / dist;
-        const ny = dy / dist;
-        const overlap = minDist - dist;
-
-        a.x -= nx * overlap * 0.5;
-        a.y -= ny * overlap * 0.5;
-        b.x += nx * overlap * 0.5;
-        b.y += ny * overlap * 0.5;
-
-        const tension = 0.028;
-        a.vx -= nx * tension;
-        a.vy -= ny * tension;
-        b.vx += nx * tension;
-        b.vy += ny * tension;
-      }
-    }
-  }
-
-  for(const b of balls){
-    b.vx *= 0.998;
-    b.vy *= 0.998;
-    b.el.style.left = b.x + "px";
-    b.el.style.top = b.y + "px";
-  }
-
-  requestAnimationFrame(update);
 }
 
-startStage();
-requestAnimationFrame(update);
+/* 충돌 */
+
+for(let i=0;i<balls.length;i++){
+
+for(let j=i+1;j<balls.length;j++){
+
+let a=balls[i]
+let b=balls[j]
+
+let dx=b.x-a.x
+let dy=b.y-a.y
+
+let dist=Math.sqrt(dx*dx+dy*dy)
+
+let min=a.size
+
+if(dist<min){
+
+let angle=Math.atan2(dy,dx)
+
+let overlap=min-dist
+
+let pushX=Math.cos(angle)*(overlap/2)
+let pushY=Math.sin(angle)*(overlap/2)
+
+a.x-=pushX
+a.y-=pushY
+
+b.x+=pushX
+b.y+=pushY
+
+}
+
+}
+
+}
+
+balls.forEach(b=>{
+
+b.el.style.left=b.x+"px"
+b.el.style.top=b.y+"px"
+
+})
+
+requestAnimationFrame(update)
+
+}
+
+update()
+
 </script>
 
 </body>
