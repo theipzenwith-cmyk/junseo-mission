@@ -1,0 +1,517 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+<title>이모지 터치 게임</title>
+
+<style>
+*{
+  box-sizing:border-box;
+  -webkit-tap-highlight-color:transparent;
+}
+
+html, body{
+  margin:0;
+  width:100%;
+  height:100%;
+  overflow:hidden;
+  background:#000;
+  font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,sans-serif;
+}
+
+body{
+  position:relative;
+  color:#fff;
+}
+
+#score{
+  position:fixed;
+  top:18px;
+  left:50%;
+  transform:translateX(-50%);
+  z-index:20;
+  font-size:30px;
+  font-weight:800;
+  letter-spacing:0.5px;
+  text-shadow:0 2px 10px rgba(255,255,255,0.15);
+}
+
+#combo{
+  position:fixed;
+  top:58px;
+  left:50%;
+  transform:translateX(-50%);
+  z-index:20;
+  min-height:28px;
+  font-size:20px;
+  font-weight:800;
+  color:#ffd84d;
+  text-shadow:0 2px 8px rgba(255,216,77,0.25);
+}
+
+#speedText{
+  position:fixed;
+  top:92px;
+  left:50%;
+  transform:translateX(-50%);
+  z-index:20;
+  min-height:24px;
+  font-size:15px;
+  font-weight:700;
+  color:#9ca3af;
+}
+
+#startScreen,
+#gameOver{
+  position:fixed;
+  inset:0;
+  z-index:30;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  background:rgba(0,0,0,0.86);
+}
+
+.panel{
+  width:min(88vw,420px);
+  padding:28px 22px;
+  border-radius:24px;
+  text-align:center;
+  background:rgba(255,255,255,0.06);
+  border:1px solid rgba(255,255,255,0.08);
+  box-shadow:0 10px 30px rgba(0,0,0,0.35);
+  backdrop-filter:blur(8px);
+}
+
+.title{
+  font-size:34px;
+  font-weight:900;
+  margin-bottom:12px;
+}
+
+.desc{
+  line-height:1.6;
+  color:#d1d5db;
+  font-size:17px;
+  margin-bottom:20px;
+}
+
+.bigScore{
+  font-size:40px;
+  font-weight:900;
+  margin:12px 0 4px;
+}
+
+.sub{
+  color:#9ca3af;
+  font-size:16px;
+}
+
+.btn{
+  border:none;
+  border-radius:18px;
+  padding:16px 24px;
+  font-size:20px;
+  font-weight:800;
+  cursor:pointer;
+  margin-top:22px;
+}
+
+.startBtn{
+  background:#f59e0b;
+  color:#fff;
+}
+
+.retryBtn{
+  background:#fff;
+  color:#000;
+}
+
+.emoji{
+  position:absolute;
+  user-select:none;
+  cursor:pointer;
+  transform:translateZ(0);
+  will-change:transform, top;
+}
+
+.boom{
+  position:absolute;
+  pointer-events:none;
+  font-size:42px;
+  animation:boom 0.35s ease-out forwards;
+  z-index:15;
+}
+
+@keyframes boom{
+  0%{
+    transform:scale(0.7);
+    opacity:1;
+  }
+  100%{
+    transform:scale(2.1);
+    opacity:0;
+  }
+}
+
+.flash{
+  position:fixed;
+  inset:0;
+  background:rgba(255,255,255,0.1);
+  pointer-events:none;
+  z-index:12;
+  opacity:0;
+}
+
+.flash.show{
+  animation:flash 0.2s ease;
+}
+
+@keyframes flash{
+  0%{opacity:0;}
+  50%{opacity:1;}
+  100%{opacity:0;}
+}
+</style>
+</head>
+<body>
+
+<div id="score">0</div>
+<div id="combo"></div>
+<div id="speedText"></div>
+<div id="flash" class="flash"></div>
+
+<div id="startScreen">
+  <div class="panel">
+    <div class="title">이모지 터치</div>
+    <div class="desc">
+      떨어지는 이모지를 눌러 점수를 올리세요<br>
+      🌟 황금별은 +5점<br>
+      💣 폭탄을 누르면 바로 종료돼요
+    </div>
+    <button id="startBtn" class="btn startBtn">시작하기</button>
+  </div>
+</div>
+
+<div id="gameOver" style="display:none;">
+  <div class="panel">
+    <div class="title">💣 게임 종료</div>
+    <div class="sub">최종 점수</div>
+    <div id="finalScore" class="bigScore">0</div>
+    <div class="sub">최고 점수: <span id="bestScore">0</span></div>
+    <button id="retryBtn" class="btn retryBtn">다시하기</button>
+  </div>
+</div>
+
+<script>
+const scoreUI = document.getElementById("score");
+const comboUI = document.getElementById("combo");
+const speedTextUI = document.getElementById("speedText");
+const startScreen = document.getElementById("startScreen");
+const gameOverUI = document.getElementById("gameOver");
+const finalScoreUI = document.getElementById("finalScore");
+const bestScoreUI = document.getElementById("bestScore");
+const startBtn = document.getElementById("startBtn");
+const retryBtn = document.getElementById("retryBtn");
+const flash = document.getElementById("flash");
+
+const normalEmojis = ["🍎","🍓","🐶","⭐"];
+const goldEmoji = "🌟";
+const bombEmoji = "💣";
+
+let playing = false;
+let score = 0;
+let combo = 0;
+let speed = 2.2;
+let spawnDelay = 700;
+let spawnTimer = null;
+let speedTimer = null;
+let activeDrops = new Set();
+
+function speak(text){
+  try{
+    const utter = new SpeechSynthesisUtterance(text);
+    utter.lang = "ko-KR";
+    utter.rate = 1;
+    speechSynthesis.cancel();
+    speechSynthesis.speak(utter);
+  }catch(e){}
+}
+
+function makeSound(freq=600, duration=90, type="sine", volume=0.05){
+  try{
+    const ctx = new (window.AudioContext || window.webkitAudioContext)();
+    const osc = ctx.createOscillator();
+    const gain = ctx.createGain();
+
+    osc.type = type;
+    osc.frequency.value = freq;
+    gain.gain.value = volume;
+
+    osc.connect(gain);
+    gain.connect(ctx.destination);
+
+    osc.start();
+
+    setTimeout(() => {
+      osc.stop();
+      ctx.close();
+    }, duration);
+  }catch(e){}
+}
+
+function playNormalSound(){
+  makeSound(620, 70, "sine", 0.05);
+}
+
+function playGoldSound(){
+  makeSound(980, 70, "triangle", 0.06);
+  setTimeout(() => makeSound(1320, 90, "triangle", 0.05), 70);
+}
+
+function playBombSound(){
+  makeSound(180, 140, "sawtooth", 0.07);
+}
+
+function updateScore(){
+  scoreUI.textContent = score;
+}
+
+function updateCombo(){
+  if(combo >= 10){
+    comboUI.textContent = "AMAZING 🔥";
+  }else if(combo >= 5){
+    comboUI.textContent = "SUPER ⚡";
+  }else if(combo >= 3){
+    comboUI.textContent = "COMBO ✨";
+  }else{
+    comboUI.textContent = "";
+  }
+}
+
+function updateSpeedText(){
+  if(speed < 4.5){
+    speedTextUI.textContent = "🐢 느림";
+  }else if(speed < 7){
+    speedTextUI.textContent = "🚶 보통";
+  }else if(speed < 10){
+    speedTextUI.textContent = "🚀 빠름";
+  }else{
+    speedTextUI.textContent = "⚡ 매우 빠름";
+  }
+}
+
+function createBoom(x, y){
+  const boom = document.createElement("div");
+  boom.className = "boom";
+  boom.textContent = "💥";
+  boom.style.left = x + "px";
+  boom.style.top = y + "px";
+  document.body.appendChild(boom);
+
+  setTimeout(() => {
+    boom.remove();
+  }, 350);
+}
+
+function flashScreen(){
+  flash.classList.remove("show");
+  void flash.offsetWidth;
+  flash.classList.add("show");
+}
+
+function resetGameData(){
+  score = 0;
+  combo = 0;
+  speed = 2.2;
+  spawnDelay = 700;
+  updateScore();
+  updateCombo();
+  updateSpeedText();
+
+  document.querySelectorAll(".emoji").forEach(el => el.remove());
+  activeDrops.forEach(item => clearInterval(item.interval));
+  activeDrops.clear();
+}
+
+function getRandomType(){
+  const r = Math.random();
+
+  if(r < 0.70){
+    return { emoji: normalEmojis[Math.floor(Math.random() * normalEmojis.length)], type: "normal" };
+  }
+  if(r < 0.90){
+    return { emoji: goldEmoji, type: "gold" };
+  }
+  return { emoji: bombEmoji, type: "bomb" };
+}
+
+function spawnEmoji(){
+  if(!playing) return;
+
+  const item = getRandomType();
+  const el = document.createElement("div");
+  el.className = "emoji";
+  el.textContent = item.emoji;
+  el.dataset.type = item.type;
+
+  const size = item.type === "bomb" ? 38 : 42;
+  el.style.fontSize = size + "px";
+
+  const maxLeft = Math.max(window.innerWidth - 52, 10);
+  const left = Math.random() * maxLeft;
+  let y = -60;
+
+  el.style.left = left + "px";
+  el.style.top = y + "px";
+
+  document.body.appendChild(el);
+
+  const dropData = {
+    el,
+    interval: null
+  };
+
+  activeDrops.add(dropData);
+
+  const tickMs = 16;
+
+  dropData.interval = setInterval(() => {
+    if(!playing){
+      clearInterval(dropData.interval);
+      activeDrops.delete(dropData);
+      return;
+    }
+
+    y += speed;
+    el.style.top = y + "px";
+
+    if(y > window.innerHeight + 60){
+      combo = 0;
+      updateCombo();
+
+      clearInterval(dropData.interval);
+      activeDrops.delete(dropData);
+      el.remove();
+    }
+  }, tickMs);
+
+  function hitEmoji(){
+    if(!playing) return;
+
+    clearInterval(dropData.interval);
+    activeDrops.delete(dropData);
+
+    const rect = el.getBoundingClientRect();
+    createBoom(rect.left, rect.top);
+
+    const type = el.dataset.type;
+
+    if(type === "bomb"){
+      playBombSound();
+      el.remove();
+      gameOver();
+      return;
+    }
+
+    if(type === "gold"){
+      score += 5;
+      combo += 1;
+      playGoldSound();
+      flashScreen();
+    }else{
+      score += 1;
+      combo += 1;
+      playNormalSound();
+    }
+
+    updateScore();
+    updateCombo();
+    el.remove();
+  }
+
+  el.addEventListener("pointerdown", hitEmoji, { passive:true });
+}
+
+function startSpawnLoop(){
+  if(spawnTimer) clearInterval(spawnTimer);
+
+  spawnTimer = setInterval(() => {
+    spawnEmoji();
+  }, spawnDelay);
+}
+
+function startSpeedLoop(){
+  if(speedTimer) clearInterval(speedTimer);
+
+  speedTimer = setInterval(() => {
+    if(!playing) return;
+
+    if(speed < 16){
+      speed += 0.55;
+    }
+
+    if(spawnDelay > 230){
+      spawnDelay -= 18;
+      startSpawnLoop();
+    }
+
+    updateSpeedText();
+  }, 4000);
+}
+
+function startGame(){
+  resetGameData();
+  playing = true;
+  startScreen.style.display = "none";
+  gameOverUI.style.display = "none";
+
+  startSpawnLoop();
+  startSpeedLoop();
+}
+
+function gameOver(){
+  playing = false;
+
+  if(spawnTimer) clearInterval(spawnTimer);
+  if(speedTimer) clearInterval(speedTimer);
+
+  activeDrops.forEach(item => clearInterval(item.interval));
+  activeDrops.clear();
+
+  document.querySelectorAll(".emoji").forEach(el => el.remove());
+
+  finalScoreUI.textContent = score;
+
+  const best = Number(localStorage.getItem("emojiTouchBestScore") || 0);
+  const nextBest = Math.max(best, score);
+  localStorage.setItem("emojiTouchBestScore", String(nextBest));
+  bestScoreUI.textContent = nextBest;
+
+  gameOverUI.style.display = "flex";
+}
+
+startBtn.addEventListener("click", () => {
+  try{
+    const ctx = new (window.AudioContext || window.webkitAudioContext)();
+    ctx.resume().then(() => ctx.close());
+  }catch(e){}
+  startGame();
+});
+
+retryBtn.addEventListener("click", () => {
+  startGame();
+});
+
+window.addEventListener("load", () => {
+  updateScore();
+  updateCombo();
+  updateSpeedText();
+  const best = Number(localStorage.getItem("emojiTouchBestScore") || 0);
+  bestScoreUI.textContent = best;
+});
+</script>
+
+</body>
+</html>
