@@ -57,6 +57,8 @@ margin-bottom:20px;
 
 box-shadow:0 10px 25px rgba(0,0,0,0.4);
 
+transition:0.15s;
+
 }
 
 .card:active{
@@ -83,15 +85,40 @@ transform:scale(0.97);
 
 <div class="container">
 
-<a class="card" href="vision.html">시력 테스트</a>
+<a class="card">시력 테스트</a>
 
-<a class="card" href="color.html">색깔 미션</a>
+<a class="card">색깔 미션</a>
 
-<a class="card" href="number-balloon.html">숫자 풍선 찾기</a>
+<a class="card">숫자 풍선 찾기</a>
 
-<a class="card" href="emoji-touch.html">이모지 터치 게임</a>
+<a class="card">이모지 터치 게임</a>
 
 </div>
+
+<script>
+
+const colors = [
+
+"#ef4444",
+"#f97316",
+"#eab308",
+"#22c55e",
+"#06b6d4",
+"#3b82f6",
+"#8b5cf6",
+"#ec4899"
+
+]
+
+document.querySelectorAll(".card").forEach(card => {
+
+const color = colors[Math.floor(Math.random()*colors.length)]
+
+card.style.background = color
+
+})
+
+</script>
 
 </body>
 </html>
