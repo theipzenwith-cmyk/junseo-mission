@@ -11,16 +11,16 @@
 
 body{
 margin:0;
-background:#06142b;
+background:#0b132b;
 font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto;
 color:white;
 text-align:center;
 overflow:hidden;
 }
 
-/* 홈 버튼 */
+/* 홈버튼 */
 
-.homeBtn{
+.home{
 
 position:absolute;
 top:20px;
@@ -30,42 +30,40 @@ width:44px;
 height:44px;
 
 border-radius:50%;
-
-background:rgba(255,255,255,0.15);
-backdrop-filter:blur(10px);
+background:rgba(255,255,255,.15);
 
 display:flex;
 align-items:center;
 justify-content:center;
 
-font-size:22px;
+font-size:20px;
 font-weight:bold;
 
 cursor:pointer;
 
-z-index:100;
+z-index:10;
 
-}
-
-.homeBtn:active{
-transform:scale(.9);
 }
 
 /* 제목 */
 
 .title{
+
 margin-top:40px;
 font-size:32px;
 font-weight:800;
+
 }
 
 /* 미션 */
 
 .mission{
+
 margin-top:10px;
 font-size:26px;
-color:#ffd54f;
+color:#ffd166;
 font-weight:700;
+
 }
 
 /* 게임 영역 */
@@ -73,25 +71,22 @@ font-weight:700;
 #game{
 
 position:relative;
-
 width:100vw;
 height:85vh;
 
-overflow:hidden;
-
 }
 
-/* 풍선 */
+/* 숫자 원 */
 
-.balloon{
+.ball{
 
 position:absolute;
+
+border-radius:50%;
 
 display:flex;
 align-items:center;
 justify-content:center;
-
-border-radius:50%;
 
 font-weight:800;
 color:white;
@@ -101,36 +96,25 @@ cursor:pointer;
 user-select:none;
 
 box-shadow:
+0 8px 20px rgba(0,0,0,.35),
+inset 0 6px 8px rgba(255,255,255,.15);
 
-inset -8px -10px rgba(0,0,0,.15),
-inset 10px 10px rgba(255,255,255,.2),
-0 10px 20px rgba(0,0,0,.3);
+transition:transform .15s;
 
 }
 
-/* 풍선 꼬리 */
+.ball:active{
 
-.balloon::after{
-
-content:"";
-
-position:absolute;
-
-bottom:-14px;
-
-width:0;
-height:0;
-
-border-left:8px solid transparent;
-border-right:8px solid transparent;
-border-top:14px solid rgba(255,255,255,.9);
+transform:scale(.9);
 
 }
 
 /* 터지는 애니메이션 */
 
 .pop{
+
 animation:pop .25s forwards;
+
 }
 
 @keyframes pop{
@@ -141,35 +125,13 @@ animation:pop .25s forwards;
 
 }
 
-/* 파편 */
-
-.particle{
-
-position:absolute;
-width:8px;
-height:8px;
-border-radius:50%;
-
-pointer-events:none;
-
-animation:burst .5s forwards;
-
-}
-
-@keyframes burst{
-
-0%{opacity:1}
-100%{transform:translate(var(--x),var(--y));opacity:0}
-
-}
-
 </style>
 
 </head>
 
 <body>
 
-<div class="homeBtn" onclick="location.href='index.html'">
+<div class="home" onclick="location.href='index.html'">
 ✕
 </div>
 
@@ -188,14 +150,15 @@ animation:burst .5s forwards;
 const game=document.getElementById("game")
 const mission=document.getElementById("mission")
 
-let balloons=[]
+let balls=[]
 let level=1
 let target=0
 let remaining=0
 
 const colors=[
-"#ff5252","#ff9800","#ffd740","#00e676",
-"#00e5ff","#448aff","#7c4dff","#ff4081"
+"#ff595e","#ff924c","#ffca3a",
+"#8ac926","#52b788",
+"#1982c4","#6a4c93"
 ]
 
 const popSound=new Audio("https://assets.mixkit.co/sfx/preview/mixkit-balloon-pop-1980.mp3")
@@ -204,7 +167,7 @@ function speak(t){
 
 if(!speechSynthesis)return
 
-const s=new SpeechSynthesisUtterance(t)
+let s=new SpeechSynthesisUtterance(t)
 
 s.lang="ko-KR"
 
@@ -218,7 +181,7 @@ speechSynthesis.speak(s)
 function startRound(){
 
 game.innerHTML=""
-balloons=[]
+balls=[]
 
 let max=level<3?9:level<5?20:99
 
@@ -232,29 +195,27 @@ let total=10+level*4
 
 remaining=Math.floor(total/4)
 
-let size=90-level*5
-
-if(size<40)size=40
+let size=90-level*6
+if(size<38)size=38
 
 for(let i=0;i<total;i++){
 
 let num=Math.floor(Math.random()*max)+1
-
 if(i<remaining)num=target
 
-spawnBalloon(num,size)
+spawn(num,size)
 
 }
 
 }
 
-/* 풍선 생성 */
+/* 원 생성 */
 
-function spawnBalloon(num,size){
+function spawn(num,size){
 
 let el=document.createElement("div")
 
-el.className="balloon"
+el.className="ball"
 
 el.innerText=num
 
@@ -268,8 +229,8 @@ el.style.background=colors[Math.floor(Math.random()*colors.length)]
 let x=Math.random()*(window.innerWidth-size)
 let y=Math.random()*(window.innerHeight-200)
 
-let vx=(Math.random()*2-1)*1.5
-let vy=(Math.random()*2-1)*1.5
+let vx=(Math.random()-.5)*0.8
+let vy=(Math.random()-.5)*0.8
 
 el.style.left=x+"px"
 el.style.top=y+"px"
@@ -285,8 +246,6 @@ if(num==target){
 popSound.currentTime=0
 popSound.play()
 
-explode(x,y,el.style.background)
-
 el.classList.add("pop")
 
 speak(num)
@@ -298,8 +257,7 @@ setTimeout(()=>el.remove(),200)
 if(remaining==0){
 
 level++
-
-setTimeout(startRound,700)
+setTimeout(startRound,600)
 
 }
 
@@ -311,41 +269,15 @@ speak("다시")
 
 }
 
-balloons.push(obj)
+balls.push(obj)
 
 }
 
-/* 파편 효과 */
-
-function explode(x,y,color){
-
-for(let i=0;i<10;i++){
-
-let p=document.createElement("div")
-
-p.className="particle"
-
-p.style.background=color
-
-p.style.left=x+"px"
-p.style.top=y+"px"
-
-p.style.setProperty("--x",(Math.random()*80-40)+"px")
-p.style.setProperty("--y",(Math.random()*80-40)+"px")
-
-document.body.appendChild(p)
-
-setTimeout(()=>p.remove(),500)
-
-}
-
-}
-
-/* 물리 업데이트 */
+/* 물리 */
 
 function update(){
 
-for(let b of balloons){
+for(let b of balls){
 
 b.x+=b.vx
 b.y+=b.vy
@@ -364,21 +296,36 @@ b.vy*=-1
 
 }
 
-/* 풍선 충돌 */
+/* 충돌 */
 
-for(let i=0;i<balloons.length;i++){
+for(let i=0;i<balls.length;i++){
 
-for(let j=i+1;j<balloons.length;j++){
+for(let j=i+1;j<balls.length;j++){
 
-let a=balloons[i]
-let b=balloons[j]
+let a=balls[i]
+let b=balls[j]
 
-let dx=a.x-b.x
-let dy=a.y-b.y
+let dx=b.x-a.x
+let dy=b.y-a.y
 
 let dist=Math.sqrt(dx*dx+dy*dy)
 
-if(dist<a.size){
+let min=a.size
+
+if(dist<min){
+
+let angle=Math.atan2(dy,dx)
+
+let overlap=min-dist
+
+let pushX=Math.cos(angle)*(overlap/2)
+let pushY=Math.sin(angle)*(overlap/2)
+
+a.x-=pushX
+a.y-=pushY
+
+b.x+=pushX
+b.y+=pushY
 
 let temp=a.vx
 a.vx=b.vx
@@ -394,7 +341,9 @@ b.vy=temp
 
 }
 
-for(let b of balloons){
+/* 위치 업데이트 */
+
+for(let b of balls){
 
 b.el.style.left=b.x+"px"
 b.el.style.top=b.y+"px"
