@@ -5,104 +5,72 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
-<title>색깔 미션</title>
+<title>숫자 찾기 게임</title>
 
 <style>
 
 body{
 margin:0;
-height:100vh;
-font-family:-apple-system,BlinkMacSystemFont,"Segoe UI";
+background:#06142b;
+font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto;
 color:white;
-transition:background 0.4s;
+text-align:center;
+overflow:hidden;
 }
 
-/* 중앙 텍스트 */
+.title{
+margin-top:40px;
+font-size:32px;
+font-weight:800;
+}
 
-.center{
+.mission{
+margin-top:10px;
+font-size:26px;
+color:#ffd54f;
+font-weight:700;
+}
+
+#game{
+position:relative;
+width:100vw;
+height:80vh;
+margin-top:20px;
+}
+
+.balloon{
 
 position:absolute;
-top:50%;
-left:50%;
-
-transform:translate(-50%,-50%);
-
-text-align:center;
-
-font-size:52px;
-font-weight:700;
-
-cursor:pointer;
-
-}
-
-.en{
-font-size:34px;
-margin-top:12px;
-opacity:0.9;
-}
-
-/* X 버튼 */
-
-.close{
-
-position:fixed;
-top:20px;
-left:20px;
-
-width:50px;
-height:50px;
-
-border-radius:50%;
-
-background:rgba(0,0,0,0.35);
 
 display:flex;
 align-items:center;
 justify-content:center;
 
-font-size:28px;
+border-radius:50%;
 
-color:white;
-text-decoration:none;
-
-}
-
-/* 화살표 */
-
-.arrow{
-
-position:fixed;
-bottom:50px;
-
-font-size:70px;
+font-weight:800;
 color:white;
 
 cursor:pointer;
+
 user-select:none;
 
+transition:transform .15s;
+
 }
 
-.left{
-left:30px;
+.balloon:active{
+transform:scale(0.9);
 }
 
-.right{
-right:30px;
+.pop{
+animation:pop .25s forwards;
 }
 
-/* 찰랑 애니메이션 */
-
-.bounce{
-animation:bounce 0.35s ease;
-}
-
-@keyframes bounce{
-
-0%{transform:translate(-50%,-50%) scale(0.9);}
-50%{transform:translate(-50%,-50%) scale(1.08);}
-100%{transform:translate(-50%,-50%) scale(1);}
-
+@keyframes pop{
+0%{transform:scale(1);}
+50%{transform:scale(1.3);}
+100%{transform:scale(0);opacity:0;}
 }
 
 </style>
@@ -111,173 +79,136 @@ animation:bounce 0.35s ease;
 
 <body>
 
-<a class="close" href="index.html">✕</a>
-
-<div class="center" onclick="speakColor()">
-
-<div id="ko"></div>
-<div id="en" class="en"></div>
-
+<div class="title">
+숫자 찾기 게임
 </div>
 
-<div class="arrow left" onclick="prevColor()">‹</div>
-<div class="arrow right" onclick="nextColor()">›</div>
+<div class="mission" id="mission">
+3을 빠르게 찾으세요!
+</div>
+
+<div id="game"></div>
 
 <script>
 
-/* 컬러 목록 (35개) */
+let level = 1
+let target = 0
+let remaining = 0
+
+const game = document.getElementById("game")
+const mission = document.getElementById("mission")
 
 const colors = [
+"#ff5252","#ff9800","#ffd740","#00e676",
+"#00e5ff","#448aff","#7c4dff","#ff4081"
+]
 
-{ko:"빨간색",en:"red",color:"#ff3b30"},
-{ko:"파란색",en:"blue",color:"#007aff"},
-{ko:"노란색",en:"yellow",color:"#ffcc00"},
-{ko:"초록색",en:"green",color:"#34c759"},
-{ko:"보라색",en:"purple",color:"#af52de"},
-{ko:"주황색",en:"orange",color:"#ff9500"},
-{ko:"분홍색",en:"pink",color:"#ff2d55"},
-{ko:"하늘색",en:"sky blue",color:"#5ac8fa"},
-{ko:"민트색",en:"mint",color:"#2dd4bf"},
-{ko:"라임색",en:"lime",color:"#a3e635"},
-{ko:"연두색",en:"light green",color:"#9ef01a"},
-{ko:"자홍색",en:"magenta",color:"#ff00ff"},
-{ko:"남색",en:"navy",color:"#001f3f"},
-{ko:"청록색",en:"teal",color:"#008080"},
-{ko:"연보라",en:"lavender",color:"#b57edc"},
-{ko:"연핑크",en:"light pink",color:"#ffb6c1"},
-{ko:"살구색",en:"apricot",color:"#fbceb1"},
-{ko:"베이지",en:"beige",color:"#f5f5dc"},
-{ko:"아이보리",en:"ivory",color:"#fffff0"},
-{ko:"금색",en:"gold",color:"#ffd700"},
-{ko:"은색",en:"silver",color:"#c0c0c0"},
-{ko:"갈색",en:"brown",color:"#8b4513"},
-{ko:"초콜릿색",en:"chocolate",color:"#7b3f00"},
-{ko:"와인색",en:"wine",color:"#722f37"},
-{ko:"버건디",en:"burgundy",color:"#800020"},
-{ko:"코랄",en:"coral",color:"#ff7f50"},
-{ko:"터키색",en:"turquoise",color:"#40e0d0"},
-{ko:"에메랄드",en:"emerald",color:"#50c878"},
-{ko:"올리브",en:"olive",color:"#808000"},
-{ko:"차콜",en:"charcoal",color:"#36454f"},
-{ko:"연회색",en:"light gray",color:"#d3d3d3"},
-{ko:"진회색",en:"dark gray",color:"#555555"},
-{ko:"검은색",en:"black",color:"#111111"},
-{ko:"흰색",en:"white",color:"#f9f9f9"},
-{ko:"연하늘색",en:"baby blue",color:"#bde0fe"}
+const popSound = new Audio("https://assets.mixkit.co/sfx/preview/mixkit-balloon-pop-1980.mp3")
 
-];
+function speak(text){
 
-/* 랜덤 시작 */
+if(!speechSynthesis) return
 
-let index = Math.floor(Math.random()*colors.length);
+const t = new SpeechSynthesisUtterance(text)
 
-/* WebAudio */
+t.lang="ko-KR"
 
-const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
-
-/* 랜덤 효과음 */
-
-function playSound(){
-
-const sounds = [
-
-{freq:600,time:0.15},
-{freq:900,time:0.12},
-{freq:700,time:0.2},
-{freq:500,time:0.18},
-{freq:750,time:0.16}
-
-];
-
-const s = sounds[Math.floor(Math.random()*sounds.length)];
-
-const osc = audioCtx.createOscillator();
-const gain = audioCtx.createGain();
-
-osc.type="sine";
-osc.frequency.value=s.freq;
-
-gain.gain.value=0.25;
-
-osc.connect(gain);
-gain.connect(audioCtx.destination);
-
-osc.start();
-
-setTimeout(()=>{
-osc.stop();
-}, s.time*1000);
+speechSynthesis.cancel()
+speechSynthesis.speak(t)
 
 }
 
-/* 렌더 */
+function startRound(){
 
-function render(){
+game.innerHTML=""
 
-const c = colors[index];
+let maxNumber = level <3 ? 9 : level <5 ? 20 : 99
 
-document.body.style.background = c.color;
+target = Math.floor(Math.random()*maxNumber)+1
 
-const center = document.querySelector(".center");
+mission.innerText = target + "를 빠르게 찾으세요!"
 
-document.getElementById("ko").innerText = c.ko;
-document.getElementById("en").innerText = c.en;
+speak(target)
 
-/* 찰랑 */
+let total = 12 + level*3
 
-center.classList.remove("bounce");
-void center.offsetWidth;
-center.classList.add("bounce");
+remaining = Math.floor(total/4)
 
-/* 효과음 */
+let size = 90 - level*5
 
-playSound();
+if(size <40) size=40
 
-}
+for(let i=0;i<total;i++){
 
-/* 음성 */
+let num = Math.floor(Math.random()*maxNumber)+1
 
-function speakColor(){
+if(i<remaining) num = target
 
-const c = colors[index];
-
-const msg = new SpeechSynthesisUtterance(c.ko + ", " + c.en);
-
-msg.lang = "ko-KR";
-
-speechSynthesis.speak(msg);
+createBalloon(num,size)
 
 }
 
-/* 다음 */
-
-function nextColor(){
-
-index++;
-
-if(index >= colors.length){
-index = 0;
 }
 
-render();
+function createBalloon(num,size){
+
+const b = document.createElement("div")
+
+b.className="balloon"
+
+b.innerText=num
+
+b.style.width=size+"px"
+b.style.height=size+"px"
+
+b.style.fontSize=size/3+"px"
+
+b.style.background=colors[Math.floor(Math.random()*colors.length)]
+
+b.style.left=Math.random()*(window.innerWidth-size)+"px"
+
+b.style.top=Math.random()*(window.innerHeight-250)+"px"
+
+b.onclick=()=>{
+
+if(num==target){
+
+popSound.currentTime=0
+popSound.play()
+
+b.classList.add("pop")
+
+speak(num)
+
+remaining--
+
+setTimeout(()=>b.remove(),200)
+
+if(remaining==0){
+
+level++
+
+setTimeout(startRound,800)
 
 }
 
-/* 이전 */
+}else{
 
-function prevColor(){
+speak("다시")
 
-index--;
+b.style.transform="scale(1.2)"
 
-if(index < 0){
-index = colors.length-1;
-}
-
-render();
+setTimeout(()=>b.style.transform="scale(1)",200)
 
 }
 
-render();
+}
+
+game.appendChild(b)
+
+}
+
+startRound()
 
 </script>
 
