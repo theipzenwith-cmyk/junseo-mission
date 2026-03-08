@@ -16,11 +16,41 @@ font-family:-apple-system,BlinkMacSystemFont,"Segoe UI";
 text-align:center;
 }
 
+/* X 버튼 */
+
+.close{
+
+position:fixed;
+top:20px;
+left:20px;
+
+width:50px;
+height:50px;
+
+border-radius:50%;
+
+background:black;
+
+display:flex;
+align-items:center;
+justify-content:center;
+
+font-size:26px;
+
+color:white;
+text-decoration:none;
+
+}
+
+/* 제목 */
+
 .title{
-margin-top:40px;
+margin-top:60px;
 font-size:28px;
 font-weight:700;
 }
+
+/* 단계 */
 
 .stage{
 margin-top:10px;
@@ -29,18 +59,28 @@ color:#666;
 }
 
 canvas{
-margin-top:20px;
+margin-top:30px;
 touch-action:none;
 }
 
+/* 다음 단계 버튼 */
+
 .btn{
-margin-top:30px;
+
+margin-top:40px;
+
 padding:18px 40px;
+
 font-size:20px;
+
 border-radius:40px;
+
 background:black;
+
 color:white;
+
 border:none;
+
 }
 
 </style>
@@ -48,6 +88,8 @@ border:none;
 </head>
 
 <body>
+
+<a href="index.html" class="close">X</a>
 
 <div class="title">점선을 따라 그려보세요</div>
 <div class="stage" id="stage">1 / 50</div>
@@ -64,65 +106,75 @@ const canvas = document.getElementById("canvas")
 const ctx = canvas.getContext("2d")
 
 canvas.width = window.innerWidth
-canvas.height = window.innerHeight * 0.6
+canvas.height = window.innerHeight * 0.55
 
 let drawing=false
 let stage=1
 
-/* 기본 도형 (1~5단계) */
+const shapes=[
 
-const basicShapes=[
 "line",
 "curve",
 "circle",
 "triangle",
-"square"
-]
+"square",
 
-/* 랜덤 그림 (6단계 이후) */
-
-const randomShapes=[
-
+"mountain",
 "wave",
-"s",
-"star",
-"heart",
-"flower",
+"zigzag",
+"hill",
+"stairs",
+"slide",
+"road",
+"bridge",
 "cloud",
-"sun",
-"apple",
-"pear",
-"banana",
-"rabbit",
-"fish",
-"bird",
-"house",
-"car",
-"balloon",
-"umbrella",
-"boat",
-"moon",
-"rocket"
+"snake"
 
 ]
 
 let currentShape="line"
 
+/* 효과음 */
+
+function playPop(){
+
+const audioCtx = new (window.AudioContext || window.webkitAudioContext)()
+
+const oscillator = audioCtx.createOscillator()
+const gainNode = audioCtx.createGain()
+
+oscillator.type = "sine"
+oscillator.frequency.setValueAtTime(600, audioCtx.currentTime)
+oscillator.frequency.exponentialRampToValueAtTime(1200, audioCtx.currentTime + 0.2)
+
+gainNode.gain.setValueAtTime(0.3, audioCtx.currentTime)
+gainNode.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime + 0.25)
+
+oscillator.connect(gainNode)
+gainNode.connect(audioCtx.destination)
+
+oscillator.start()
+oscillator.stop(audioCtx.currentTime + 0.25)
+
+}
+
+/* 도형 선택 */
+
 function pickShape(){
 
 if(stage<=5){
 
-currentShape=basicShapes[stage-1]
+currentShape=shapes[stage-1]
 
 }else{
 
-currentShape=randomShapes[
-Math.floor(Math.random()*randomShapes.length)
-]
+currentShape=shapes[5+Math.floor(Math.random()*10)]
 
 }
 
 }
+
+/* 점선 가이드 */
 
 function drawGuide(){
 
@@ -143,17 +195,20 @@ case "line":
 
 ctx.moveTo(100,h/2)
 ctx.lineTo(w-100,h/2)
+
 break
 
 case "curve":
 
 ctx.moveTo(100,h/2)
 ctx.quadraticCurveTo(w/2,100,w-100,h/2)
+
 break
 
 case "circle":
 
 ctx.arc(w/2,h/2,150,0,Math.PI*2)
+
 break
 
 case "triangle":
@@ -162,74 +217,143 @@ ctx.moveTo(w/2,150)
 ctx.lineTo(w/2-150,h-150)
 ctx.lineTo(w/2+150,h-150)
 ctx.closePath()
+
 break
 
 case "square":
 
 ctx.rect(w/2-150,h/2-150,300,300)
+
+break
+
+case "mountain":
+
+ctx.moveTo(100,h-200)
+ctx.lineTo(w/2,200)
+ctx.lineTo(w-100,h-200)
+
 break
 
 case "wave":
 
-ctx.moveTo(50,h/2)
-for(let i=0;i<6;i++){
+ctx.moveTo(100,h/2)
+
+for(let i=0;i<4;i++){
+
 ctx.quadraticCurveTo(
-100+i*150,
-h/2-100,
-150+i*150,
+200+i*200,
+h/2-120,
+300+i*200,
 h/2
 )
+
 }
+
 break
 
-case "s":
+case "zigzag":
 
 ctx.moveTo(100,200)
-ctx.bezierCurveTo(w/2,0,w/2,h,w-100,h-200)
+
+for(let i=0;i<6;i++){
+
+ctx.lineTo(200+i*120,300)
+ctx.lineTo(260+i*120,200)
+
+}
+
 break
 
-case "star":
+case "hill":
 
-ctx.moveTo(w/2,120)
+ctx.moveTo(100,h-200)
+
+ctx.quadraticCurveTo(
+w/2,
+100,
+w-100,
+h-200
+)
+
+break
+
+case "stairs":
+
+ctx.moveTo(100,h-200)
 
 for(let i=0;i<5;i++){
 
-ctx.lineTo(
-w/2 + Math.cos((18+i*72)/180*Math.PI)*150,
-h/2 - Math.sin((18+i*72)/180*Math.PI)*150
-)
+ctx.lineTo(200+i*120,h-200-i*40)
+ctx.lineTo(200+i*120,h-200-(i+1)*40)
 
-ctx.lineTo(
-w/2 + Math.cos((54+i*72)/180*Math.PI)*60,
-h/2 - Math.sin((54+i*72)/180*Math.PI)*60
+}
+
+break
+
+case "slide":
+
+ctx.moveTo(100,200)
+ctx.lineTo(w-200,h-200)
+
+break
+
+case "road":
+
+ctx.moveTo(100,h-200)
+ctx.lineTo(w-100,200)
+
+break
+
+case "bridge":
+
+ctx.moveTo(100,h-200)
+
+for(let i=0;i<4;i++){
+
+ctx.quadraticCurveTo(
+200+i*200,
+h-300,
+300+i*200,
+h-200
 )
 
 }
 
-ctx.closePath()
 break
 
-case "heart":
+case "cloud":
 
-ctx.moveTo(w/2,h/2)
+ctx.moveTo(200,h/2)
 
-ctx.bezierCurveTo(
-w/2-200,h/2-200,
-w/2-200,h/2+100,
-w/2,h/2+200
-)
-
-ctx.bezierCurveTo(
-w/2+200,h/2+100,
-w/2+200,h/2-200,
-w/2,h/2
-)
+ctx.quadraticCurveTo(300,200,400,h/2)
+ctx.quadraticCurveTo(500,150,600,h/2)
+ctx.quadraticCurveTo(700,200,800,h/2)
 
 break
 
-default:
+case "snake":
 
-ctx.arc(w/2,h/2,150,0,Math.PI*2)
+ctx.moveTo(100,h/2)
+
+for(let i=0;i<5;i++){
+
+ctx.quadraticCurveTo(
+200+i*200,
+h/2-120,
+300+i*200,
+h/2
+)
+
+ctx.quadraticCurveTo(
+400+i*200,
+h/2+120,
+500+i*200,
+h/2
+)
+
+}
+
+break
 
 }
 
@@ -237,8 +361,12 @@ ctx.stroke()
 
 }
 
+/* 초기 실행 */
+
 pickShape()
 drawGuide()
+
+/* 그리기 */
 
 canvas.addEventListener("touchstart",start)
 canvas.addEventListener("touchmove",draw)
@@ -284,7 +412,11 @@ drawing=false
 
 }
 
+/* 다음 단계 */
+
 function nextStage(){
+
+playPop()
 
 stage++
 
