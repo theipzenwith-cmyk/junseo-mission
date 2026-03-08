@@ -1,96 +1,114 @@
 <!DOCTYPE html>
 <html lang="ko">
 <head>
-
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-
 <title>시력 테스트</title>
 
 <style>
-
 body{
-margin:0;
-background:white;
-font-family:-apple-system,BlinkMacSystemFont,"Segoe UI";
-text-align:center;
+  margin:0;
+  background:white;
+  font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,sans-serif;
+  text-align:center;
 }
-
-/* X 버튼 */
 
 .close{
-
-position:fixed;
-top:20px;
-left:20px;
-
-width:50px;
-height:50px;
-
-border-radius:50%;
-
-background:black;
-
-display:flex;
-align-items:center;
-justify-content:center;
-
-font-size:26px;
-
-color:white;
-text-decoration:none;
-
+  position:fixed;
+  top:20px;
+  left:20px;
+  width:46px;
+  height:46px;
+  border-radius:50%;
+  background:black;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  font-size:24px;
+  color:white;
+  text-decoration:none;
+  z-index:10;
 }
-
-/* 제목 */
 
 .title{
-margin-top:80px;
-font-size:32px;
-font-weight:700;
+  margin-top:70px;
+  font-size:30px;
+  font-weight:800;
 }
 
-/* 시력 줄 */
+.chart{
+  margin-top:34px;
+  display:flex;
+  flex-direction:column;
+  align-items:center;
+  gap:26px;
+}
 
 .row{
-margin-top:40px;
+  display:flex;
+  justify-content:center;
+  align-items:center;
+  flex-wrap:nowrap;
 }
 
 .row span{
-margin:0 14px;
-font-weight:700;
+  display:inline-flex;
+  align-items:center;
+  justify-content:center;
+  font-weight:700;
+  line-height:1;
+  cursor:pointer;
+  user-select:none;
 }
 
-/* 줄별 크기 */
-
-.r1 span{ font-size:72px; }
-.r2 span{ font-size:56px; }
-.r3 span{ font-size:46px; }
-.r4 span{ font-size:36px; }
-.r5 span{ font-size:28px; }
-.r6 span{ font-size:22px; }
-
-/* 버튼 */
+/* 위에서 아래로 갈수록 작아지고, 숫자는 많아짐 */
+.r1 span{ font-size:88px; margin:0 10px; min-width:52px; }
+.r2 span{ font-size:64px; margin:0 11px; min-width:38px; }
+.r3 span{ font-size:50px; margin:0 10px; min-width:30px; }
+.r4 span{ font-size:40px; margin:0 9px;  min-width:24px; }
+.r5 span{ font-size:32px; margin:0 8px;  min-width:20px; }
+.r6 span{ font-size:26px; margin:0 7px;  min-width:17px; }
+.r7 span{ font-size:21px; margin:0 6px;  min-width:14px; }
+.r8 span{ font-size:17px; margin:0 5px;  min-width:11px; }
 
 .controls{
-
-margin-top:60px;
-
+  margin-top:54px;
+  margin-bottom:40px;
 }
 
 button{
-
-font-size:22px;
-padding:14px 30px;
-border-radius:12px;
-border:none;
-background:black;
-color:white;
-
+  font-size:20px;
+  padding:14px 28px;
+  border-radius:12px;
+  border:none;
+  background:black;
+  color:white;
 }
 
-</style>
+button:active{
+  transform:scale(0.98);
+}
 
+@media (max-width:430px){
+  .title{
+    font-size:28px;
+  }
+
+  .chart{
+    gap:22px;
+    margin-top:28px;
+  }
+
+  .r1 span{ font-size:78px; margin:0 8px; min-width:46px; }
+  .r2 span{ font-size:58px; margin:0 9px; min-width:34px; }
+  .r3 span{ font-size:44px; margin:0 8px; min-width:26px; }
+  .r4 span{ font-size:35px; margin:0 7px; min-width:21px; }
+  .r5 span{ font-size:28px; margin:0 6px; min-width:18px; }
+  .r6 span{ font-size:23px; margin:0 5px; min-width:15px; }
+  .r7 span{ font-size:19px; margin:0 4px; min-width:12px; }
+  .r8 span{ font-size:15px; margin:0 3px; min-width:10px; }
+}
+</style>
 </head>
 
 <body>
@@ -99,74 +117,63 @@ color:white;
 
 <div class="title">시력 테스트</div>
 
-<div class="row r1" id="row1"></div>
-<div class="row r2" id="row2"></div>
-<div class="row r3" id="row3"></div>
-<div class="row r4" id="row4"></div>
-<div class="row r5" id="row5"></div>
-<div class="row r6" id="row6"></div>
+<div class="chart">
+  <div class="row r1" id="row1"></div>
+  <div class="row r2" id="row2"></div>
+  <div class="row r3" id="row3"></div>
+  <div class="row r4" id="row4"></div>
+  <div class="row r5" id="row5"></div>
+  <div class="row r6" id="row6"></div>
+  <div class="row r7" id="row7"></div>
+  <div class="row r8" id="row8"></div>
+</div>
 
 <div class="controls">
-<button onclick="generate()">다음 검사</button>
+  <button onclick="generate()">다음 검사</button>
 </div>
 
 <script>
-
 const numbers = ["1","2","3","4","5","6","7","8","9"];
-
 const emoji = ["🍎","🐶","🚗","⭐","🍌","🎈","🍓","🐱","🌙"];
 
 function speak(num){
-
-const msg = new SpeechSynthesisUtterance(num);
-
-msg.lang="ko-KR";
-
-speechSynthesis.speak(msg);
-
-}
-
-function makeRow(id,count){
-
-let html="";
-
-for(let i=0;i<count;i++){
-
-let n = numbers[Math.floor(Math.random()*numbers.length)];
-
-html += `<span onclick="tap(this)">${n}</span>`;
-
-}
-
-document.getElementById(id).innerHTML = html;
-
+  window.speechSynthesis.cancel();
+  const msg = new SpeechSynthesisUtterance(num);
+  msg.lang = "ko-KR";
+  speechSynthesis.speak(msg);
 }
 
 function tap(el){
+  const num = el.innerText;
+  speak(num);
+  const e = emoji[Math.floor(Math.random() * emoji.length)];
+  el.innerText = e;
+}
 
-let num = el.innerText;
+function randomNumber(){
+  return numbers[Math.floor(Math.random() * numbers.length)];
+}
 
-speak(num);
-
-let e = emoji[Math.floor(Math.random()*emoji.length)];
-
-el.innerText = e;
-
+function makeRow(id, count){
+  let html = "";
+  for(let i=0; i<count; i++){
+    html += `<span onclick="tap(this)">${randomNumber()}</span>`;
+  }
+  document.getElementById(id).innerHTML = html;
 }
 
 function generate(){
-
-makeRow("row1",1);
-makeRow("row2",2);
-makeRow("row3",3);
-makeRow("row4",4);
-makeRow("row5",5);
-makeRow("row6",2); /* 추가된 2열 */
-
+  makeRow("row1", 1);
+  makeRow("row2", 2);
+  makeRow("row3", 3);
+  makeRow("row4", 4);
+  makeRow("row5", 5);
+  makeRow("row6", 6);
+  makeRow("row7", 7);
+  makeRow("row8", 8);
 }
 
 generate();
-
 </script>
 
 </body>
