@@ -3,6 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
 <title>숫자 찾기 게임</title>
 
 <style>
@@ -16,7 +17,7 @@ text-align:center;
 overflow:hidden;
 }
 
-/* 홈버튼 */
+/* 홈 버튼 */
 
 .home{
 position:absolute;
@@ -80,7 +81,7 @@ align-items:center;
 gap:20px;
 }
 
-/* 안내 문구 */
+/* 안내 */
 
 .guide{
 font-size:22px;
@@ -129,6 +130,7 @@ animation:pop .25s forwards;
 }
 
 </style>
+
 </head>
 
 <body>
@@ -144,7 +146,7 @@ animation:pop .25s forwards;
 
 <div id="startScreen" class="startScreen">
 
-<div id="guideText" class="guide">
+<div class="guide">
 폰을 움직여 숨은 숫자를 찾아보세요
 </div>
 
@@ -202,7 +204,7 @@ setTimeout(()=>{
 
 speak("폰을 움직여 숨은 숫자를 찾아보세요")
 
-},600)
+},700)
 
 }
 
@@ -219,7 +221,7 @@ tiltY=e.beta*0.05
 
 }
 
-/* 시작 버튼 */
+/* 시작 */
 
 startBtn.onclick=async()=>{
 
@@ -317,11 +319,11 @@ el.style.fontSize=size/3+"px"
 
 el.style.background=colors[Math.floor(Math.random()*colors.length)]
 
-let x=Math.random()*(window.innerWidth-size)
-let y=Math.random()*(window.innerHeight-200)
+let x=Math.random()*(game.clientWidth-size)
+let y=Math.random()*(game.clientHeight-size)
 
-let vx=(Math.random()-.5)*0.3
-let vy=(Math.random()-.5)*0.3
+let vx=(Math.random()-.5)*(0.3+stage*0.05)
+let vy=(Math.random()-.5)*(0.3+stage*0.05)
 
 el.style.left=x+"px"
 el.style.top=y+"px"
@@ -359,13 +361,35 @@ balls.push(obj)
 
 function update(){
 
+let w=game.clientWidth
+let h=game.clientHeight
+
 for(let b of balls){
 
 b.x+=b.vx+tiltX
 b.y+=b.vy+tiltY
 
-if(b.x<0||b.x+b.size>window.innerWidth) b.vx*=-1
-if(b.y<0||b.y+b.size>window.innerHeight) b.vy*=-1
+/* 화면 밖 못 나가게 */
+
+if(b.x<0){
+b.x=0
+b.vx*=-1
+}
+
+if(b.x+b.size>w){
+b.x=w-b.size
+b.vx*=-1
+}
+
+if(b.y<0){
+b.y=0
+b.vy*=-1
+}
+
+if(b.y+b.size>h){
+b.y=h-b.size
+b.vy*=-1
+}
 
 }
 
