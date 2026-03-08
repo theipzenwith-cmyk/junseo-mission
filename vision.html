@@ -12,47 +12,81 @@
 body{
 margin:0;
 background:white;
-font-family:Arial;
+font-family:-apple-system,BlinkMacSystemFont,"Segoe UI";
 text-align:center;
 }
 
+/* X 버튼 */
+
+.close{
+
+position:fixed;
+top:20px;
+left:20px;
+
+width:50px;
+height:50px;
+
+border-radius:50%;
+
+background:black;
+
+display:flex;
+align-items:center;
+justify-content:center;
+
+font-size:26px;
+
+color:white;
+text-decoration:none;
+
+}
+
+/* 제목 */
+
 .title{
+margin-top:80px;
+font-size:32px;
+font-weight:700;
+}
+
+/* 시력 줄 */
+
+.row{
 margin-top:40px;
-font-size:28px;
-font-weight:bold;
 }
 
-.board{
+.row span{
+margin:0 14px;
+font-weight:700;
+}
+
+/* 줄별 크기 */
+
+.r1 span{ font-size:72px; }
+.r2 span{ font-size:56px; }
+.r3 span{ font-size:46px; }
+.r4 span{ font-size:36px; }
+.r5 span{ font-size:28px; }
+.r6 span{ font-size:22px; }
+
+/* 버튼 */
+
+.controls{
+
 margin-top:60px;
-}
 
-.line{
-margin:20px 0;
 }
-
-.num{
-font-weight:bold;
-color:black;
-cursor:pointer;
-display:inline-block;
-margin:0 10px;
-}
-
-.l1 .num{font-size:90px;}
-.l2 .num{font-size:70px;}
-.l3 .num{font-size:55px;}
-.l4 .num{font-size:40px;}
-.l5 .num{font-size:28px;}
 
 button{
-margin-top:60px;
-font-size:20px;
+
+font-size:22px;
 padding:14px 30px;
+border-radius:12px;
 border:none;
-border-radius:8px;
 background:black;
 color:white;
-cursor:pointer;
+
 }
 
 </style>
@@ -61,79 +95,77 @@ cursor:pointer;
 
 <body>
 
+<a class="close" href="index.html">✕</a>
+
 <div class="title">시력 테스트</div>
 
-<div class="board">
+<div class="row r1" id="row1"></div>
+<div class="row r2" id="row2"></div>
+<div class="row r3" id="row3"></div>
+<div class="row r4" id="row4"></div>
+<div class="row r5" id="row5"></div>
+<div class="row r6" id="row6"></div>
 
-<div class="line l1">
-<span class="num" onclick="clickNum(this)">8</span>
+<div class="controls">
+<button onclick="generate()">다음 검사</button>
 </div>
-
-<div class="line l2">
-<span class="num" onclick="clickNum(this)">3</span>
-<span class="num" onclick="clickNum(this)">5</span>
-</div>
-
-<div class="line l3">
-<span class="num" onclick="clickNum(this)">7</span>
-<span class="num" onclick="clickNum(this)">2</span>
-<span class="num" onclick="clickNum(this)">9</span>
-</div>
-
-<div class="line l4">
-<span class="num" onclick="clickNum(this)">4</span>
-<span class="num" onclick="clickNum(this)">6</span>
-<span class="num" onclick="clickNum(this)">1</span>
-<span class="num" onclick="clickNum(this)">8</span>
-</div>
-
-<div class="line l5">
-<span class="num" onclick="clickNum(this)">2</span>
-<span class="num" onclick="clickNum(this)">5</span>
-<span class="num" onclick="clickNum(this)">7</span>
-<span class="num" onclick="clickNum(this)">3</span>
-<span class="num" onclick="clickNum(this)">9</span>
-</div>
-
-</div>
-
-<button onclick="newTest()">다음 검사</button>
 
 <script>
 
-const emojis=["😀","🐶","🍎","🚗","⭐","🐱","🍌","🎈","🍕"];
+const numbers = ["1","2","3","4","5","6","7","8","9"];
 
-function speak(text){
+const emoji = ["🍎","🐶","🚗","⭐","🍌","🎈","🍓","🐱","🌙"];
 
-const msg=new SpeechSynthesisUtterance(text);
+function speak(num){
+
+const msg = new SpeechSynthesisUtterance(num);
+
 msg.lang="ko-KR";
+
 speechSynthesis.speak(msg);
 
 }
 
-function clickNum(el){
+function makeRow(id,count){
 
-const n=el.innerText;
+let html="";
 
-speak(n);
+for(let i=0;i<count;i++){
 
-el.innerText=emojis[Math.floor(Math.random()*emojis.length)];
+let n = numbers[Math.floor(Math.random()*numbers.length)];
+
+html += `<span onclick="tap(this)">${n}</span>`;
+
+}
+
+document.getElementById(id).innerHTML = html;
 
 }
 
-function rand(){
-return Math.floor(Math.random()*9)+1;
-}
+function tap(el){
 
-function newTest(){
+let num = el.innerText;
 
-const nums=document.querySelectorAll(".num");
+speak(num);
 
-nums.forEach(el=>{
-el.innerText=rand();
-});
+let e = emoji[Math.floor(Math.random()*emoji.length)];
+
+el.innerText = e;
 
 }
+
+function generate(){
+
+makeRow("row1",1);
+makeRow("row2",2);
+makeRow("row3",3);
+makeRow("row4",4);
+makeRow("row5",5);
+makeRow("row6",2); /* 추가된 2열 */
+
+}
+
+generate();
 
 </script>
 
