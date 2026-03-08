@@ -17,7 +17,7 @@ text-align:center;
 overflow:hidden;
 }
 
-/* 홈 버튼 */
+/* 홈버튼 */
 
 .home{
 position:absolute;
@@ -170,9 +170,6 @@ let stage=1
 let target=0
 let previousTarget=null
 
-let tiltX=0
-let tiltY=0
-
 const stageCount=[5,7,10,15,20,25,30]
 
 const colors=[
@@ -208,36 +205,11 @@ speak("폰을 움직여 숨은 숫자를 찾아보세요")
 
 }
 
-/* 자이로 */
-
-function enableGyro(){
-
-window.addEventListener("deviceorientation",(e)=>{
-
-tiltX=e.gamma*0.05
-tiltY=e.beta*0.05
-
-})
-
-}
-
 /* 시작 */
 
-startBtn.onclick=async()=>{
+startBtn.onclick=()=>{
 
 startScreen.style.display="none"
-
-if(typeof DeviceOrientationEvent.requestPermission==="function"){
-
-const permission=await DeviceOrientationEvent.requestPermission()
-
-if(permission==="granted") enableGyro()
-
-}else{
-
-enableGyro()
-
-}
 
 startStage()
 
@@ -366,30 +338,11 @@ let h=game.clientHeight
 
 for(let b of balls){
 
-b.x+=b.vx+tiltX
-b.y+=b.vy+tiltY
+b.x+=b.vx
+b.y+=b.vy
 
-/* 화면 밖 못 나가게 */
-
-if(b.x<0){
-b.x=0
-b.vx*=-1
-}
-
-if(b.x+b.size>w){
-b.x=w-b.size
-b.vx*=-1
-}
-
-if(b.y<0){
-b.y=0
-b.vy*=-1
-}
-
-if(b.y+b.size>h){
-b.y=h-b.size
-b.vy*=-1
-}
+if(b.x<0||b.x+b.size>w) b.vx*=-1
+if(b.y<0||b.y+b.size>h) b.vy*=-1
 
 }
 
