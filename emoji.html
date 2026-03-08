@@ -107,8 +107,13 @@ const gameoverUI = document.getElementById("gameover")
 
 let score = 0
 let combo = 0
+
 let speed = 2
+let maxSpeed = 8
+
 let spawn = 700
+let minSpawn = 250
+
 let playing = true
 
 const normal = ["🍎","🍓","🐶","⭐"]
@@ -303,13 +308,31 @@ gameoverUI.style.display="block"
 
 }
 
-setInterval(spawnEmoji, spawn)
+function gameLoop(){
+
+if(!playing) return
+
+spawnEmoji()
+
+setTimeout(gameLoop, spawn)
+
+}
+
+gameLoop()
 
 setInterval(()=>{
 
-if(speed<16){
+// 속도는 어느정도까지만 증가
+if(speed < maxSpeed){
 
-speed+=0.7
+speed += 0.5
+
+}
+
+// 대신 이모지 생성이 많아짐
+if(spawn > minSpawn){
+
+spawn -= 40
 
 }
 
