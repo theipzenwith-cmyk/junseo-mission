@@ -1,0 +1,317 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+<title>선 따라 그리기</title>
+
+<style>
+
+body{
+margin:0;
+background:white;
+font-family:-apple-system,BlinkMacSystemFont,"Segoe UI";
+text-align:center;
+}
+
+.title{
+margin-top:40px;
+font-size:28px;
+font-weight:700;
+}
+
+.stage{
+margin-top:10px;
+font-size:20px;
+color:#666;
+}
+
+canvas{
+margin-top:20px;
+touch-action:none;
+}
+
+.btn{
+margin-top:30px;
+padding:18px 40px;
+font-size:20px;
+border-radius:40px;
+background:black;
+color:white;
+border:none;
+}
+
+</style>
+
+</head>
+
+<body>
+
+<div class="title">점선을 따라 그려보세요</div>
+<div class="stage" id="stage">1 / 50</div>
+
+<canvas id="canvas"></canvas>
+
+<br>
+
+<button class="btn" onclick="nextStage()">다음 단계</button>
+
+<script>
+
+const canvas = document.getElementById("canvas")
+const ctx = canvas.getContext("2d")
+
+canvas.width = window.innerWidth
+canvas.height = window.innerHeight * 0.6
+
+let drawing=false
+let stage=0
+
+const shapes=[
+
+"line","line2","line3","diag1","diag2",
+
+"curve1","curve2","s","wave","zig",
+
+"circle","circleSmall","triangle","square","star",
+
+"heart","flower","tree","cloud","sun",
+
+"apple","pear","banana","strawberry","grape",
+
+"rabbit","dog","cat","fish","bird",
+
+"house","car","balloon","umbrella","boat",
+
+"icecream","cake","moon","star2","rocket",
+
+"bigCircle","wave2","bigS","bigHeart","bigStar",
+
+"flower2","tree2","apple2","rabbit2","free"
+
+]
+
+function drawGuide(){
+
+ctx.clearRect(0,0,canvas.width,canvas.height)
+
+ctx.setLineDash([12,10])
+ctx.strokeStyle="#bbb"
+ctx.lineWidth=5
+
+ctx.beginPath()
+
+let w=canvas.width
+let h=canvas.height
+
+let s=shapes[stage]
+
+if(s=="line"){
+
+ctx.moveTo(100,h/2)
+ctx.lineTo(w-100,h/2)
+
+}
+
+else if(s=="line2"){
+
+ctx.moveTo(200,h/2)
+ctx.lineTo(w-200,h/2)
+
+}
+
+else if(s=="line3"){
+
+ctx.moveTo(50,h/2)
+ctx.lineTo(w-50,h/2)
+
+}
+
+else if(s=="diag1"){
+
+ctx.moveTo(100,100)
+ctx.lineTo(w-100,h-100)
+
+}
+
+else if(s=="diag2"){
+
+ctx.moveTo(w-100,100)
+ctx.lineTo(100,h-100)
+
+}
+
+else if(s=="curve1"){
+
+ctx.moveTo(100,h/2)
+ctx.quadraticCurveTo(w/2,0,w-100,h/2)
+
+}
+
+else if(s=="curve2"){
+
+ctx.moveTo(100,h/2)
+ctx.quadraticCurveTo(w/2,h,w-100,h/2)
+
+}
+
+else if(s=="s"){
+
+ctx.moveTo(100,200)
+ctx.bezierCurveTo(w/2,0,w/2,h,w-100,h-200)
+
+}
+
+else if(s=="wave"){
+
+ctx.moveTo(50,h/2)
+
+for(let i=0;i<6;i++){
+
+ctx.quadraticCurveTo(
+100+i*150,
+h/2-100,
+150+i*150,
+h/2
+)
+
+}
+
+}
+
+else if(s=="zig"){
+
+ctx.moveTo(100,200)
+
+for(let i=0;i<10;i++){
+
+ctx.lineTo(150+i*80,300)
+ctx.lineTo(200+i*80,200)
+
+}
+
+}
+
+else if(s=="circle"){
+
+ctx.arc(w/2,h/2,150,0,Math.PI*2)
+
+}
+
+else if(s=="circleSmall"){
+
+ctx.arc(w/2,h/2,100,0,Math.PI*2)
+
+}
+
+else if(s=="triangle"){
+
+ctx.moveTo(w/2,150)
+ctx.lineTo(w/2-150,h-150)
+ctx.lineTo(w/2+150,h-150)
+ctx.closePath()
+
+}
+
+else if(s=="square"){
+
+ctx.rect(w/2-150,h/2-150,300,300)
+
+}
+
+else if(s=="star"){
+
+ctx.moveTo(w/2,120)
+
+for(let i=0;i<5;i++){
+
+ctx.lineTo(
+w/2 + Math.cos((18+i*72)/180*Math.PI)*150,
+h/2 - Math.sin((18+i*72)/180*Math.PI)*150
+)
+
+ctx.lineTo(
+w/2 + Math.cos((54+i*72)/180*Math.PI)*60,
+h/2 - Math.sin((54+i*72)/180*Math.PI)*60
+)
+
+}
+
+ctx.closePath()
+
+}
+
+else{
+
+ctx.arc(w/2,h/2,150,0,Math.PI*2)
+
+}
+
+ctx.stroke()
+
+}
+
+drawGuide()
+
+canvas.addEventListener("touchstart",start)
+canvas.addEventListener("touchmove",draw)
+canvas.addEventListener("touchend",end)
+
+function start(e){
+
+drawing=true
+
+ctx.setLineDash([])
+ctx.strokeStyle="black"
+ctx.lineWidth=8
+
+ctx.beginPath()
+
+let rect=canvas.getBoundingClientRect()
+
+ctx.moveTo(
+e.touches[0].clientX-rect.left,
+e.touches[0].clientY-rect.top
+)
+
+}
+
+function draw(e){
+
+if(!drawing)return
+
+let rect=canvas.getBoundingClientRect()
+
+ctx.lineTo(
+e.touches[0].clientX-rect.left,
+e.touches[0].clientY-rect.top
+)
+
+ctx.stroke()
+
+}
+
+function end(){
+
+drawing=false
+
+}
+
+function nextStage(){
+
+stage++
+
+if(stage>=50) stage=0
+
+document.getElementById("stage").innerText=(stage+1)+" / 50"
+
+drawGuide()
+
+}
+
+</script>
+
+</body>
+</html>
