@@ -45,8 +45,6 @@ margin-right:auto;
 
 }
 
-/* 큰 폰 */
-
 @media(min-width:600px){
 
 .grid{
@@ -54,8 +52,6 @@ grid-template-columns:repeat(3,1fr);
 }
 
 }
-
-/* 아이패드 */
 
 @media(min-width:1000px){
 
@@ -93,11 +89,42 @@ justify-content:center;
 
 font-size:55px;
 
+/* 색상은 JS에서 랜덤 */
+
 box-shadow:
-0 10px 25px rgba(0,0,0,0.5),
-inset 0 2px 4px rgba(255,255,255,0.2);
+0 12px 30px rgba(0,0,0,0.6),
+inset 0 3px 6px rgba(255,255,255,0.25),
+inset 0 -6px 10px rgba(0,0,0,0.25);
+
+position:relative;
 
 transition:transform .15s;
+
+}
+
+/* 상단 하이라이트 */
+
+.icon::after{
+
+content:"";
+
+position:absolute;
+
+top:0;
+left:0;
+right:0;
+
+height:45%;
+
+border-radius:28px 28px 0 0;
+
+background:linear-gradient(
+to bottom,
+rgba(255,255,255,0.35),
+rgba(255,255,255,0)
+);
+
+pointer-events:none;
 
 }
 
