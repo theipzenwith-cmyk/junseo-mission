@@ -10,75 +10,47 @@
 <style>
 
 body{
-
 margin:0;
-min-height:100vh;
-
+background:black;
 font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto;
-
-display:flex;
-flex-direction:column;
-align-items:center;
-
 color:white;
-
-background:linear-gradient(
-120deg,
-#ff7a7a,
-#6a85ff,
-#8fd3f4,
-#84fab0
-);
-
-background-size:400% 400%;
-
-animation:bgMove 18s ease infinite;
-
+text-align:center;
 }
 
-@keyframes bgMove{
-
-0%{background-position:0% 50%;}
-50%{background-position:100% 50%;}
-100%{background-position:0% 50%;}
-
-}
+/* 제목 */
 
 .title{
-
-margin-top:60px;
-font-size:36px;
+margin-top:50px;
+font-size:34px;
 font-weight:800;
-
 }
 
 /* GRID */
 
 .grid{
 
-margin-top:50px;
+margin-top:40px;
 
 display:grid;
 
 grid-template-columns:repeat(2,1fr);
 
-gap:40px;
+gap:30px;
 
-padding:20px;
+padding:30px;
 
-width:100%;
 max-width:900px;
+margin-left:auto;
+margin-right:auto;
 
 }
 
-/* 큰폰 */
+/* 큰 폰 */
 
 @media(min-width:600px){
 
 .grid{
-
 grid-template-columns:repeat(3,1fr);
-
 }
 
 }
@@ -88,9 +60,7 @@ grid-template-columns:repeat(3,1fr);
 @media(min-width:1000px){
 
 .grid{
-
 grid-template-columns:repeat(4,1fr);
-
 }
 
 }
@@ -112,25 +82,19 @@ color:white;
 
 .icon{
 
-width:130px;
-height:130px;
+width:120px;
+height:120px;
 
-border-radius:30px;
+border-radius:28px;
 
 display:flex;
 align-items:center;
 justify-content:center;
 
-font-size:60px;
-
-background:linear-gradient(
-135deg,
-#3b82f6,
-#9333ea
-);
+font-size:55px;
 
 box-shadow:
-0 12px 30px rgba(0,0,0,0.4),
+0 10px 25px rgba(0,0,0,0.5),
 inset 0 2px 4px rgba(255,255,255,0.2);
 
 transition:transform .15s;
@@ -138,20 +102,16 @@ transition:transform .15s;
 }
 
 .icon:active{
-
 transform:scale(0.9);
-
 }
 
 /* LABEL */
 
 .label{
 
-margin-top:14px;
+margin-top:12px;
 
-font-size:18px;
-
-text-align:center;
+font-size:17px;
 
 }
 
@@ -161,13 +121,24 @@ text-align:center;
 
 <body>
 
-<div class="title">
-준서 놀이터
-</div>
+<div class="title">준서 놀이터</div>
 
 <div class="grid" id="gameGrid"></div>
 
 <script>
+
+const colors=[
+
+"#3b82f6",
+"#9333ea",
+"#ef4444",
+"#f97316",
+"#22c55e",
+"#eab308",
+"#06b6d4",
+"#6366f1"
+
+]
 
 fetch("missions.json")
 .then(res=>res.json())
@@ -180,16 +151,23 @@ data.games.forEach(game=>{
 if(!game.active) return
 
 const a=document.createElement("a")
-
 a.href=game.url
 a.className="app"
+
+/* icon */
 
 const icon=document.createElement("div")
 icon.className="icon"
 
+const color=colors[Math.floor(Math.random()*colors.length)]
+
+icon.style.background=color
+
 const emoji=game.title.split(" ")[0]
 
 icon.innerText=emoji
+
+/* label */
 
 const label=document.createElement("div")
 label.className="label"
