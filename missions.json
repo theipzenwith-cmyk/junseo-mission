@@ -1,0 +1,29 @@
+{
+"games":[
+{
+"title":"👁 시력 테스트",
+"url":"vision.html",
+"active":true
+},
+{
+"title":"🎨 색깔 미션",
+"url":"color.html",
+"active":true
+},
+{
+"title":"🎈 숫자 풍선 찾기",
+"url":"number.html",
+"active":true
+},
+{
+"title":"💥 이모지 터치 게임",
+"url":"emoji.html",
+"active":true
+},
+{
+"title":"✏️ 선따라 그리기",
+"url":"trace.html",
+"active":true
+}
+]
+}
