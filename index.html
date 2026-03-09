@@ -10,106 +10,148 @@
 <style>
 
 body{
+
 margin:0;
-height:100vh;
-background:radial-gradient(circle at 20% 20%, #1e293b 0%, #000000 60%);
-color:white;
+min-height:100vh;
+
 font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto;
-text-align:center;
-overflow-x:hidden;
+
+display:flex;
+flex-direction:column;
+align-items:center;
+
+color:white;
+
+background:linear-gradient(
+120deg,
+#ff7a7a,
+#6a85ff,
+#8fd3f4,
+#84fab0
+);
+
+background-size:400% 400%;
+
+animation:bgMove 18s ease infinite;
+
 }
 
-/* 별 배경 */
+@keyframes bgMove{
 
-body::before{
-content:"";
-position:fixed;
-top:0;
-left:0;
-width:100%;
-height:100%;
-background-image:
-radial-gradient(2px 2px at 20% 30%, white, transparent),
-radial-gradient(2px 2px at 70% 40%, white, transparent),
-radial-gradient(2px 2px at 50% 80%, white, transparent),
-radial-gradient(2px 2px at 90% 20%, white, transparent);
-opacity:0.4;
-pointer-events:none;
-}
+0%{background-position:0% 50%;}
+50%{background-position:100% 50%;}
+100%{background-position:0% 50%;}
 
-.header{
-padding-top:60px;
 }
 
 .title{
+
+margin-top:60px;
 font-size:36px;
 font-weight:800;
+
 }
 
-.subtitle{
-margin-top:10px;
-font-size:18px;
-color:#aaa;
+/* GRID */
+
+.grid{
+
+margin-top:50px;
+
+display:grid;
+
+grid-template-columns:repeat(2,1fr);
+
+gap:40px;
+
+padding:20px;
+
+width:100%;
+max-width:900px;
+
 }
 
-.container{
-padding:30px 20px;
-max-width:520px;
-margin:auto;
+/* 큰폰 */
+
+@media(min-width:600px){
+
+.grid{
+
+grid-template-columns:repeat(3,1fr);
+
 }
 
-/* 카드 */
+}
 
-.card{
+/* 아이패드 */
+
+@media(min-width:1000px){
+
+.grid{
+
+grid-template-columns:repeat(4,1fr);
+
+}
+
+}
+
+/* APP */
+
+.app{
+
+display:flex;
+flex-direction:column;
+align-items:center;
+
+text-decoration:none;
+color:white;
+
+}
+
+/* ICON */
+
+.icon{
+
+width:130px;
+height:130px;
+
+border-radius:30px;
 
 display:flex;
 align-items:center;
 justify-content:center;
 
-height:90px;
-
-border-radius:26px;
-
-font-size:22px;
-font-weight:700;
-
-color:white;
-
-text-decoration:none;
-
-margin-bottom:14px;
+font-size:60px;
 
 background:linear-gradient(
-45deg,
-#ef4444,
-#f97316,
-#eab308,
-#22c55e,
+135deg,
 #3b82f6,
-#8b5cf6
+#9333ea
 );
 
-background-size:400% 400%;
-
-animation:gradientMove 10s ease infinite;
-
 box-shadow:
-0 20px 40px rgba(0,0,0,0.6),
-0 0 20px rgba(255,255,255,0.15);
+0 12px 30px rgba(0,0,0,0.4),
+inset 0 2px 4px rgba(255,255,255,0.2);
 
 transition:transform .15s;
 
 }
 
-.card:active{
-transform:scale(0.96);
+.icon:active{
+
+transform:scale(0.9);
+
 }
 
-@keyframes gradientMove{
+/* LABEL */
 
-0%{background-position:0% 50%;}
-50%{background-position:100% 50%;}
-100%{background-position:0% 50%;}
+.label{
+
+margin-top:14px;
+
+font-size:18px;
+
+text-align:center;
 
 }
 
@@ -119,19 +161,11 @@ transform:scale(0.96);
 
 <body>
 
-<div class="header">
-
 <div class="title">
 준서 놀이터
 </div>
 
-<div class="subtitle">
-재미있는 게임을 골라보세요
-</div>
-
-</div>
-
-<div class="container" id="gameBox"></div>
+<div class="grid" id="gameGrid"></div>
 
 <script>
 
@@ -139,19 +173,33 @@ fetch("missions.json")
 .then(res=>res.json())
 .then(data=>{
 
-const box=document.getElementById("gameBox")
+const grid=document.getElementById("gameGrid")
 
 data.games.forEach(game=>{
 
 if(!game.active) return
 
-const card=document.createElement("a")
+const a=document.createElement("a")
 
-card.className="card"
-card.href=game.url
-card.innerText=game.title
+a.href=game.url
+a.className="app"
 
-box.appendChild(card)
+const icon=document.createElement("div")
+icon.className="icon"
+
+const emoji=game.title.split(" ")[0]
+
+icon.innerText=emoji
+
+const label=document.createElement("div")
+label.className="label"
+
+label.innerText=game.title.replace(emoji,"").trim()
+
+a.appendChild(icon)
+a.appendChild(label)
+
+grid.appendChild(a)
 
 })
 
