@@ -1,1 +1,421 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>이모지 매칭 - 사운드 에디션</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Pretendard:wght@400;700;900&display=swap');
+        
+        body {
+            background-color: #09090b;
+            color: #ffffff;
+            font-family: 'Pretendard', sans-serif;
+            overflow: hidden;
+        }
 
+        .card {
+            perspective: 1000px;
+            cursor: pointer;
+            touch-action: manipulation;
+        }
+
+        .card-inner {
+            position: relative;
+            width: 100%;
+            height: 100%;
+            transition: transform 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+            transform-style: preserve-3d;
+        }
+
+        .card.flipped .card-inner {
+            transform: rotateY(180deg);
+        }
+
+        .card-front, .card-back {
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            backface-visibility: hidden;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: 1.25rem;
+            box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.5);
+        }
+
+        .card-front {
+            border: 2px solid rgba(255, 255, 255, 0.2);
+            font-size: 2rem;
+            font-weight: 900;
+            transition: transform 0.2s ease;
+        }
+
+        .question-mark {
+            color: rgba(255, 255, 255, 0.5);
+        }
+
+        .card-back {
+            background: linear-gradient(145deg, #27272a, #18181b);
+            border: 2px solid currentColor;
+            transform: rotateY(180deg);
+            font-size: 2.5rem;
+        }
+
+        .matched-animation {
+            animation: match-pulse 0.5s ease-out forwards;
+        }
+
+        @keyframes match-pulse {
+            0% { transform: scale(1); filter: brightness(1); }
+            50% { transform: scale(1.1); filter: brightness(1.5); }
+            100% { transform: scale(1); filter: brightness(0.5); opacity: 0.3; }
+        }
+
+        .shake {
+            animation: shake 0.4s ease-in-out;
+        }
+
+        @keyframes shake {
+            0%, 100% { transform: translateX(0); }
+            25% { transform: translateX(-5px); }
+            75% { transform: translateX(5px); }
+        }
+
+        .progress-bar {
+            transition: width 0.3s ease-out;
+        }
+
+        .bg-glow {
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            width: 300px;
+            height: 300px;
+            background: radial-gradient(circle, var(--glow-color, #3b82f6) 0%, transparent 70%);
+            opacity: 0.15;
+            filter: blur(60px);
+            pointer-events: none;
+            z-index: -1;
+        }
+    </style>
+</head>
+<body class="min-h-screen flex flex-col items-center">
+
+    <div class="bg-glow" id="glow"></div>
+
+    <div id="app" class="w-full max-w-md bg-zinc-950 min-h-screen shadow-2xl flex flex-col relative border-x border-zinc-900 overflow-hidden">
+        
+        <!-- 홈 화면 -->
+        <div id="home-screen" class="flex-1 flex flex-col items-center justify-center p-8 text-center">
+            <div class="relative mb-8">
+                <div class="absolute -inset-4 bg-blue-500/20 blur-2xl rounded-full"></div>
+                <div class="text-8xl mb-4 relative">🔊</div>
+            </div>
+            <h1 class="text-4xl font-black mb-2 tracking-tighter">SOUND<br><span class="text-blue-400">MATCH</span></h1>
+            <p class="text-zinc-500 mb-12 text-sm font-medium">소리와 함께 즐기는 컬러 매칭!</p>
+            
+            <button onclick="startGame()" class="group relative w-full py-5 overflow-hidden rounded-2xl bg-white text-black font-bold text-xl transition-all active:scale-95 shadow-xl">
+                <div class="absolute inset-0 bg-blue-100 translate-y-full group-hover:translate-y-0 transition-transform"></div>
+                <span class="relative">시작하기</span>
+            </button>
+        </div>
+
+        <!-- 게임 화면 -->
+        <div id="game-screen" class="hidden flex-1 flex flex-col">
+            <header class="p-4 flex items-center justify-between border-b border-zinc-900 bg-black/40 backdrop-blur-md">
+                <button onclick="goHome()" class="w-10 h-10 flex items-center justify-center rounded-xl bg-zinc-900 text-zinc-400 hover:text-white transition">✕</button>
+                <div class="flex flex-col items-center">
+                    <span id="level-title" class="text-[10px] font-bold uppercase tracking-[0.2em]">Level 1</span>
+                    <span id="timer-display" class="font-mono text-xl font-bold">00:00</span>
+                </div>
+                <div class="w-10 h-10 flex items-center justify-center rounded-xl bg-zinc-900 text-zinc-400">
+                    <span id="move-count" class="text-sm font-bold">0</span>
+                </div>
+            </header>
+
+            <div class="h-1 w-full bg-zinc-900">
+                <div id="progress" class="h-full progress-bar" style="width: 0%"></div>
+            </div>
+
+            <main class="flex-1 flex flex-col items-center justify-center p-6">
+                <div id="grid" class="grid grid-cols-3 gap-3 w-full max-w-[340px]">
+                    <!-- 카드 동적 생성 -->
+                </div>
+                
+                <div id="hint-text" class="mt-8 text-zinc-500 text-xs font-medium animate-pulse text-center">
+                    사운드 피드백과 함께 짝을 찾으세요
+                </div>
+            </main>
+        </div>
+
+        <!-- 스테이지 완료 효과 -->
+        <div id="level-up" class="hidden fixed inset-0 z-40 bg-white flex items-center justify-center pointer-events-none transition-opacity duration-500 opacity-0">
+            <h2 class="text-6xl font-black italic text-black">LEVEL UP</h2>
+        </div>
+
+        <!-- 최종 결과 모달 -->
+        <div id="complete-modal" class="hidden fixed inset-0 bg-black/90 backdrop-blur-md flex items-center justify-center p-6 z-50">
+            <div class="bg-zinc-900 border border-zinc-800 rounded-[2.5rem] p-10 text-center shadow-2xl w-full max-w-xs">
+                <div class="inline-flex items-center justify-center w-20 h-20 bg-zinc-800 rounded-full mb-6">
+                    <span class="text-4xl">👑</span>
+                </div>
+                <h2 class="text-3xl font-black mb-2">성공!</h2>
+                <div class="space-y-1 mb-8">
+                    <p class="text-zinc-500 text-sm">성공 기록</p>
+                    <p id="final-stats" class="text-xl font-bold text-white">00:00 / 0 Moves</p>
+                </div>
+                <button onclick="resetGameTotal()" class="w-full bg-white text-black font-bold py-5 rounded-2xl transition-all shadow-lg active:scale-95">
+                    다시 하기
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // 사운드 생성기 (Web Audio API)
+        const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+
+        function playSound(type) {
+            const oscillator = audioCtx.createOscillator();
+            const gainNode = audioCtx.createGain();
+
+            oscillator.connect(gainNode);
+            gainNode.connect(audioCtx.destination);
+
+            if (type === 'success') {
+                // 딩동댕 (높고 경쾌한 두 음)
+                oscillator.type = 'sine';
+                oscillator.frequency.setValueAtTime(523.25, audioCtx.currentTime); // C5
+                oscillator.frequency.exponentialRampToValueAtTime(880, audioCtx.currentTime + 0.1); // A5
+                gainNode.gain.setValueAtTime(0.1, audioCtx.currentTime);
+                gainNode.gain.exponentialRampToValueAtTime(0.01, audioCtx.currentTime + 0.3);
+                oscillator.start();
+                oscillator.stop(audioCtx.currentTime + 0.3);
+            } else if (type === 'fail') {
+                // 삐 (낮고 둔탁한 음)
+                oscillator.type = 'sawtooth';
+                oscillator.frequency.setValueAtTime(110, audioCtx.currentTime); // A2
+                gainNode.gain.setValueAtTime(0.05, audioCtx.currentTime);
+                gainNode.gain.linearRampToValueAtTime(0.01, audioCtx.currentTime + 0.2);
+                oscillator.start();
+                oscillator.stop(audioCtx.currentTime + 0.2);
+            } else if (type === 'flip') {
+                // 카드 뒤집기 (짧은 클릭음)
+                oscillator.type = 'sine';
+                oscillator.frequency.setValueAtTime(440, audioCtx.currentTime);
+                gainNode.gain.setValueAtTime(0.02, audioCtx.currentTime);
+                gainNode.gain.linearRampToValueAtTime(0.01, audioCtx.currentTime + 0.05);
+                oscillator.start();
+                oscillator.stop(audioCtx.currentTime + 0.05);
+            }
+        }
+
+        const emojiPools = [
+            ['🍔', '🍕', '🍣', '🌮', '🍜', '🍱', '🍦', '🍰'],
+            ['🚗', '🚀', '🚁', '🛳️', '🚲', '🚜', '🏎️', '🛹'],
+            ['🦁', '🐨', '🐘', '🦒', '🦓', '🦖', '🐉', '🐙'],
+            ['🎸', '🎹', '🥁', '🎷', '🎻', '🎮', '🎧', '🎬']
+        ];
+
+        const vividColors = [
+            '#FF1E1E', '#FF7F1E', '#FFD700', '#1E88E5', 
+            '#43A047', '#D81B60', '#8E24AA', '#00ACC1', 
+            '#FFB300', '#F4511E', '#3949AB', '#039BE5'
+        ];
+
+        let currentLevel = 1;
+        const totalLevels = 4;
+        let cards = [];
+        let flippedCards = [];
+        let matchedCount = 0;
+        let isProcessing = false;
+        let moves = 0;
+        let timer = 0;
+        let timerInterval;
+
+        function shuffle(array) {
+            return array.sort(() => Math.random() - 0.5);
+        }
+
+        function formatTime(s) {
+            const mins = Math.floor(s / 60).toString().padStart(2, '0');
+            const secs = (s % 60).toString().padStart(2, '0');
+            return `${mins}:${secs}`;
+        }
+
+        function updateStats() {
+            document.getElementById('move-count').innerText = moves;
+            document.getElementById('timer-display').innerText = formatTime(timer);
+        }
+
+        function goHome() {
+            clearInterval(timerInterval);
+            document.getElementById('home-screen').classList.remove('hidden');
+            document.getElementById('game-screen').classList.add('hidden');
+            document.getElementById('complete-modal').classList.add('hidden');
+        }
+
+        function startGame() {
+            if (audioCtx.state === 'suspended') {
+                audioCtx.resume();
+            }
+            document.getElementById('home-screen').classList.add('hidden');
+            document.getElementById('game-screen').classList.remove('hidden');
+            currentLevel = 1;
+            moves = 0;
+            timer = 0;
+            updateStats();
+            clearInterval(timerInterval);
+            timerInterval = setInterval(() => {
+                timer++;
+                updateStats();
+            }, 1000);
+            initLevel();
+        }
+
+        function initLevel() {
+            const grid = document.getElementById('grid');
+            grid.innerHTML = '';
+            cards = [];
+            flippedCards = [];
+            matchedCount = 0;
+            isProcessing = false;
+            
+            const levelThemeColor = vividColors[Math.floor(Math.random() * vividColors.length)];
+            document.body.style.setProperty('--glow-color', levelThemeColor);
+            document.getElementById('level-title').innerText = `Level ${currentLevel}`;
+            document.getElementById('level-title').style.color = levelThemeColor;
+            document.getElementById('progress').style.backgroundColor = levelThemeColor;
+            document.getElementById('progress').style.width = '0%';
+
+            let pairCount = 4; 
+            if (currentLevel === 2) { pairCount = 6; grid.className = "grid grid-cols-3 gap-3 w-full max-w-[340px]"; }
+            else if (currentLevel >= 3) { pairCount = 8; grid.className = "grid grid-cols-4 gap-2 w-full max-w-[340px]"; }
+
+            const pool = emojiPools[Math.floor(Math.random() * emojiPools.length)];
+            const selected = shuffle([...pool]).slice(0, pairCount);
+            let gameItems = [];
+
+            selected.forEach(emoji => {
+                const backColor = vividColors[Math.floor(Math.random() * vividColors.length)];
+                gameItems.push({ emoji, color: backColor });
+                gameItems.push({ emoji, color: backColor });
+            });
+
+            gameItems = shuffle(gameItems);
+
+            gameItems.forEach((item, index) => {
+                const frontBgColor = vividColors[Math.floor(Math.random() * vividColors.length)];
+                
+                const card = document.createElement('div');
+                card.className = 'card aspect-square h-full';
+                card.innerHTML = `
+                    <div class="card-inner">
+                        <div class="card-front" style="background-color: ${frontBgColor}">
+                            <span class="question-mark">?</span>
+                        </div>
+                        <div class="card-back" style="color: ${item.color}; border-color: ${item.color}">
+                            ${item.emoji}
+                        </div>
+                    </div>
+                `;
+                card.dataset.emoji = item.emoji;
+                card.onclick = () => flipCard(card);
+                grid.appendChild(card);
+                cards.push(card);
+            });
+        }
+
+        function flipCard(card) {
+            if (isProcessing || card.classList.contains('flipped') || card.classList.contains('matched')) return;
+
+            playSound('flip');
+            card.classList.add('flipped');
+            flippedCards.push(card);
+
+            if (flippedCards.length === 2) {
+                moves++;
+                updateStats();
+                isProcessing = true;
+                checkMatch();
+            }
+        }
+
+        function checkMatch() {
+            const [card1, card2] = flippedCards;
+            const match = card1.dataset.emoji === card2.dataset.emoji;
+
+            if (match) {
+                // 일치했을 때 딩동댕 사운드
+                playSound('success');
+                setTimeout(() => {
+                    card1.classList.add('matched', 'matched-animation');
+                    card2.classList.add('matched', 'matched-animation');
+                    matchedCount += 2;
+                    
+                    const progress = (matchedCount / cards.length) * 100;
+                    document.getElementById('progress').style.width = `${progress}%`;
+
+                    flippedCards = [];
+                    isProcessing = false;
+                    checkWin();
+                }, 400);
+            } else {
+                // 틀렸을 때 삐 사운드
+                playSound('fail');
+                setTimeout(() => {
+                    card1.querySelector('.card-inner').classList.add('shake');
+                    card2.querySelector('.card-inner').classList.add('shake');
+                    setTimeout(() => {
+                        card1.classList.remove('flipped');
+                        card2.classList.remove('flipped');
+                        card1.querySelector('.card-inner').classList.remove('shake');
+                        card2.querySelector('.card-inner').classList.remove('shake');
+                        flippedCards = [];
+                        isProcessing = false;
+                    }, 400);
+                }, 300);
+            }
+        }
+
+        function checkWin() {
+            if (matchedCount === cards.length) {
+                if (currentLevel < totalLevels) {
+                    showLevelUp();
+                } else {
+                    showComplete();
+                }
+            }
+        }
+
+        function showLevelUp() {
+            const banner = document.getElementById('level-up');
+            banner.classList.remove('hidden');
+            setTimeout(() => banner.style.opacity = '1', 10);
+            
+            setTimeout(() => {
+                banner.style.opacity = '0';
+                setTimeout(() => {
+                    banner.classList.add('hidden');
+                    currentLevel++;
+                    initLevel();
+                }, 500);
+            }, 1200);
+        }
+
+        function showComplete() {
+            clearInterval(timerInterval);
+            document.getElementById('final-stats').innerText = `${formatTime(timer)} / ${moves} Moves`;
+            document.getElementById('complete-modal').classList.remove('hidden');
+        }
+
+        function resetGameTotal() {
+            document.getElementById('complete-modal').classList.add('hidden');
+            startGame();
+        }
+    </script>
+</body>
+</html>
