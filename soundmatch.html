@@ -1,436 +1,413 @@
 <!DOCTYPE html>
 <html lang="ko">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>이모지 매칭 - 풀 컬러 에디션</title>
-    <script src="https://cdn.tailwindcss.com"></script>
-    <style>
-        @import url('https://fonts.googleapis.com/css2?family=Pretendard:wght@400;700;900&display=swap');
-        
-        body {
-            background-color: #09090b;
-            color: #ffffff;
-            font-family: 'Pretendard', sans-serif;
-            overflow: hidden;
-            margin: 0;
-            padding: 0;
-        }
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>이모지 매칭 - 풀 컬러 에디션</title>
 
-        /* 반응형 컨테이너: 기기 높이에 맞춰 전체 크기 조절 */
-        #app {
-            width: 100%;
-            max-width: 600px; /* 아이패드 등 큰 화면 대응 */
-            margin: 0 auto;
-            height: 100vh;
-            display: flex;
-            flex-direction: column;
-            border-left: 1px solid #18181b;
-            border-right: 1px solid #18181b;
-            background-color: #000;
-        }
+<script src="https://cdn.tailwindcss.com"></script>
 
-        .card {
-            perspective: 1000px;
-            cursor: pointer;
-            touch-action: manipulation;
-            width: 100%;
-            /* 가로 세로 비율 1:1 유지 */
-            aspect-ratio: 1 / 1;
-        }
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Pretendard:wght@400;700;900&display=swap');
 
-        .card-inner {
-            position: relative;
-            width: 100%;
-            height: 100%;
-            transition: transform 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275);
-            transform-style: preserve-3d;
-        }
+body{
+background:#09090b;
+color:#fff;
+font-family:'Pretendard',sans-serif;
+overflow:hidden;
+margin:0;
+}
 
-        .card.flipped .card-inner {
-            transform: rotateY(180deg);
-        }
+#app{
+width:100%;
+max-width:600px;
+margin:0 auto;
+height:100vh;
+display:flex;
+flex-direction:column;
+border-left:1px solid #18181b;
+border-right:1px solid #18181b;
+background:#000;
+}
 
-        .card-front, .card-back {
-            position: absolute;
-            width: 100%;
-            height: 100%;
-            backface-visibility: hidden;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            border-radius: 1rem;
-            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.3);
-        }
+.card{
+perspective:1000px;
+cursor:pointer;
+touch-action:manipulation;
+width:100%;
+aspect-ratio:1/1;
+}
 
-        .card-front {
-            border: 2px solid rgba(255, 255, 255, 0.2);
-            /* 물음표 텍스트 크기: 기존보다 1.5배 상향 */
-            font-size: clamp(2.25rem, 7.5vw, 4.5rem);
-            font-weight: 900;
-        }
+.card-inner{
+position:relative;
+width:100%;
+height:100%;
+transition:transform .5s cubic-bezier(.175,.885,.32,1.275);
+transform-style:preserve-3d;
+}
 
-        /* 물음표는 화이트 */
-        .question-mark {
-            color: #ffffff;
-        }
+.card.flipped .card-inner{
+transform:rotateY(180deg);
+}
 
-        .card-back {
-            background: linear-gradient(145deg, #27272a, #18181b);
-            border: 2px solid currentColor;
-            transform: rotateY(180deg);
-            /* 이모지 텍스트 크기: 기존보다 1.5배 상향 */
-            font-size: clamp(3rem, 12vw, 6rem);
-        }
+.card-front,.card-back{
+position:absolute;
+width:100%;
+height:100%;
+backface-visibility:hidden;
+display:flex;
+align-items:center;
+justify-content:center;
+border-radius:1rem;
+box-shadow:0 4px 15px rgba(0,0,0,.3);
+}
 
-        .matched-animation {
-            animation: match-pulse 0.5s ease-out forwards;
-        }
+.card-front{
+border:2px solid rgba(255,255,255,.2);
+font-size:clamp(2.25rem,7.5vw,4.5rem);
+font-weight:900;
+}
 
-        @keyframes match-pulse {
-            0% { transform: scale(1); filter: brightness(1); }
-            50% { transform: scale(1.1); filter: brightness(1.5); }
-            100% { transform: scale(1); filter: brightness(0.5); opacity: 0.3; }
-        }
+.question-mark{
+color:#fff;
+}
 
-        .shake {
-            animation: shake 0.4s ease-in-out;
-        }
+.card-back{
+background:linear-gradient(145deg,#27272a,#18181b);
+border:2px solid currentColor;
+transform:rotateY(180deg);
+font-size:clamp(3rem,12vw,6rem);
+}
 
-        @keyframes shake {
-            0%, 100% { transform: translateX(0); }
-            25% { transform: translateX(-5px); }
-            75% { transform: translateX(5px); }
-        }
+.matched-animation{
+animation:match-pulse .5s ease-out forwards;
+}
 
-        .progress-bar {
-            transition: width 0.3s ease-out;
-        }
+@keyframes match-pulse{
+0%{transform:scale(1);filter:brightness(1)}
+50%{transform:scale(1.1);filter:brightness(1.5)}
+100%{transform:scale(1);filter:brightness(.5);opacity:.3}
+}
 
-        /* 배경 글로우 */
-        .bg-glow {
-            position: fixed;
-            top: 50%;
-            left: 50%;
-            transform: translate(-50%, -50%);
-            width: 80vw;
-            height: 80vw;
-            background: radial-gradient(circle, var(--glow-color, #3b82f6) 0%, transparent 70%);
-            opacity: 0.1;
-            filter: blur(80px);
-            pointer-events: none;
-            z-index: -1;
-        }
+.shake{
+animation:shake .4s ease-in-out;
+}
 
-        /* 그리드 영역이 화면 크기에 맞춰 확장되도록 설정 */
-        main {
-            flex: 1;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            padding: 1rem;
-        }
-    </style>
+@keyframes shake{
+0%,100%{transform:translateX(0)}
+25%{transform:translateX(-5px)}
+75%{transform:translateX(5px)}
+}
+
+.progress-bar{
+transition:width .3s ease-out;
+}
+
+.bg-glow{
+position:fixed;
+top:50%;
+left:50%;
+transform:translate(-50%,-50%);
+width:80vw;
+height:80vw;
+background:radial-gradient(circle,var(--glow-color,#3b82f6)0%,transparent 70%);
+opacity:.1;
+filter:blur(80px);
+pointer-events:none;
+z-index:-1;
+}
+
+main{
+flex:1;
+display:flex;
+align-items:center;
+justify-content:center;
+padding:1rem;
+}
+</style>
 </head>
+
 <body>
 
-    <div class="bg-glow" id="glow"></div>
+<div class="bg-glow" id="glow"></div>
 
-    <div id="app">
-        <!-- 게임 화면 바로 시작 -->
-        <div id="game-screen" class="flex-1 flex flex-col">
-            <header class="p-4 flex items-center justify-between border-b border-zinc-900 bg-black/40 backdrop-blur-md">
-                <!-- 좌측 상단 X 버튼 -->
-                <button onclick="resetToHome()" class="w-10 h-10 flex items-center justify-center rounded-xl bg-zinc-900 text-zinc-400 hover:text-white transition active:scale-90">
-                    <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>
-                </button>
-                <div class="flex flex-col items-center">
-                    <span id="level-title" class="text-[10px] font-bold uppercase tracking-[0.2em]">Level 1</span>
-                    <span id="timer-display" class="font-mono text-xl font-bold">00:00</span>
-                </div>
-                <div class="w-12 h-10 flex items-center justify-center rounded-xl bg-zinc-900 text-zinc-400">
-                    <span id="move-count" class="text-sm font-bold">0</span>
-                </div>
-            </header>
+<div id="app">
 
-            <div class="h-1.5 w-full bg-zinc-900">
-                <div id="progress" class="h-full progress-bar" style="width: 0%"></div>
-            </div>
+<div id="game-screen" class="flex-1 flex flex-col">
 
-            <main>
-                <!-- 그리드: 화면 가로 너비에 맞춰 꽉 차도록 설정 -->
-                <div id="grid" class="grid grid-cols-3 gap-3 w-full max-w-[500px]">
-                    <!-- 카드 동적 생성 -->
-                </div>
-            </main>
-        </div>
+<header class="p-4 flex items-center justify-between border-b border-zinc-900 bg-black/40 backdrop-blur-md">
 
-        <!-- 스테이지 완료 효과 -->
-        <div id="level-up" class="hidden fixed inset-0 z-40 bg-white flex items-center justify-center pointer-events-none transition-opacity duration-500 opacity-0">
-            <h2 class="text-6xl font-black italic text-black">LEVEL UP</h2>
-        </div>
+<button onclick="resetToHome()" class="w-10 h-10 flex items-center justify-center rounded-xl bg-zinc-900 text-zinc-400 hover:text-white transition active:scale-90">
+<svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+<line x1="18" y1="6" x2="6" y2="18"></line>
+<line x1="6" y1="6" x2="18" y2="18"></line>
+</svg>
+</button>
 
-        <!-- 최종 결과 모달 -->
-        <div id="complete-modal" class="hidden fixed inset-0 bg-black/95 backdrop-blur-md flex items-center justify-center p-6 z-50">
-            <div class="bg-zinc-900 border border-zinc-800 rounded-[2.5rem] p-10 text-center shadow-2xl w-full max-w-xs">
-                <div class="inline-flex items-center justify-center w-20 h-20 bg-zinc-800 rounded-full mb-6">
-                    <span class="text-4xl">👑</span>
-                </div>
-                <h2 class="text-3xl font-black mb-2">성공!</h2>
-                <div class="space-y-1 mb-8">
-                    <p class="text-zinc-500 text-sm">기록</p>
-                    <p id="final-stats" class="text-xl font-bold text-white">00:00 / 0 Moves</p>
-                </div>
-                <button onclick="resetGameTotal()" class="w-full bg-white text-black font-bold py-5 rounded-2xl transition-all shadow-lg active:scale-95">
-                    다시 도전하기
-                </button>
-            </div>
-        </div>
-    </div>
+<div class="flex flex-col items-center">
+<span id="level-title" class="text-[10px] font-bold uppercase tracking-[0.2em]">Level 1</span>
+<span id="timer-display" class="font-mono text-xl font-bold">00:00</span>
+</div>
 
-    <script>
-        const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+<div class="w-12 h-10 flex items-center justify-center rounded-xl bg-zinc-900 text-zinc-400">
+<span id="move-count" class="text-sm font-bold">0</span>
+</div>
 
-        function playSound(type) {
-            const oscillator = audioCtx.createOscillator();
-            const gainNode = audioCtx.createGain();
-            oscillator.connect(gainNode);
-            gainNode.connect(audioCtx.destination);
+</header>
 
-            if (type === 'success') {
-                oscillator.type = 'sine';
-                oscillator.frequency.setValueAtTime(523.25, audioCtx.currentTime);
-                oscillator.frequency.exponentialRampToValueAtTime(880, audioCtx.currentTime + 0.1);
-                gainNode.gain.setValueAtTime(0.1, audioCtx.currentTime);
-                gainNode.gain.exponentialRampToValueAtTime(0.01, audioCtx.currentTime + 0.3);
-                oscillator.start();
-                oscillator.stop(audioCtx.currentTime + 0.3);
-            } else if (type === 'fail') {
-                oscillator.type = 'sawtooth';
-                oscillator.frequency.setValueAtTime(110, audioCtx.currentTime);
-                gainNode.gain.setValueAtTime(0.05, audioCtx.currentTime);
-                gainNode.gain.linearRampToValueAtTime(0.01, audioCtx.currentTime + 0.2);
-                oscillator.start();
-                oscillator.stop(audioCtx.currentTime + 0.2);
-            } else if (type === 'flip') {
-                oscillator.type = 'sine';
-                oscillator.frequency.setValueAtTime(440, audioCtx.currentTime);
-                gainNode.gain.setValueAtTime(0.02, audioCtx.currentTime);
-                gainNode.gain.linearRampToValueAtTime(0.01, audioCtx.currentTime + 0.05);
-                oscillator.start();
-                oscillator.stop(audioCtx.currentTime + 0.05);
-            }
-        }
+<div class="h-1.5 w-full bg-zinc-900">
+<div id="progress" class="h-full progress-bar" style="width:0%"></div>
+</div>
 
-        const emojiPools = [
-            ['🍔', '🍕', '🍣', '🌮', '🍜', '🍱', '🍦', '🍰'],
-            ['🚗', '🚀', '🚁', '🛳️', '🚲', '🚜', '🏎️', '🛹'],
-            ['🦁', '🐨', '🐘', '🦒', '🦓', '🦖', '🐉', '🐙'],
-            ['🎸', '🎹', '🥁', '🎷', '🎻', '🎮', '🎧', '🎬']
-        ];
+<main>
+<div id="grid" class="grid grid-cols-3 gap-3 w-full max-w-[500px]"></div>
+</main>
 
-        const vividColors = [
-            '#FF1E1E', '#FF7F1E', '#FFD700', '#1E88E5', 
-            '#43A047', '#D81B60', '#8E24AA', '#00ACC1', 
-            '#FFB300', '#F4511E', '#3949AB', '#039BE5'
-        ];
+</div>
 
-        let currentLevel = 1;
-        const totalLevels = 4;
-        let cards = [];
-        let flippedCards = [];
-        let matchedCount = 0;
-        let isProcessing = false;
-        let moves = 0;
-        let timer = 0;
-        let timerInterval;
+<div id="level-up" class="hidden fixed inset-0 z-40 bg-white flex items-center justify-center pointer-events-none transition-opacity duration-500 opacity-0">
+<h2 class="text-6xl font-black italic text-black">LEVEL UP</h2>
+</div>
 
-        function shuffle(array) {
-            return array.sort(() => Math.random() - 0.5);
-        }
+<div id="complete-modal" class="hidden fixed inset-0 bg-black/95 backdrop-blur-md flex items-center justify-center p-6 z-50">
+<div class="bg-zinc-900 border border-zinc-800 rounded-[2.5rem] p-10 text-center shadow-2xl w-full max-w-xs">
+<div class="inline-flex items-center justify-center w-20 h-20 bg-zinc-800 rounded-full mb-6">
+<span class="text-4xl">👑</span>
+</div>
+<h2 class="text-3xl font-black mb-2">성공!</h2>
+<p id="final-stats" class="text-xl font-bold text-white mb-6">00:00 / 0 Moves</p>
 
-        function formatTime(s) {
-            const mins = Math.floor(s / 60).toString().padStart(2, '0');
-            const secs = (s % 60).toString().padStart(2, '0');
-            return `${mins}:${secs}`;
-        }
+<button onclick="resetGameTotal()" class="w-full bg-white text-black font-bold py-5 rounded-2xl active:scale-95">
+다시 도전하기
+</button>
 
-        function updateStats() {
-            document.getElementById('move-count').innerText = moves;
-            document.getElementById('timer-display').innerText = formatTime(timer);
-        }
+</div>
+</div>
 
-        // 게임 완전 초기화
-        function resetToHome() {
-            if (confirm("게임을 초기화하고 레벨 1부터 다시 시작할까요?")) {
-                startGame();
-            }
-        }
+</div>
 
-        // 바로 게임 시작
-        window.onload = function() {
-            startGame();
-        };
+<script>
 
-        function startGame() {
-            if (audioCtx.state === 'suspended') {
-                audioCtx.resume();
-            }
-            currentLevel = 1;
-            moves = 0;
-            timer = 0;
-            updateStats();
-            clearInterval(timerInterval);
-            timerInterval = setInterval(() => {
-                timer++;
-                updateStats();
-            }, 1000);
-            initLevel();
-        }
+const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
 
-        function initLevel() {
-            const grid = document.getElementById('grid');
-            grid.innerHTML = '';
-            cards = [];
-            flippedCards = [];
-            matchedCount = 0;
-            isProcessing = false;
-            
-            const levelThemeColor = vividColors[Math.floor(Math.random() * vividColors.length)];
-            document.body.style.setProperty('--glow-color', levelThemeColor);
-            document.getElementById('level-title').innerText = `Level ${currentLevel}`;
-            document.getElementById('level-title').style.color = levelThemeColor;
-            document.getElementById('progress').style.backgroundColor = levelThemeColor;
-            document.getElementById('progress').style.width = '0%';
+function playSound(type){
 
-            let pairCount = 4; 
-            if (currentLevel === 2) { 
-                pairCount = 6; 
-                grid.className = "grid grid-cols-3 gap-3 w-full max-w-[500px]"; 
-            } else if (currentLevel >= 3) { 
-                pairCount = 8; 
-                grid.className = "grid grid-cols-4 gap-2 w-full max-w-[500px]"; 
-            }
+const oscillator = audioCtx.createOscillator();
+const gainNode = audioCtx.createGain();
 
-            const pool = emojiPools[Math.floor(Math.random() * emojiPools.length)];
-            const selected = shuffle([...pool]).slice(0, pairCount);
-            let gameItems = [];
+oscillator.connect(gainNode);
+gainNode.connect(audioCtx.destination);
 
-            selected.forEach(emoji => {
-                const backColor = vividColors[Math.floor(Math.random() * vividColors.length)];
-                gameItems.push({ emoji, color: backColor });
-                gameItems.push({ emoji, color: backColor });
-            });
+if(type==='success'){
+oscillator.type='sine';
+oscillator.frequency.setValueAtTime(523,audioCtx.currentTime);
+oscillator.frequency.exponentialRampToValueAtTime(880,audioCtx.currentTime+.1);
+gainNode.gain.setValueAtTime(.1,audioCtx.currentTime);
+gainNode.gain.exponentialRampToValueAtTime(.01,audioCtx.currentTime+.3);
+oscillator.start();
+oscillator.stop(audioCtx.currentTime+.3);
+}
 
-            gameItems = shuffle(gameItems);
+else if(type==='fail'){
+oscillator.type='sawtooth';
+oscillator.frequency.setValueAtTime(110,audioCtx.currentTime);
+gainNode.gain.setValueAtTime(.05,audioCtx.currentTime);
+gainNode.gain.linearRampToValueAtTime(.01,audioCtx.currentTime+.2);
+oscillator.start();
+oscillator.stop(audioCtx.currentTime+.2);
+}
 
-            gameItems.forEach((item, index) => {
-                const frontBgColor = vividColors[Math.floor(Math.random() * vividColors.length)];
-                
-                const card = document.createElement('div');
-                card.className = 'card';
-                card.innerHTML = `
-                    <div class="card-inner">
-                        <div class="card-front" style="background-color: ${frontBgColor}">
-                            <span class="question-mark">?</span>
-                        </div>
-                        <div class="card-back" style="color: ${item.color}; border-color: ${item.color}">
-                            ${item.emoji}
-                        </div>
-                    </div>
-                `;
-                card.dataset.emoji = item.emoji;
-                card.onclick = () => flipCard(card);
-                grid.appendChild(card);
-                cards.push(card);
-            });
-        }
+else if(type==='flip'){
+oscillator.type='sine';
+oscillator.frequency.setValueAtTime(440,audioCtx.currentTime);
+gainNode.gain.setValueAtTime(.02,audioCtx.currentTime);
+gainNode.gain.linearRampToValueAtTime(.01,audioCtx.currentTime+.05);
+oscillator.start();
+oscillator.stop(audioCtx.currentTime+.05);
+}
 
-        function flipCard(card) {
-            if (isProcessing || card.classList.contains('flipped') || card.classList.contains('matched')) return;
+}
 
-            playSound('flip');
-            card.classList.add('flipped');
-            flippedCards.push(card);
+const emojiPools=[
+['🍔','🍕','🍣','🌮','🍜','🍦','🍰'],
+['🚗','🚀','🚁','🚲','🚜','🏎️'],
+['🦁','🐨','🐘','🦒','🦓','🐙'],
+['🎸','🎹','🥁','🎷','🎻','🎮']
+];
 
-            if (flippedCards.length === 2) {
-                moves++;
-                updateStats();
-                isProcessing = true;
-                checkMatch();
-            }
-        }
+const vividColors=[
+'#FF1E1E','#FF7F1E','#FFD700','#1E88E5',
+'#43A047','#D81B60','#8E24AA','#00ACC1'
+];
 
-        function checkMatch() {
-            const [card1, card2] = flippedCards;
-            const match = card1.dataset.emoji === card2.dataset.emoji;
+let currentLevel=1;
+let cards=[];
+let flippedCards=[];
+let matchedCount=0;
+let moves=0;
+let timer=0;
+let timerInterval;
 
-            if (match) {
-                playSound('success');
-                setTimeout(() => {
-                    card1.classList.add('matched', 'matched-animation');
-                    card2.classList.add('matched', 'matched-animation');
-                    matchedCount += 2;
-                    
-                    const progress = (matchedCount / cards.length) * 100;
-                    document.getElementById('progress').style.width = `${progress}%`;
+function formatTime(s){
+const m=Math.floor(s/60).toString().padStart(2,'0');
+const sec=(s%60).toString().padStart(2,'0');
+return `${m}:${sec}`;
+}
 
-                    flippedCards = [];
-                    isProcessing = false;
-                    checkWin();
-                }, 400);
-            } else {
-                playSound('fail');
-                setTimeout(() => {
-                    card1.querySelector('.card-inner').classList.add('shake');
-                    card2.querySelector('.card-inner').classList.add('shake');
-                    setTimeout(() => {
-                        card1.classList.remove('flipped');
-                        card2.classList.remove('flipped');
-                        card1.querySelector('.card-inner').classList.remove('shake');
-                        card2.querySelector('.card-inner').classList.remove('shake');
-                        flippedCards = [];
-                        isProcessing = false;
-                    }, 400);
-                }, 300);
-            }
-        }
+function updateStats(){
+document.getElementById('move-count').innerText=moves;
+document.getElementById('timer-display').innerText=formatTime(timer);
+}
 
-        function checkWin() {
-            if (matchedCount === cards.length) {
-                if (currentLevel < totalLevels) {
-                    showLevelUp();
-                } else {
-                    showComplete();
-                }
-            }
-        }
+function resetToHome(){
+window.location.href="index.html";
+}
 
-        function showLevelUp() {
-            const banner = document.getElementById('level-up');
-            banner.classList.remove('hidden');
-            setTimeout(() => banner.style.opacity = '1', 10);
-            
-            setTimeout(() => {
-                banner.style.opacity = '0';
-                setTimeout(() => {
-                    banner.classList.add('hidden');
-                    currentLevel++;
-                    initLevel();
-                }, 500);
-            }, 1200);
-        }
+window.onload=function(){
+startGame();
+}
 
-        function showComplete() {
-            clearInterval(timerInterval);
-            document.getElementById('final-stats').innerText = `${formatTime(timer)} / ${moves} Moves`;
-            document.getElementById('complete-modal').classList.remove('hidden');
-        }
+function startGame(){
 
-        function resetGameTotal() {
-            document.getElementById('complete-modal').classList.add('hidden');
-            startGame();
-        }
-    </script>
+moves=0;
+timer=0;
+currentLevel=1;
+
+updateStats();
+
+clearInterval(timerInterval);
+
+timerInterval=setInterval(()=>{
+timer++;
+updateStats();
+},1000);
+
+initLevel();
+}
+
+function initLevel(){
+
+const grid=document.getElementById('grid');
+grid.innerHTML='';
+
+cards=[];
+flippedCards=[];
+matchedCount=0;
+
+const pool=emojiPools[Math.floor(Math.random()*emojiPools.length)];
+
+const selected=pool.slice(0,4);
+
+let gameItems=[];
+
+selected.forEach(e=>{
+gameItems.push(e);
+gameItems.push(e);
+});
+
+gameItems.sort(()=>Math.random()-0.5);
+
+gameItems.forEach(emoji=>{
+
+const card=document.createElement('div');
+card.className='card';
+
+card.innerHTML=`
+<div class="card-inner">
+<div class="card-front"><span class="question-mark">?</span></div>
+<div class="card-back">${emoji}</div>
+</div>
+`;
+
+card.dataset.emoji=emoji;
+
+card.onclick=()=>flipCard(card);
+
+grid.appendChild(card);
+
+cards.push(card);
+
+});
+
+}
+
+function flipCard(card){
+
+if(card.classList.contains('flipped')||card.classList.contains('matched'))return;
+
+playSound('flip');
+
+card.classList.add('flipped');
+
+flippedCards.push(card);
+
+if(flippedCards.length===2){
+
+moves++;
+
+updateStats();
+
+checkMatch();
+
+}
+
+}
+
+function checkMatch(){
+
+const[c1,c2]=flippedCards;
+
+if(c1.dataset.emoji===c2.dataset.emoji){
+
+playSound('success');
+
+c1.classList.add('matched');
+c2.classList.add('matched');
+
+matchedCount+=2;
+
+flippedCards=[];
+
+if(matchedCount===cards.length){
+
+setTimeout(showComplete,500);
+
+}
+
+}else{
+
+playSound('fail');
+
+setTimeout(()=>{
+c1.classList.remove('flipped');
+c2.classList.remove('flipped');
+flippedCards=[];
+},600);
+
+}
+
+}
+
+function showComplete(){
+
+clearInterval(timerInterval);
+
+document.getElementById('final-stats').innerText=
+`${formatTime(timer)} / ${moves} Moves`;
+
+document.getElementById('complete-modal').classList.remove('hidden');
+
+}
+
+function resetGameTotal(){
+
+document.getElementById('complete-modal').classList.add('hidden');
+
+startGame();
+
+}
+
+</script>
+
 </body>
 </html>
