@@ -77,7 +77,7 @@
             font-size: clamp(1.8rem, 5vw, 2.5rem);
             font-weight: 800;
             margin-bottom: 30px;
-            background: linear-gradient(to right, #818cf8, #c084fc);
+            background: linear-gradient(to right, #fbbf24, #f87171);
             -webkit-background-clip: text;
             -webkit-text-fill-color: transparent;
         }
@@ -121,9 +121,9 @@
             top: 55%;
             left: 50%;
             transform: translate(-50%, -50%);
-            width: 85vw; /* 해상도에 따라 유동적으로 변화 */
+            width: 85vw;
             height: 85vw;
-            max-width: 500px; /* PC 등 대화면에서 너무 커지지 않게 제한 */
+            max-width: 500px;
             max-height: 500px;
             background: rgba(255, 255, 255, 0.05);
             border-radius: 12px;
@@ -195,7 +195,7 @@
 
 <!-- 홈 화면 -->
 <div id="home">
-    <div class="title">🧩 그림 맞추기</div>
+    <div class="title">🎨 귀여운 그림 맞추기</div>
     <div class="grid" id="menu"></div>
 </div>
 
@@ -206,7 +206,7 @@
     </div>
 </div>
 
-<div class="toast" id="toast">레벨 클리어! 🌟</div>
+<div class="toast" id="toast">참 잘했어요! 🌟</div>
 
 <audio id="sound">
     <source src="https://actions.google.com/sounds/v1/cartoon/clang_and_wobble.ogg">
@@ -214,14 +214,15 @@
 
 <script>
 /* 데이터 및 변수 */
+// 일러스트 느낌의 이미지를 불러오기 위해 키워드 기반 서비스 활용
 const images = [
-    "https://picsum.photos/600/600?random=11",
-    "https://picsum.photos/600/600?random=22",
-    "https://picsum.photos/600/600?random=33",
-    "https://picsum.photos/600/600?random=44",
-    "https://picsum.photos/600/600?random=55"
+    "https://loremflickr.com/600/600/illustration,animal?lock=1",
+    "https://loremflickr.com/600/600/illustration,cat?lock=2",
+    "https://loremflickr.com/600/600/illustration,dog?lock=3",
+    "https://loremflickr.com/600/600/illustration,cute?lock=4",
+    "https://loremflickr.com/600/600/illustration,dinosaur?lock=5"
 ];
-const emojis = ["🐶", "🐰", "🚗", "🍎", "🦖"];
+const emojis = ["🦁", "🐱", "🐶", "🧸", "🦖"];
 
 const homeDiv = document.getElementById("home");
 const gameDiv = document.getElementById("game");
@@ -240,14 +241,14 @@ let currentBoardSize = 0;
 /* 초기 메뉴 생성 */
 function randomColor() {
     let h = Math.floor(Math.random() * 360);
-    return `hsl(${h}, 60%, 50%)`;
+    return `hsl(${h}, 70%, 65%)`; // 조금 더 밝고 파스텔 톤으로 조정
 }
 
 emojis.forEach((emoji, i) => {
     const card = document.createElement("div");
     card.className = "card";
     card.style.background = `linear-gradient(135deg, ${randomColor()}, ${randomColor()})`;
-    card.innerHTML = `<span class="card-emoji">${emoji}</span><span>게임 ${i + 1}</span>`;
+    card.innerHTML = `<span class="card-emoji">${emoji}</span><span>그림 ${i + 1}</span>`;
     card.onclick = () => startGame(i);
     menu.appendChild(card);
 });
@@ -281,7 +282,6 @@ function updateLevelBadge() {
 function createPuzzle() {
     board.innerHTML = "";
     
-    // 현재 해상도에 따른 보드 크기 계산
     currentBoardSize = boardContainer.clientWidth;
     const pieceSize = currentBoardSize / size;
     let pieces = [];
@@ -293,14 +293,13 @@ function createPuzzle() {
             p.style.width = pieceSize + "px";
             p.style.height = pieceSize + "px";
             p.style.backgroundImage = `url(${imgUrl})`;
-            // 배경 크기도 보드 크기에 맞게 조정
             p.style.backgroundSize = `${currentBoardSize}px ${currentBoardSize}px`;
             p.style.backgroundPosition = `${-x * pieceSize}px ${-y * pieceSize}px`;
 
             p.dataset.x = x;
             p.dataset.y = y;
 
-            // 정답 위치 프리뷰
+            // 정답 위치 프리뷰 (정렬된 상태로 먼저 보여줌)
             p.style.left = (x * pieceSize) + "px";
             p.style.top = (y * pieceSize) + "px";
 
@@ -309,6 +308,7 @@ function createPuzzle() {
         }
     }
 
+    // 2초 뒤에 흩어지기
     setTimeout(() => scatter(pieces, pieceSize), 2000);
 }
 
@@ -316,7 +316,6 @@ function scatter(pieces, pieceSize) {
     pieces.forEach((p) => {
         p.style.transition = "all 0.6s cubic-bezier(0.175, 0.885, 0.32, 1.275)";
         
-        // 보드 영역을 약간 벗어날 수 있도록 랜덤 범위 지정 (더 역동적인 느낌)
         const rx = (Math.random() - 0.2) * (currentBoardSize);
         const ry = (Math.random() - 0.2) * (currentBoardSize);
         
@@ -366,7 +365,6 @@ function checkSnap(el, pieceSize) {
 
     const dist = Math.sqrt(Math.pow(curL - tarL, 2) + Math.pow(curT - tarT, 2));
 
-    // 스냅 감지 거리를 조각 크기에 비례하게 설정
     if (dist < pieceSize * 0.4) {
         el.style.transition = "all 0.2s ease-out";
         el.style.left = tarL + "px";
@@ -393,7 +391,7 @@ function showWinEffects() {
     for (let i = 0; i < 30; i++) {
         const s = document.createElement("div");
         s.className = "star";
-        s.innerHTML = ["⭐", "✨", "🎊", "🌟"][Math.floor(Math.random() * 4)];
+        s.innerHTML = ["⭐", "✨", "🎈", "🌟"][Math.floor(Math.random() * 4)];
         s.style.left = Math.random() * currentBoardSize + "px";
         s.style.top = Math.random() * currentBoardSize + "px";
         board.appendChild(s);
@@ -404,17 +402,13 @@ function showWinEffects() {
 function nextLevel() {
     toast.style.display = "none";
     level++;
-    if (size < 6) size++; // 최대 6x6까지 확장 가능
+    if (size < 6) size++;
     updateLevelBadge();
     createPuzzle();
 }
 
-// 화면 크기 변경 시 대응 (선택 사항: 현재 퍼즐 상태 유지를 위해 가급적 시작 시 크기 고정)
 window.addEventListener('resize', () => {
-    if (gameDiv.style.display === "block") {
-        // 게임 도중 리사이즈는 조각 위치 계산이 복잡해지므로 
-        // 필요한 경우 여기에 재계산 로직을 추가할 수 있습니다.
-    }
+    // 게임 도중 리사이즈 시 대응 로직 필요 시 추가
 });
 </script>
 
