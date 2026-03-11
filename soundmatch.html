@@ -65,8 +65,8 @@
 
         .card-front {
             border: 2px solid rgba(255, 255, 255, 0.2);
-            /* 폰트 크기를 반응형으로 설정 */
-            font-size: clamp(1.5rem, 5vw, 3rem);
+            /* 물음표 텍스트 크기: 기존보다 1.5배 상향 */
+            font-size: clamp(2.25rem, 7.5vw, 4.5rem);
             font-weight: 900;
         }
 
@@ -79,7 +79,8 @@
             background: linear-gradient(145deg, #27272a, #18181b);
             border: 2px solid currentColor;
             transform: rotateY(180deg);
-            font-size: clamp(2rem, 8vw, 4rem);
+            /* 이모지 텍스트 크기: 기존보다 1.5배 상향 */
+            font-size: clamp(3rem, 12vw, 6rem);
         }
 
         .matched-animation {
@@ -139,7 +140,10 @@
         <!-- 게임 화면 바로 시작 -->
         <div id="game-screen" class="flex-1 flex flex-col">
             <header class="p-4 flex items-center justify-between border-b border-zinc-900 bg-black/40 backdrop-blur-md">
-                <div class="w-10"></div> <!-- 밸런스용 빈 공간 -->
+                <!-- 좌측 상단 X 버튼 -->
+                <button onclick="resetToHome()" class="w-10 h-10 flex items-center justify-center rounded-xl bg-zinc-900 text-zinc-400 hover:text-white transition active:scale-90">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>
+                </button>
                 <div class="flex flex-col items-center">
                     <span id="level-title" class="text-[10px] font-bold uppercase tracking-[0.2em]">Level 1</span>
                     <span id="timer-display" class="font-mono text-xl font-bold">00:00</span>
@@ -254,6 +258,13 @@
         function updateStats() {
             document.getElementById('move-count').innerText = moves;
             document.getElementById('timer-display').innerText = formatTime(timer);
+        }
+
+        // 게임 완전 초기화
+        function resetToHome() {
+            if (confirm("게임을 초기화하고 레벨 1부터 다시 시작할까요?")) {
+                startGame();
+            }
         }
 
         // 바로 게임 시작
