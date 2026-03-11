@@ -1,374 +1,394 @@
 <!DOCTYPE html>
 <html lang="ko">
 <head>
+
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
-<title>사운드 매칭</title>
-
-<script src="https://cdn.tailwindcss.com"></script>
+<title>선 따라 그리기</title>
 
 <style>
 
 body{
-background:#09090b;
-color:white;
-font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto;
 margin:0;
-overflow-x:hidden;
+background:white;
+font-family:-apple-system,BlinkMacSystemFont,"Segoe UI";
+text-align:center;
 }
 
-.card{
-perspective:1000px;
-cursor:pointer;
-}
+/* X 버튼 */
 
-.card-inner{
-position:relative;
-width:100%;
-height:100%;
-transition:transform .5s;
-transform-style:preserve-3d;
-}
+.close{
+position:fixed;
+top:20px;
+left:20px;
 
-.card.flipped .card-inner{
-transform:rotateY(180deg);
-}
+width:50px;
+height:50px;
 
-.card-front,.card-back{
-position:absolute;
-width:100%;
-height:100%;
-backface-visibility:hidden;
+border-radius:50%;
+
+background:black;
+
 display:flex;
 align-items:center;
 justify-content:center;
-border-radius:18px;
+
+font-size:26px;
+
+color:white;
+text-decoration:none;
 }
 
-.card-front{
-background:#18181b;
-border:2px solid rgba(255,255,255,.2);
-font-size:30px;
-font-weight:900;
+/* 제목 */
+
+.title{
+margin-top:60px;
+font-size:28px;
+font-weight:700;
 }
 
-.card-back{
-transform:rotateY(180deg);
-font-size:36px;
-background:#27272a;
-border:2px solid currentColor;
+/* 단계 */
+
+.stage{
+margin-top:10px;
+font-size:20px;
+color:#666;
 }
 
-.matched{
-opacity:.3;
+canvas{
+margin-top:30px;
+touch-action:none;
 }
 
-.shake{
-animation:shake .35s;
-}
+/* 다음 단계 버튼 */
 
-@keyframes shake{
-0%{transform:translateX(0)}
-25%{transform:translateX(-6px)}
-75%{transform:translateX(6px)}
-100%{transform:translateX(0)}
-}
-
-.progress{
-transition:width .3s;
+.btn{
+margin-top:40px;
+padding:18px 40px;
+font-size:20px;
+border-radius:40px;
+background:black;
+color:white;
+border:none;
 }
 
 </style>
+
 </head>
 
+<body>
 
-<body class="min-h-screen flex justify-center">
+<a href="index.html" class="close">X</a>
 
-<div class="w-full max-w-md bg-black min-h-screen flex flex-col">
+<div class="title">점선을 따라 그려보세요</div>
+<div class="stage" id="stage">1 / 50</div>
 
-<header class="p-4 flex items-center justify-between border-b border-zinc-900">
+<canvas id="canvas"></canvas>
 
-<a href="index.html"
-class="w-10 h-10 flex items-center justify-center rounded-xl bg-zinc-900 text-zinc-400 text-xl">
-✕
-</a>
+<br>
 
-<div class="text-center">
-<div id="level-title" class="text-xs tracking-widest">LEVEL 1</div>
-<div id="timer-display" class="font-mono text-xl font-bold">00:00</div>
-</div>
-
-<div class="w-10 h-10 flex items-center justify-center rounded-xl bg-zinc-900">
-<span id="move-count" class="text-sm font-bold">0</span>
-</div>
-
-</header>
-
-<div class="h-1 bg-zinc-900">
-<div id="progress" class="h-full progress bg-blue-500" style="width:0%"></div>
-</div>
-
-<main class="flex-1 flex flex-col items-center justify-center p-6">
-
-<div id="grid" class="grid grid-cols-3 gap-3 w-full max-w-[340px]"></div>
-
-<div class="mt-6 text-xs text-zinc-500">
-같은 이모지를 찾아보세요
-</div>
-
-</main>
-
-</div>
+<button class="btn" onclick="nextStage()">다음 단계</button>
 
 <script>
 
-const audioCtx=new(window.AudioContext||window.webkitAudioContext)()
+const canvas = document.getElementById("canvas")
+const ctx = canvas.getContext("2d")
 
-function playSound(type){
+let drawing=false
+let stage=1
 
-const osc=audioCtx.createOscillator()
-const gain=audioCtx.createGain()
+/* 아이패드 대응 캔버스 크기 */
 
-osc.connect(gain)
-gain.connect(audioCtx.destination)
+function resizeCanvas(){
 
-if(type==="success"){
-osc.frequency.value=700
-gain.gain.value=.1
-osc.start()
-osc.stop(audioCtx.currentTime+.2)
+let w = window.innerWidth
+let h = window.innerHeight
+
+canvas.width = w
+
+if(w > 900){
+canvas.height = h * 0.75
+}else{
+canvas.height = h * 0.55
 }
 
-if(type==="fail"){
-osc.frequency.value=120
-gain.gain.value=.05
-osc.start()
-osc.stop(audioCtx.currentTime+.2)
-}
-
-if(type==="flip"){
-osc.frequency.value=400
-gain.gain.value=.02
-osc.start()
-osc.stop(audioCtx.currentTime+.05)
-}
+drawGuide()
 
 }
 
-const emojiPools=[
-['🍔','🍕','🍣','🌮','🍜','🍦','🍰','🍩'],
-['🚗','🚀','🚁','🚲','🚜','🏎️','🛹','🚂'],
-['🐶','🐱','🐸','🐼','🦁','🐨','🐵','🐯'],
-['🎮','🎧','🎸','🎹','🥁','🎲','🎯','🎬']
+window.addEventListener("resize",resizeCanvas)
+
+/* 도형 목록 */
+
+const shapes=[
+
+"line",
+"curve",
+"circle",
+"triangle",
+"square",
+
+"mountain",
+"wave",
+"zigzag",
+"hill",
+"stairs",
+"slide",
+"road",
+"bridge",
+"cloud",
+"snake"
+
 ]
 
-const colors=[
-'#FF4D4D','#FFD93D','#4CAF50','#2196F3',
-'#FF6F00','#9C27B0','#00BCD4','#FF4081'
-]
+let currentShape="line"
 
-let level=1
-const totalLevels=4
-let cards=[]
-let flipped=[]
-let matched=0
-let processing=false
-let moves=0
-let timer=0
-let timerInterval
+/* 효과음 */
 
-function shuffle(a){
-return a.sort(()=>Math.random()-0.5)
-}
+function playPop(){
 
-function time(t){
-const m=Math.floor(t/60).toString().padStart(2,'0')
-const s=(t%60).toString().padStart(2,'0')
-return m+":"+s
-}
+const audioCtx = new (window.AudioContext || window.webkitAudioContext)()
 
-function updateStats(){
-document.getElementById("move-count").innerText=moves
-document.getElementById("timer-display").innerText=time(timer)
-}
+const oscillator = audioCtx.createOscillator()
+const gainNode = audioCtx.createGain()
 
-function startGame(){
+oscillator.type = "sine"
+oscillator.frequency.setValueAtTime(600, audioCtx.currentTime)
+oscillator.frequency.exponentialRampToValueAtTime(1200, audioCtx.currentTime + 0.2)
 
-if(audioCtx.state==="suspended")audioCtx.resume()
+gainNode.gain.setValueAtTime(0.3, audioCtx.currentTime)
+gainNode.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime + 0.25)
 
-moves=0
-timer=0
-updateStats()
+oscillator.connect(gainNode)
+gainNode.connect(audioCtx.destination)
 
-clearInterval(timerInterval)
-
-timerInterval=setInterval(()=>{
-timer++
-updateStats()
-},1000)
-
-initLevel()
+oscillator.start()
+oscillator.stop(audioCtx.currentTime + 0.25)
 
 }
 
-function initLevel(){
+/* 도형 선택 */
 
-const grid=document.getElementById("grid")
+function pickShape(){
 
-grid.innerHTML=""
-cards=[]
-flipped=[]
-matched=0
-processing=false
+if(stage<=5){
 
-let pairCount=4
+currentShape=shapes[stage-1]
 
-if(level===2)pairCount=6
-if(level>=3)pairCount=8
+}else{
 
-let pool=shuffle([...emojiPools[Math.floor(Math.random()*emojiPools.length)]]).slice(0,pairCount)
-
-let items=[]
-
-pool.forEach(e=>{
-const c=colors[Math.floor(Math.random()*colors.length)]
-items.push({emoji:e,color:c})
-items.push({emoji:e,color:c})
-})
-
-items=shuffle(items)
-
-if(pairCount===8)grid.className="grid grid-cols-4 gap-2 w-full max-w-[340px]"
-else grid.className="grid grid-cols-3 gap-3 w-full max-w-[340px]"
-
-items.forEach(i=>{
-
-const card=document.createElement("div")
-
-card.className="card aspect-square"
-
-card.innerHTML=`
-<div class="card-inner">
-
-<div class="card-front">?</div>
-
-<div class="card-back" style="color:${i.color};border-color:${i.color}">
-${i.emoji}
-</div>
-
-</div>
-`
-
-card.dataset.emoji=i.emoji
-
-card.onclick=()=>flipCard(card)
-
-grid.appendChild(card)
-
-cards.push(card)
-
-})
-
-}
-
-function flipCard(card){
-
-if(processing||card.classList.contains("flipped")||card.classList.contains("matched"))return
-
-playSound("flip")
-
-card.classList.add("flipped")
-
-flipped.push(card)
-
-if(flipped.length===2){
-
-moves++
-updateStats()
-processing=true
-
-checkMatch()
+currentShape=shapes[5+Math.floor(Math.random()*10)]
 
 }
 
 }
 
-function checkMatch(){
+/* 점선 가이드 */
 
-const[c1,c2]=flipped
+function drawGuide(){
 
-if(c1.dataset.emoji===c2.dataset.emoji){
+ctx.clearRect(0,0,canvas.width,canvas.height)
 
-playSound("success")
+ctx.setLineDash([12,10])
+ctx.strokeStyle="#bbb"
+ctx.lineWidth=5
 
-setTimeout(()=>{
+let w=canvas.width
+let h=canvas.height
 
-c1.classList.add("matched")
-c2.classList.add("matched")
+ctx.beginPath()
 
-matched+=2
+switch(currentShape){
 
-document.getElementById("progress").style.width=(matched/cards.length*100)+"%"
+case "line":
+ctx.moveTo(100,h/2)
+ctx.lineTo(w-100,h/2)
+break
 
-flipped=[]
-processing=false
+case "curve":
+ctx.moveTo(100,h/2)
+ctx.quadraticCurveTo(w/2,100,w-100,h/2)
+break
 
-checkWin()
+case "circle":
+ctx.arc(w/2,h/2,150,0,Math.PI*2)
+break
 
-},300)
+case "triangle":
+ctx.moveTo(w/2,150)
+ctx.lineTo(w/2-150,h-150)
+ctx.lineTo(w/2+150,h-150)
+ctx.closePath()
+break
+
+case "square":
+ctx.rect(w/2-150,h/2-150,300,300)
+break
+
+case "mountain":
+ctx.moveTo(100,h-200)
+ctx.lineTo(w/2,200)
+ctx.lineTo(w-100,h-200)
+break
+
+case "wave":
+ctx.moveTo(100,h/2)
+for(let i=0;i<4;i++){
+ctx.quadraticCurveTo(
+200+i*200,
+h/2-120,
+300+i*200,
+h/2
+)
+}
+break
+
+case "zigzag":
+ctx.moveTo(100,200)
+for(let i=0;i<6;i++){
+ctx.lineTo(200+i*120,300)
+ctx.lineTo(260+i*120,200)
+}
+break
+
+case "hill":
+ctx.moveTo(100,h-200)
+ctx.quadraticCurveTo(
+w/2,
+100,
+w-100,
+h-200
+)
+break
+
+case "stairs":
+ctx.moveTo(100,h-200)
+for(let i=0;i<5;i++){
+ctx.lineTo(200+i*120,h-200-i*40)
+ctx.lineTo(200+i*120,h-200-(i+1)*40)
+}
+break
+
+case "slide":
+ctx.moveTo(100,200)
+ctx.lineTo(w-200,h-200)
+break
+
+case "road":
+ctx.moveTo(100,h-200)
+ctx.lineTo(w-100,200)
+break
+
+case "bridge":
+ctx.moveTo(100,h-200)
+for(let i=0;i<4;i++){
+ctx.quadraticCurveTo(
+200+i*200,
+h-300,
+300+i*200,
+h-200
+)
+}
+break
+
+case "cloud":
+ctx.moveTo(200,h/2)
+ctx.quadraticCurveTo(300,200,400,h/2)
+ctx.quadraticCurveTo(500,150,600,h/2)
+ctx.quadraticCurveTo(700,200,800,h/2)
+break
+
+case "snake":
+ctx.moveTo(100,h/2)
+for(let i=0;i<5;i++){
+ctx.quadraticCurveTo(
+200+i*200,
+h/2-120,
+300+i*200,
+h/2
+)
+ctx.quadraticCurveTo(
+400+i*200,
+h/2+120,
+500+i*200,
+h/2
+)
+}
+break
 
 }
 
-else{
-
-playSound("fail")
-
-setTimeout(()=>{
-
-c1.classList.add("shake")
-c2.classList.add("shake")
-
-setTimeout(()=>{
-
-c1.classList.remove("flipped","shake")
-c2.classList.remove("flipped","shake")
-
-flipped=[]
-processing=false
-
-},300)
-
-},200)
+ctx.stroke()
 
 }
 
+/* 초기 실행 */
+
+resizeCanvas()
+pickShape()
+drawGuide()
+
+/* 그리기 */
+
+canvas.addEventListener("touchstart",start)
+canvas.addEventListener("touchmove",draw)
+canvas.addEventListener("touchend",end)
+
+function start(e){
+
+drawing=true
+
+ctx.setLineDash([])
+ctx.strokeStyle="black"
+ctx.lineWidth = window.innerWidth > 900 ? 14 : 8
+
+ctx.beginPath()
+
+let rect=canvas.getBoundingClientRect()
+
+ctx.moveTo(
+e.touches[0].clientX-rect.left,
+e.touches[0].clientY-rect.top
+)
+
 }
 
-function checkWin(){
+function draw(e){
 
-if(matched===cards.length){
+if(!drawing)return
 
-if(level<totalLevels){
+let rect=canvas.getBoundingClientRect()
 
-level++
-initLevel()
+ctx.lineTo(
+e.touches[0].clientX-rect.left,
+e.touches[0].clientY-rect.top
+)
 
-}
-
-else{
-
-alert("성공!")
-
-location.reload()
+ctx.stroke()
 
 }
 
+function end(){
+drawing=false
 }
 
-}
+/* 다음 단계 */
 
-window.onload=startGame
+function nextStage(){
+
+playPop()
+
+stage++
+
+if(stage>50) stage=1
+
+document.getElementById("stage").innerText=stage+" / 50"
+
+pickShape()
+drawGuide()
+
+}
 
 </script>
 
