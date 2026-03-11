@@ -26,8 +26,8 @@
       "active": true
     },
     {
-      "title": "🔊 사운드 매칭",
-      "url": "soundmatch.html",
+      "title": "🧩 그림 맞추기",
+      "url": "puzzle.html",
       "active": true
     }
   ]
