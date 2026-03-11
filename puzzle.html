@@ -21,7 +21,7 @@
             touch-action: none;
         }
 
-        /* 상단 컨트롤 */
+        /* Top Controls */
         .header {
             position: fixed;
             top: 0;
@@ -61,7 +61,7 @@
             backdrop-filter: blur(5px);
         }
 
-        /* 홈 화면 */
+        /* Home Screen */
         #home {
             height: 100vh;
             display: flex;
@@ -109,7 +109,7 @@
         .card:active { transform: scale(0.95); }
         .card-emoji { font-size: 2.2rem; }
 
-        /* 게임 화면 */
+        /* Game Screen */
         #game {
             display: none;
             height: 100vh;
@@ -138,7 +138,7 @@
             overflow: visible;
         }
 
-        /* 카운트다운 오버레이 */
+        /* Countdown Overlay */
         #countdown-overlay {
             position: absolute;
             top: 0;
@@ -168,7 +168,7 @@
             100% { transform: scale(1); opacity: 0.8; }
         }
 
-        /* 퍼즐 조각 */
+        /* Puzzle Piece */
         .piece {
             position: absolute;
             border-radius: 4px;
@@ -185,7 +185,7 @@
             cursor: default;
         }
 
-        /* 별 애니메이션 */
+        /* Star Animation */
         .star {
             position: absolute;
             pointer-events: none;
@@ -223,18 +223,18 @@
     <div class="level-badge" id="level-display" style="display: none;">LEVEL 1</div>
 </div>
 
-<!-- 홈 화면 -->
+<!-- Home Screen -->
 <div id="home">
     <div class="title">🎨 귀여운 그림 맞추기</div>
     <div class="grid" id="menu"></div>
 </div>
 
-<!-- 게임 화면 -->
+<!-- Game Screen -->
 <div id="game">
     <div id="board-container">
         <div id="board"></div>
         <div id="countdown-overlay">
-            <div id="countdown-text">3</div>
+            <div id="countdown-text">5</div>
         </div>
     </div>
 </div>
@@ -246,7 +246,7 @@
 </audio>
 
 <script>
-/* 데이터 및 변수 */
+/* Data and Variables */
 const images = [
     "https://loremflickr.com/600/600/illustration,animal?lock=1",
     "https://loremflickr.com/600/600/illustration,cat?lock=2",
@@ -273,7 +273,7 @@ let imgUrl = "";
 let currentBoardSize = 0;
 let isGaming = false;
 
-/* 초기 메뉴 생성 */
+/* Initial Menu Generation */
 function getSoftColor() {
     const hue = Math.floor(Math.random() * 360);
     const color1 = `hsl(${hue}, 60%, 55%)`;
@@ -290,7 +290,7 @@ emojis.forEach((emoji, i) => {
     menu.appendChild(card);
 });
 
-/* 게임 제어 */
+/* Game Control */
 function exitToMain() {
     if (isGaming) {
         goHome();
@@ -357,8 +357,8 @@ function createPuzzle() {
         }
     }
 
-    // 3초 카운트다운 시작
-    startCountdown(3, () => {
+    // Start 5-second countdown
+    startCountdown(5, () => {
         countdownOverlay.style.display = "none";
         if(isGaming) scatter(pieces, pieceSize);
     });
