@@ -98,7 +98,7 @@
             cursor: pointer;
             box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.3);
             transition: transform 0.2s, box-shadow 0.2s;
-            border: 2px solid rgba(255, 255, 255, 0.1);
+            border: 1px solid rgba(255, 255, 255, 0.05);
             color: white;
             display: flex;
             flex-direction: column;
@@ -138,7 +138,7 @@
             overflow: visible;
         }
 
-        /* 퍼즐 */
+        /* 퍼즐 조각 */
         .piece {
             position: absolute;
             border-radius: 4px;
@@ -188,9 +188,9 @@
 
 <body>
 
-<div class="header" id="game-header" style="display: none;">
-    <div class="close-btn" onclick="goHome()">✕</div>
-    <div class="level-badge" id="level-display">LEVEL 1</div>
+<div class="header" id="game-header">
+    <div class="close-btn" onclick="exitToMain()">✕</div>
+    <div class="level-badge" id="level-display" style="display: none;">LEVEL 1</div>
 </div>
 
 <!-- 홈 화면 -->
@@ -214,7 +214,6 @@
 
 <script>
 /* 데이터 및 변수 */
-// 일러스트 느낌의 이미지를 불러오기 위해 키워드 기반 서비스 활용
 const images = [
     "https://loremflickr.com/600/600/illustration,animal?lock=1",
     "https://loremflickr.com/600/600/illustration,cat?lock=2",
@@ -237,32 +236,47 @@ let size = 2;
 let level = 1;
 let imgUrl = "";
 let currentBoardSize = 0;
+let isGaming = false;
 
 /* 초기 메뉴 생성 */
-function randomColor() {
-    let h = Math.floor(Math.random() * 360);
-    return `hsl(${h}, 70%, 65%)`; // 조금 더 밝고 파스텔 톤으로 조정
+function getSoftColor() {
+    // 너무 강하지 않은 파스텔톤 컬러 생성
+    const hue = Math.floor(Math.random() * 360);
+    const color1 = `hsl(${hue}, 60%, 55%)`;
+    const color2 = `hsl(${hue}, 60%, 50%)`; // 명도만 아주 살짝 차이 나도록
+    return `linear-gradient(145deg, ${color1}, ${color2})`;
 }
 
 emojis.forEach((emoji, i) => {
     const card = document.createElement("div");
     card.className = "card";
-    card.style.background = `linear-gradient(135deg, ${randomColor()}, ${randomColor()})`;
+    card.style.background = getSoftColor();
     card.innerHTML = `<span class="card-emoji">${emoji}</span><span>그림 ${i + 1}</span>`;
     card.onclick = () => startGame(i);
     menu.appendChild(card);
 });
 
 /* 게임 제어 */
+function exitToMain() {
+    if (isGaming) {
+        goHome();
+    } else {
+        // 인덱스로 나가기 (브라우저 뒤로 가기)
+        window.history.back();
+    }
+}
+
 function goHome() {
+    isGaming = false;
     gameDiv.style.display = "none";
-    headerDiv.style.display = "none";
+    levelDisplay.style.display = "none";
     homeDiv.style.display = "flex";
     board.innerHTML = "";
     toast.style.display = "none";
 }
 
 function startGame(i) {
+    isGaming = true;
     imgUrl = images[i];
     size = 2;
     level = 1;
@@ -270,7 +284,7 @@ function startGame(i) {
 
     homeDiv.style.display = "none";
     gameDiv.style.display = "block";
-    headerDiv.style.display = "flex";
+    levelDisplay.style.display = "block";
 
     createPuzzle();
 }
@@ -299,22 +313,24 @@ function createPuzzle() {
             p.dataset.x = x;
             p.dataset.y = y;
 
-            // 정답 위치 프리뷰 (정렬된 상태로 먼저 보여줌)
             p.style.left = (x * pieceSize) + "px";
             p.style.top = (y * pieceSize) + "px";
+            p.style.opacity = "1";
 
             board.appendChild(p);
             pieces.push(p);
         }
     }
 
-    // 2초 뒤에 흩어지기
-    setTimeout(() => scatter(pieces, pieceSize), 2000);
+    // 1.5초 동안 완성된 그림을 보여준 뒤 흩어짐
+    setTimeout(() => {
+        if(isGaming) scatter(pieces, pieceSize);
+    }, 1500);
 }
 
 function scatter(pieces, pieceSize) {
     pieces.forEach((p) => {
-        p.style.transition = "all 0.6s cubic-bezier(0.175, 0.885, 0.32, 1.275)";
+        p.style.transition = "all 0.8s cubic-bezier(0.175, 0.885, 0.32, 1.275)";
         
         const rx = (Math.random() - 0.2) * (currentBoardSize);
         const ry = (Math.random() - 0.2) * (currentBoardSize);
@@ -325,7 +341,7 @@ function scatter(pieces, pieceSize) {
         setTimeout(() => {
             p.style.transition = "none";
             makeDraggable(p, pieceSize);
-        }, 600);
+        }, 800);
     });
 }
 
@@ -400,16 +416,13 @@ function showWinEffects() {
 }
 
 function nextLevel() {
+    if (!isGaming) return;
     toast.style.display = "none";
     level++;
     if (size < 6) size++;
     updateLevelBadge();
     createPuzzle();
 }
-
-window.addEventListener('resize', () => {
-    // 게임 도중 리사이즈 시 대응 로직 필요 시 추가
-});
 </script>
 
 </body>
