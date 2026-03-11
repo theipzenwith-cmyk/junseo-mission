@@ -29,6 +29,11 @@
       "title": "🧩 그림 맞추기",
       "url": "puzzle.html",
       "active": true
+    },
+    {
+      "title": "🫣 같은 이모지 찾기",
+      "url": "soundmatch.html",
+      "active": true
     }
   ]
 }
