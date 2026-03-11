@@ -1,0 +1,422 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>그림 맞추기 퍼즐</title>
+    <style>
+        :root {
+            --bg-color: #0f172a;
+            --text-main: #f8fafc;
+            --accent-color: #f59e0b;
+        }
+
+        body {
+            margin: 0;
+            background-color: var(--bg-color);
+            font-family: 'Pretendard', -apple-system, BlinkMacSystemFont, system-ui, Roboto, sans-serif;
+            color: var(--text-main);
+            text-align: center;
+            overflow: hidden;
+            touch-action: none;
+        }
+
+        /* 상단 컨트롤 */
+        .header {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 70px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 0 20px;
+            z-index: 100;
+        }
+
+        .close-btn {
+            width: 44px;
+            height: 44px;
+            border-radius: 12px;
+            background: rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            color: white;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 24px;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .level-badge {
+            background: rgba(245, 158, 11, 0.2);
+            color: var(--accent-color);
+            padding: 8px 16px;
+            border-radius: 20px;
+            font-weight: 800;
+            border: 1px solid var(--accent-color);
+            backdrop-filter: blur(5px);
+        }
+
+        /* 홈 화면 */
+        #home {
+            height: 100vh;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            padding: 20px;
+            box-sizing: border-box;
+            overflow-y: auto;
+        }
+
+        .title {
+            font-size: clamp(1.8rem, 5vw, 2.5rem);
+            font-weight: 800;
+            margin-bottom: 30px;
+            background: linear-gradient(to right, #818cf8, #c084fc);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        .grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 16px;
+            width: 100%;
+            max-width: 500px;
+        }
+
+        .card {
+            border-radius: 24px;
+            padding: 30px 10px;
+            font-size: 1.1rem;
+            font-weight: 700;
+            cursor: pointer;
+            box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.3);
+            transition: transform 0.2s, box-shadow 0.2s;
+            border: 2px solid rgba(255, 255, 255, 0.1);
+            color: white;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .card:active { transform: scale(0.95); }
+        .card-emoji { font-size: 2.2rem; }
+
+        /* 게임 화면 */
+        #game {
+            display: none;
+            height: 100vh;
+            position: relative;
+        }
+
+        #board-container {
+            position: absolute;
+            top: 55%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            width: 85vw; /* 해상도에 따라 유동적으로 변화 */
+            height: 85vw;
+            max-width: 500px; /* PC 등 대화면에서 너무 커지지 않게 제한 */
+            max-height: 500px;
+            background: rgba(255, 255, 255, 0.05);
+            border-radius: 12px;
+            border: 2px dashed rgba(255, 255, 255, 0.2);
+            box-sizing: content-box;
+        }
+
+        #board {
+            position: relative;
+            width: 100%;
+            height: 100%;
+            overflow: visible;
+        }
+
+        /* 퍼즐 */
+        .piece {
+            position: absolute;
+            border-radius: 4px;
+            box-shadow: 0 4px 10px rgba(0,0,0,0.4);
+            touch-action: none;
+            cursor: grab;
+            z-index: 10;
+        }
+
+        .piece.snapped {
+            box-shadow: none;
+            border: 1px solid rgba(255,255,255,0.1);
+            z-index: 1;
+            cursor: default;
+        }
+
+        /* 별 애니메이션 */
+        .star {
+            position: absolute;
+            pointer-events: none;
+            font-size: clamp(20px, 4vw, 32px);
+            z-index: 100;
+            animation: star-pop 1s forwards;
+        }
+
+        @keyframes star-pop {
+            0% { transform: scale(0); opacity: 1; }
+            100% { transform: scale(2); opacity: 0; }
+        }
+
+        .toast {
+            position: fixed;
+            bottom: 40px;
+            left: 50%;
+            transform: translateX(-50%);
+            background: rgba(255, 255, 255, 0.9);
+            color: #000;
+            padding: 12px 24px;
+            border-radius: 30px;
+            font-weight: bold;
+            display: none;
+            z-index: 1000;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.3);
+        }
+    </style>
+</head>
+
+<body>
+
+<div class="header" id="game-header" style="display: none;">
+    <div class="close-btn" onclick="goHome()">✕</div>
+    <div class="level-badge" id="level-display">LEVEL 1</div>
+</div>
+
+<!-- 홈 화면 -->
+<div id="home">
+    <div class="title">🧩 그림 맞추기</div>
+    <div class="grid" id="menu"></div>
+</div>
+
+<!-- 게임 화면 -->
+<div id="game">
+    <div id="board-container">
+        <div id="board"></div>
+    </div>
+</div>
+
+<div class="toast" id="toast">레벨 클리어! 🌟</div>
+
+<audio id="sound">
+    <source src="https://actions.google.com/sounds/v1/cartoon/clang_and_wobble.ogg">
+</audio>
+
+<script>
+/* 데이터 및 변수 */
+const images = [
+    "https://picsum.photos/600/600?random=11",
+    "https://picsum.photos/600/600?random=22",
+    "https://picsum.photos/600/600?random=33",
+    "https://picsum.photos/600/600?random=44",
+    "https://picsum.photos/600/600?random=55"
+];
+const emojis = ["🐶", "🐰", "🚗", "🍎", "🦖"];
+
+const homeDiv = document.getElementById("home");
+const gameDiv = document.getElementById("game");
+const headerDiv = document.getElementById("game-header");
+const board = document.getElementById("board");
+const boardContainer = document.getElementById("board-container");
+const menu = document.getElementById("menu");
+const levelDisplay = document.getElementById("level-display");
+const toast = document.getElementById("toast");
+
+let size = 2;
+let level = 1;
+let imgUrl = "";
+let currentBoardSize = 0;
+
+/* 초기 메뉴 생성 */
+function randomColor() {
+    let h = Math.floor(Math.random() * 360);
+    return `hsl(${h}, 60%, 50%)`;
+}
+
+emojis.forEach((emoji, i) => {
+    const card = document.createElement("div");
+    card.className = "card";
+    card.style.background = `linear-gradient(135deg, ${randomColor()}, ${randomColor()})`;
+    card.innerHTML = `<span class="card-emoji">${emoji}</span><span>게임 ${i + 1}</span>`;
+    card.onclick = () => startGame(i);
+    menu.appendChild(card);
+});
+
+/* 게임 제어 */
+function goHome() {
+    gameDiv.style.display = "none";
+    headerDiv.style.display = "none";
+    homeDiv.style.display = "flex";
+    board.innerHTML = "";
+    toast.style.display = "none";
+}
+
+function startGame(i) {
+    imgUrl = images[i];
+    size = 2;
+    level = 1;
+    updateLevelBadge();
+
+    homeDiv.style.display = "none";
+    gameDiv.style.display = "block";
+    headerDiv.style.display = "flex";
+
+    createPuzzle();
+}
+
+function updateLevelBadge() {
+    levelDisplay.innerText = "LEVEL " + level;
+}
+
+function createPuzzle() {
+    board.innerHTML = "";
+    
+    // 현재 해상도에 따른 보드 크기 계산
+    currentBoardSize = boardContainer.clientWidth;
+    const pieceSize = currentBoardSize / size;
+    let pieces = [];
+
+    for (let y = 0; y < size; y++) {
+        for (let x = 0; x < size; x++) {
+            const p = document.createElement("div");
+            p.className = "piece";
+            p.style.width = pieceSize + "px";
+            p.style.height = pieceSize + "px";
+            p.style.backgroundImage = `url(${imgUrl})`;
+            // 배경 크기도 보드 크기에 맞게 조정
+            p.style.backgroundSize = `${currentBoardSize}px ${currentBoardSize}px`;
+            p.style.backgroundPosition = `${-x * pieceSize}px ${-y * pieceSize}px`;
+
+            p.dataset.x = x;
+            p.dataset.y = y;
+
+            // 정답 위치 프리뷰
+            p.style.left = (x * pieceSize) + "px";
+            p.style.top = (y * pieceSize) + "px";
+
+            board.appendChild(p);
+            pieces.push(p);
+        }
+    }
+
+    setTimeout(() => scatter(pieces, pieceSize), 2000);
+}
+
+function scatter(pieces, pieceSize) {
+    pieces.forEach((p) => {
+        p.style.transition = "all 0.6s cubic-bezier(0.175, 0.885, 0.32, 1.275)";
+        
+        // 보드 영역을 약간 벗어날 수 있도록 랜덤 범위 지정 (더 역동적인 느낌)
+        const rx = (Math.random() - 0.2) * (currentBoardSize);
+        const ry = (Math.random() - 0.2) * (currentBoardSize);
+        
+        p.style.left = rx + "px";
+        p.style.top = ry + "px";
+
+        setTimeout(() => {
+            p.style.transition = "none";
+            makeDraggable(p, pieceSize);
+        }, 600);
+    });
+}
+
+function makeDraggable(el, pieceSize) {
+    let startX, startY, initialL, initialT;
+
+    el.onpointerdown = (e) => {
+        if(el.classList.contains('snapped')) return;
+        el.setPointerCapture(e.pointerId);
+        
+        startX = e.clientX;
+        startY = e.clientY;
+        initialL = parseFloat(el.style.left);
+        initialT = parseFloat(el.style.top);
+
+        el.style.zIndex = "100";
+
+        el.onpointermove = (ev) => {
+            el.style.left = (initialL + (ev.clientX - startX)) + "px";
+            el.style.top = (initialT + (ev.clientY - startY)) + "px";
+        };
+
+        el.onpointerup = () => {
+            el.onpointermove = null;
+            el.onpointerup = null;
+            el.style.zIndex = "10";
+            checkSnap(el, pieceSize);
+        };
+    };
+}
+
+function checkSnap(el, pieceSize) {
+    const curL = parseFloat(el.style.left);
+    const curT = parseFloat(el.style.top);
+    const tarL = parseInt(el.dataset.x) * pieceSize;
+    const tarT = parseInt(el.dataset.y) * pieceSize;
+
+    const dist = Math.sqrt(Math.pow(curL - tarL, 2) + Math.pow(curT - tarT, 2));
+
+    // 스냅 감지 거리를 조각 크기에 비례하게 설정
+    if (dist < pieceSize * 0.4) {
+        el.style.transition = "all 0.2s ease-out";
+        el.style.left = tarL + "px";
+        el.style.top = tarT + "px";
+        el.classList.add("snapped");
+        el.onpointerdown = null;
+        checkWin();
+    }
+}
+
+function checkWin() {
+    const pieces = document.querySelectorAll(".piece");
+    const isCleared = [...pieces].every(p => p.classList.contains("snapped"));
+    
+    if (isCleared) {
+        document.getElementById("sound").play();
+        showWinEffects();
+        setTimeout(nextLevel, 1500);
+    }
+}
+
+function showWinEffects() {
+    toast.style.display = "block";
+    for (let i = 0; i < 30; i++) {
+        const s = document.createElement("div");
+        s.className = "star";
+        s.innerHTML = ["⭐", "✨", "🎊", "🌟"][Math.floor(Math.random() * 4)];
+        s.style.left = Math.random() * currentBoardSize + "px";
+        s.style.top = Math.random() * currentBoardSize + "px";
+        board.appendChild(s);
+        setTimeout(() => s.remove(), 1000);
+    }
+}
+
+function nextLevel() {
+    toast.style.display = "none";
+    level++;
+    if (size < 6) size++; // 최대 6x6까지 확장 가능
+    updateLevelBadge();
+    createPuzzle();
+}
+
+// 화면 크기 변경 시 대응 (선택 사항: 현재 퍼즐 상태 유지를 위해 가급적 시작 시 크기 고정)
+window.addEventListener('resize', () => {
+    if (gameDiv.style.display === "block") {
+        // 게임 도중 리사이즈는 조각 위치 계산이 복잡해지므로 
+        // 필요한 경우 여기에 재계산 로직을 추가할 수 있습니다.
+    }
+});
+</script>
+
+</body>
+</html>
