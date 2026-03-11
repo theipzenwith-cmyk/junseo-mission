@@ -138,6 +138,36 @@
             overflow: visible;
         }
 
+        /* 카운트다운 오버레이 */
+        #countdown-overlay {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            display: none;
+            align-items: center;
+            justify-content: center;
+            background: rgba(0,0,0,0.2);
+            border-radius: 12px;
+            z-index: 50;
+            pointer-events: none;
+        }
+
+        #countdown-text {
+            font-size: 8rem;
+            font-weight: 900;
+            color: #fff;
+            text-shadow: 0 0 20px rgba(0,0,0,0.5);
+            animation: pulse 1s infinite;
+        }
+
+        @keyframes pulse {
+            0% { transform: scale(1); opacity: 0.8; }
+            50% { transform: scale(1.2); opacity: 1; }
+            100% { transform: scale(1); opacity: 0.8; }
+        }
+
         /* 퍼즐 조각 */
         .piece {
             position: absolute;
@@ -203,6 +233,9 @@
 <div id="game">
     <div id="board-container">
         <div id="board"></div>
+        <div id="countdown-overlay">
+            <div id="countdown-text">3</div>
+        </div>
     </div>
 </div>
 
@@ -231,6 +264,8 @@ const boardContainer = document.getElementById("board-container");
 const menu = document.getElementById("menu");
 const levelDisplay = document.getElementById("level-display");
 const toast = document.getElementById("toast");
+const countdownOverlay = document.getElementById("countdown-overlay");
+const countdownText = document.getElementById("countdown-text");
 
 let size = 2;
 let level = 1;
@@ -240,10 +275,9 @@ let isGaming = false;
 
 /* 초기 메뉴 생성 */
 function getSoftColor() {
-    // 너무 강하지 않은 파스텔톤 컬러 생성
     const hue = Math.floor(Math.random() * 360);
     const color1 = `hsl(${hue}, 60%, 55%)`;
-    const color2 = `hsl(${hue}, 60%, 50%)`; // 명도만 아주 살짝 차이 나도록
+    const color2 = `hsl(${hue}, 60%, 50%)`;
     return `linear-gradient(145deg, ${color1}, ${color2})`;
 }
 
@@ -261,7 +295,6 @@ function exitToMain() {
     if (isGaming) {
         goHome();
     } else {
-        // 인덱스로 나가기 (브라우저 뒤로 가기)
         window.history.back();
     }
 }
@@ -273,6 +306,7 @@ function goHome() {
     homeDiv.style.display = "flex";
     board.innerHTML = "";
     toast.style.display = "none";
+    countdownOverlay.style.display = "none";
 }
 
 function startGame(i) {
@@ -295,6 +329,7 @@ function updateLevelBadge() {
 
 function createPuzzle() {
     board.innerHTML = "";
+    countdownOverlay.style.display = "flex";
     
     currentBoardSize = boardContainer.clientWidth;
     const pieceSize = currentBoardSize / size;
@@ -322,10 +357,26 @@ function createPuzzle() {
         }
     }
 
-    // 1.5초 동안 완성된 그림을 보여준 뒤 흩어짐
-    setTimeout(() => {
+    // 3초 카운트다운 시작
+    startCountdown(3, () => {
+        countdownOverlay.style.display = "none";
         if(isGaming) scatter(pieces, pieceSize);
-    }, 1500);
+    });
+}
+
+function startCountdown(seconds, callback) {
+    let count = seconds;
+    countdownText.innerText = count;
+    
+    const interval = setInterval(() => {
+        count--;
+        if (count > 0) {
+            countdownText.innerText = count;
+        } else {
+            clearInterval(interval);
+            callback();
+        }
+    }, 1000);
 }
 
 function scatter(pieces, pieceSize) {
@@ -349,7 +400,7 @@ function makeDraggable(el, pieceSize) {
     let startX, startY, initialL, initialT;
 
     el.onpointerdown = (e) => {
-        if(el.classList.contains('snapped')) return;
+        if(el.classList.contains('snapped') || countdownOverlay.style.display === "flex") return;
         el.setPointerCapture(e.pointerId);
         
         startX = e.clientX;
