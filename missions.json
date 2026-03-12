@@ -2,36 +2,43 @@
   "games": [
     {
       "title": "👁 시력 테스트",
+      "desc": "숫자를 보고 눈을 테스트해요",
       "url": "vision.html",
       "active": true
     },
     {
       "title": "🎨 색깔 미션",
+      "desc": "색깔을 맞춰보는 재미있는 게임",
       "url": "color.html",
       "active": true
     },
     {
       "title": "🎈 숫자 풍선 찾기",
+      "desc": "숨은 숫자를 찾아보세요",
       "url": "number.html",
       "active": true
     },
     {
       "title": "💥 이모지 터치 게임",
+      "desc": "이모지를 빠르게 터치해요",
       "url": "emoji.html",
       "active": true
     },
     {
       "title": "✏️ 선따라 그리기",
+      "desc": "점선을 따라 그림을 완성해요",
       "url": "trace.html",
       "active": true
     },
     {
       "title": "🧩 그림 맞추기",
+      "desc": "퍼즐을 맞춰 그림을 완성해요",
       "url": "puzzle.html",
       "active": true
     },
     {
       "title": "🫣 같은 이모지 찾기",
+      "desc": "같은 이모지를 기억하고 찾아요",
       "url": "soundmatch.html",
       "active": true
     }
