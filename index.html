@@ -1,4 +1,179 @@
-<!-- 기존 코드 동일, script 부분만 아래로 교체 -->
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+<title>준서 놀이터</title>
+
+<meta property="og:title" content="준서 놀이터">
+<meta property="og:description" content="아이들을 위한 재미있는 게임 놀이터">
+<meta property="og:type" content="website">
+
+<style>
+
+body{
+margin:0;
+background:black;
+font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto;
+color:white;
+}
+
+.header{
+padding:60px 30px 20px;
+max-width:900px;
+margin:auto;
+}
+
+.title{
+font-size:52px;
+font-weight:900;
+background:linear-gradient(90deg,#ff6ec4,#7873f5,#42e695,#ff6ec4);
+background-size:300% 300%;
+-webkit-background-clip:text;
+-webkit-text-fill-color:transparent;
+animation:gradientMove 6s ease infinite;
+}
+
+@keyframes gradientMove{
+0%{background-position:0% 50%;}
+50%{background-position:100% 50%;}
+100%{background-position:0% 50%;}
+}
+
+.subtitle{
+color:#888;
+margin-top:10px;
+font-size:22px;
+}
+
+.list{
+max-width:900px;
+margin:auto;
+padding:20px 30px 40px;
+}
+
+.game{
+display:flex;
+align-items:center;
+gap:26px;
+padding:34px 0;
+border-bottom:1px solid #222;
+text-decoration:none;
+color:white;
+transition:0.2s;
+}
+
+.game:active{
+transform:scale(0.97);
+}
+
+.thumb{
+width:100px;
+height:100px;
+border-radius:24px;
+display:flex;
+align-items:center;
+justify-content:center;
+font-size:46px;
+box-shadow:
+0 12px 30px rgba(0,0,0,0.6),
+inset 0 4px 8px rgba(255,255,255,0.25),
+inset 0 -8px 14px rgba(0,0,0,0.25);
+}
+
+.text{flex:1;}
+
+.game-title{
+font-size:30px;
+font-weight:800;
+}
+
+.game-desc{
+font-size:20px;
+color:#aaa;
+margin-top:6px;
+}
+
+/* 메모 영역 */
+.memo-wrap{
+max-width:900px;
+margin:auto;
+padding:30px;
+}
+
+.memo{
+background:#1a1a1a;
+padding:14px;
+border-radius:12px;
+margin-bottom:10px;
+}
+
+.profile{
+display:flex;
+align-items:center;
+gap:8px;
+font-size:14px;
+color:#aaa;
+margin-bottom:6px;
+}
+
+.profile span{
+font-size:20px;
+}
+
+input{
+padding:10px;
+border-radius:10px;
+border:none;
+flex:1;
+}
+
+button{
+padding:10px 14px;
+border:none;
+border-radius:10px;
+background:#3b82f6;
+color:white;
+font-weight:700;
+cursor:pointer;
+}
+
+.loading{
+text-align:center;
+padding:60px;
+color:#666;
+}
+
+</style>
+
+</head>
+
+<body>
+
+<div class="header">
+<div class="title">준서 놀이터</div>
+<div class="subtitle">오늘은 이 게임 🎮</div>
+</div>
+
+<div class="list" id="gameList">
+<div class="loading">불러오는 중...</div>
+</div>
+
+<!-- 메모 -->
+<div class="memo-wrap">
+
+<h2>📝 준서에게 한마디</h2>
+
+<div style="display:flex;gap:10px;margin-bottom:14px;">
+<input id="memoInput" placeholder="준서에게 메모 남기기">
+<button onclick="addMemo()">작성</button>
+</div>
+
+<div id="memoList"></div>
+
+</div>
 
 <script>
 
@@ -8,61 +183,75 @@ const colors=[
 "#22c55e","#eab308","#06b6d4","#6366f1"
 ]
 
-fetch("missions.json")
-.then(res=>res.json())
-.then(data=>{
-const list=document.getElementById("gameList")
-list.innerHTML=""
-const games=data.games || []
+async function loadGames(){
+  try{
+    const res = await fetch("missions.json")
+    const data = await res.json()
 
-games.forEach((game,i)=>{
-if(!game.active) return
+    const list=document.getElementById("gameList")
+    list.innerHTML=""
 
-const a=document.createElement("a")
-a.href=game.url
-a.className="game"
+    const games=data.games || []
 
-const thumb=document.createElement("div")
-thumb.className="thumb"
-thumb.style.background=colors[i%colors.length]
+    games.forEach((game,i)=>{
 
-let emoji="🎮"
-const first=game.title.trim().split(" ")[0]
-if(first.length<=3){ emoji=first }
+      if(!game.active) return
 
-thumb.innerText=emoji
+      const a=document.createElement("a")
+      a.href=game.url
+      a.className="game"
 
-const text=document.createElement("div")
-text.className="text"
+      const thumb=document.createElement("div")
+      thumb.className="thumb"
+      thumb.style.background=colors[i%colors.length]
 
-const title=document.createElement("div")
-title.className="game-title"
-const cleanTitle=game.title.replace(emoji,"").trim()
-title.innerText=cleanTitle || game.desc
+      let emoji="🎮"
+      const first = game.title ? game.title.trim().split(" ")[0] : ""
+      if(first && first.length<=3){ emoji=first }
 
-const desc=document.createElement("div")
-desc.className="game-desc"
-desc.innerText=game.desc || ""
+      thumb.innerText=emoji
 
-text.appendChild(title)
-text.appendChild(desc)
+      const text=document.createElement("div")
+      text.className="text"
 
-a.appendChild(thumb)
-a.appendChild(text)
+      const title=document.createElement("div")
+      title.className="game-title"
 
-list.appendChild(a)
-})
-})
+      const cleanTitle = game.title ? game.title.replace(emoji,"").trim() : ""
+      title.innerText=cleanTitle || game.desc || "게임"
+
+      const desc=document.createElement("div")
+      desc.className="game-desc"
+      desc.innerText=game.desc || ""
+
+      text.appendChild(title)
+      text.appendChild(desc)
+
+      a.appendChild(thumb)
+      a.appendChild(text)
+
+      list.appendChild(a)
+    })
+
+  }catch(e){
+    document.getElementById("gameList").innerHTML =
+    "<div class='loading'>게임 불러오기 실패</div>"
+  }
+}
 
 /* 프로필 */
-const emojis=["🐶","🐱","🐼","🦊","🐰","🐸","🐻","🐯"]
-const names=["행복한","용감한","귀여운","똑똑한","빠른","웃는"]
-
 function getProfile(){
-  let p = JSON.parse(localStorage.getItem("profile"))
-  if(p) return p
+  try{
+    let p = JSON.parse(localStorage.getItem("profile"))
+    if(p) return p
+  }catch{
+    localStorage.removeItem("profile")
+  }
 
-  p={
+  const emojis=["🐶","🐱","🐼","🦊","🐰","🐸","🐻","🐯"]
+  const names=["행복한","용감한","귀여운","똑똑한","빠른","웃는"]
+
+  const p={
     emoji: emojis[Math.floor(Math.random()*emojis.length)],
     name: names[Math.floor(Math.random()*names.length)]+" 친구"
   }
@@ -73,15 +262,25 @@ function getProfile(){
 
 /* 메모 */
 function loadMemo(){
-  const memos = JSON.parse(localStorage.getItem("memos") || "[]")
-  renderMemo(memos)
+  try{
+    const memos = JSON.parse(localStorage.getItem("memos") || "[]")
+    renderMemo(memos)
+  }catch{
+    localStorage.removeItem("memos")
+    renderMemo([])
+  }
 }
 
 function addMemo(){
-  const text=document.getElementById("memoInput").value.trim()
+  const input=document.getElementById("memoInput")
+  const text=input.value.trim()
   if(!text) return
 
-  const memos = JSON.parse(localStorage.getItem("memos") || "[]")
+  let memos=[]
+  try{
+    memos = JSON.parse(localStorage.getItem("memos") || "[]")
+  }catch{}
+
   const profile = getProfile()
 
   memos.unshift({
@@ -93,21 +292,30 @@ function addMemo(){
   })
 
   localStorage.setItem("memos",JSON.stringify(memos))
-  document.getElementById("memoInput").value=""
+
+  input.value=""
   renderMemo(memos)
 }
 
-/* 👍 좋아요 */
+/* 좋아요 */
 function likeMemo(i){
 
-  let liked = JSON.parse(localStorage.getItem("liked") || "[]")
+  let liked=[]
+  try{
+    liked = JSON.parse(localStorage.getItem("liked") || "[]")
+  }catch{}
 
   if(liked.includes(i)){
     alert("이미 좋아요 했어요")
     return
   }
 
-  const memos = JSON.parse(localStorage.getItem("memos") || "[]")
+  let memos=[]
+  try{
+    memos = JSON.parse(localStorage.getItem("memos") || "[]")
+  }catch{}
+
+  if(!memos[i]) return
 
   memos[i].likes = (memos[i].likes || 0) + 1
 
@@ -149,12 +357,21 @@ function renderMemo(memos){
 }
 
 function deleteMemo(i){
-  const memos = JSON.parse(localStorage.getItem("memos") || "[]")
+  let memos=[]
+  try{
+    memos = JSON.parse(localStorage.getItem("memos") || "[]")
+  }catch{}
+
   memos.splice(i,1)
   localStorage.setItem("memos",JSON.stringify(memos))
   renderMemo(memos)
 }
 
+/* 실행 */
+loadGames()
 loadMemo()
 
 </script>
+
+</body>
+</html>
