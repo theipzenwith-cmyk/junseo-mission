@@ -148,7 +148,7 @@ color:#ccc;
 cursor:pointer;
 }
 
-/* 💥 귀여운 모달 */
+/* 모달 */
 .modal{
 position:fixed;
 top:0;
@@ -215,6 +215,11 @@ cursor:pointer;
 <script>
 
 /* 게임 */
+const colors=[
+"#3b82f6","#9333ea","#ef4444","#f97316",
+"#22c55e","#eab308","#06b6d4","#6366f1"
+]
+
 async function loadGames(){
   try{
     const res=await fetch("missions.json")
@@ -223,18 +228,26 @@ async function loadGames(){
     const list=document.getElementById("gameList")
     list.innerHTML=""
 
-    data.games.forEach((g)=>{
+    data.games.forEach((g,i)=>{
+
       if(!g.active) return
+
+      const emoji = g.emoji || "🎮"
 
       const div=document.createElement("div")
       div.className="game"
+
       div.innerHTML=`
-        <div class="thumb">${g.title[0]}</div>
+        <div class="thumb" style="background:${colors[i%colors.length]}">
+          ${emoji}
+        </div>
+
         <div class="text">
           <div class="game-title">${g.title}</div>
-          <div class="game-desc">${g.desc}</div>
+          <div class="game-desc">${g.desc || ""}</div>
         </div>
       `
+
       list.appendChild(div)
     })
 
@@ -294,7 +307,7 @@ function likeMemo(i){
   renderMemo(memos)
 }
 
-/* 💥 모달 */
+/* 모달 */
 function showDeleteConfirm(i){
 
   const modal=document.createElement("div")
@@ -359,7 +372,6 @@ function renderMemo(memos){
     `
 
     longPress(div,i)
-
     list.appendChild(div)
   })
 }
