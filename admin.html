@@ -71,6 +71,11 @@ padding:0 6px;
 
 <div id="list"></div>
 
+<br>
+
+<button onclick="saveLocal()">💾 저장 (브라우저)</button>
+<button onclick="resetData()">🧹 초기화</button>
+
 <h3>missions.json</h3>
 <textarea id="output"></textarea>
 <button onclick="copyJSON()">JSON 복사</button>
@@ -79,8 +84,17 @@ padding:0 6px;
 
 let games = []
 
-/* 🔥 JSON 불러오기 */
+/* 🔥 최초 로드 */
 async function load(){
+
+  const saved = localStorage.getItem("games")
+
+  if(saved){
+    games = JSON.parse(saved)
+    render()
+    return
+  }
+
   const res = await fetch("missions.json")
   const data = await res.json()
   games = data.games || []
@@ -96,7 +110,6 @@ function render(){
 
     const div=document.createElement("div")
     div.className="game"
-    div.setAttribute("data-index", i)
 
     div.innerHTML=`
     <span class="drag">☰</span>
@@ -110,14 +123,13 @@ function render(){
     list.appendChild(div)
   })
 
-  /* 🔥 드래그 적용 */
   new Sortable(list, {
     animation:150,
     handle:'.drag',
-
     onEnd: function(evt){
-      const movedItem = games.splice(evt.oldIndex,1)[0]
-      games.splice(evt.newIndex,0,movedItem)
+      const moved = games.splice(evt.oldIndex,1)[0]
+      games.splice(evt.newIndex,0,moved)
+      saveLocalSilent()
       render()
     }
   })
@@ -126,17 +138,19 @@ function render(){
 }
 
 /* 수정 */
-function updateTitle(i,v){ games[i].title=v; generateJSON(); }
-function updateDesc(i,v){ games[i].desc=v; generateJSON(); }
-function updateUrl(i,v){ games[i].url=v; generateJSON(); }
+function updateTitle(i,v){ games[i].title=v; saveLocalSilent(); generateJSON(); }
+function updateDesc(i,v){ games[i].desc=v; saveLocalSilent(); generateJSON(); }
+function updateUrl(i,v){ games[i].url=v; saveLocalSilent(); generateJSON(); }
 
 function toggle(i){
   games[i].active=!games[i].active
+  saveLocalSilent()
   generateJSON()
 }
 
 function removeGame(i){
   games.splice(i,1)
+  saveLocalSilent()
   render()
 }
 
@@ -158,7 +172,31 @@ function addGame(){
     active:true
   })
 
+  document.getElementById("title").value=""
+  document.getElementById("desc").value=""
+  document.getElementById("url").value=""
+
+  saveLocalSilent()
   render()
+}
+
+/* 🔥 브라우저 저장 */
+function saveLocal(){
+  localStorage.setItem("games", JSON.stringify(games))
+  alert("저장 완료 (이 브라우저에서 유지됨)")
+}
+
+/* 자동 저장 (알림 없음) */
+function saveLocalSilent(){
+  localStorage.setItem("games", JSON.stringify(games))
+}
+
+/* 초기화 */
+function resetData(){
+  if(confirm("저장된 데이터 삭제할까요?")){
+    localStorage.removeItem("games")
+    location.reload()
+  }
 }
 
 /* JSON 출력 */
@@ -172,7 +210,7 @@ function copyJSON(){
   const t=document.getElementById("output")
   t.select()
   document.execCommand("copy")
-  alert("복사 완료 → missions.json 붙여넣기")
+  alert("복사 완료 → missions.json에 붙여넣기")
 }
 
 load()
