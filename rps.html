@@ -1,0 +1,353 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>가위바위보 챌린지</title>
+    <style>
+        :root {
+            --bg-top: #3485f1;
+            --bg-bottom: #5da0f8;
+            --white: #ffffff;
+            --text-dark: #333333;
+            --accent-blue: #2a76e6;
+        }
+
+        body {
+            margin: 0;
+            padding: 0;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: space-between;
+            min-height: 100vh;
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+            background: linear-gradient(to bottom, var(--bg-top), var(--bg-bottom));
+            color: var(--white);
+            text-align: center;
+            overflow: hidden;
+        }
+
+        /* 닫기 버튼 */
+        .close-btn {
+            position: absolute;
+            top: 20px;
+            left: 20px;
+            width: 40px;
+            height: 40px;
+            background: rgba(0, 0, 0, 0.3);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            text-decoration: none;
+            color: white;
+            font-size: 20px;
+            font-weight: bold;
+            z-index: 100;
+            transition: background 0.2s;
+        }
+
+        .close-btn:hover {
+            background: rgba(0, 0, 0, 0.5);
+        }
+
+        /* 헤더 영역 */
+        header {
+            margin-top: 60px;
+            z-index: 5;
+        }
+
+        h1 {
+            font-size: 24px;
+            font-weight: 600;
+            margin: 0;
+            line-height: 1.4;
+            opacity: 0.95;
+        }
+
+        .score-box {
+            font-size: 14px;
+            background: rgba(0, 0, 0, 0.1);
+            padding: 5px 15px;
+            border-radius: 20px;
+            margin-top: 10px;
+            display: inline-block;
+        }
+
+        /* 대전 영역 (좌우 배치) */
+        .battle-view {
+            flex-grow: 1;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            width: 100%;
+            gap: 40px;
+            position: relative;
+        }
+
+        .hand-container {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 15px;
+        }
+
+        .hand-circle {
+            width: 120px;
+            height: 120px;
+            background: rgba(255, 255, 255, 0.15);
+            border: 3px solid rgba(255, 255, 255, 0.3);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 70px;
+            transition: all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+            filter: drop-shadow(0 10px 20px rgba(0,0,0,0.1));
+        }
+
+        .label-tag {
+            font-size: 12px;
+            font-weight: bold;
+            background: rgba(0, 0, 0, 0.2);
+            padding: 4px 10px;
+            border-radius: 10px;
+            text-transform: uppercase;
+        }
+
+        .vs-divider {
+            font-size: 24px;
+            font-weight: 900;
+            font-style: italic;
+            opacity: 0.6;
+            margin-top: 20px;
+        }
+
+        /* 하단 컨트롤러 카드 */
+        .controls-card {
+            background: var(--white);
+            width: 90%;
+            max-width: 380px;
+            border-radius: 30px;
+            padding: 25px 20px;
+            margin-bottom: 40px;
+            box-shadow: 0 15px 35px rgba(0, 0, 0, 0.15);
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+            z-index: 5;
+        }
+
+        .buttons-group {
+            display: flex;
+            justify-content: center;
+            gap: 12px;
+        }
+
+        .btn-choice {
+            width: 80px;
+            height: 80px;
+            border-radius: 50%;
+            border: none;
+            background-color: var(--bg-top);
+            color: white;
+            font-size: 35px;
+            cursor: pointer;
+            transition: transform 0.2s, background-color 0.2s;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            box-shadow: 0 5px 15px rgba(52, 133, 241, 0.3);
+        }
+
+        .btn-choice:hover {
+            transform: translateY(-5px);
+            background-color: var(--accent-blue);
+        }
+
+        .btn-choice:active {
+            transform: scale(0.9);
+        }
+
+        .guide-text {
+            color: #888;
+            font-size: 13px;
+            margin: 0;
+        }
+
+        /* 결과 팝업 메시지 */
+        #status-message {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%) scale(0.5);
+            background: var(--white);
+            color: var(--text-dark);
+            padding: 15px 40px;
+            border-radius: 50px;
+            font-weight: bold;
+            font-size: 24px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.3);
+            pointer-events: none;
+            opacity: 0;
+            transition: all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+            z-index: 20;
+        }
+
+        #status-message.show {
+            opacity: 1;
+            transform: translate(-50%, -50%) scale(1);
+        }
+
+        /* 흔들기 애니메이션 */
+        @keyframes shake {
+            0%, 100% { transform: translateY(0); }
+            50% { transform: translateY(-30px); }
+        }
+
+        .animating {
+            animation: shake 0.3s ease-in-out infinite;
+        }
+
+        .win-border { border-color: #fff; background: rgba(255, 255, 255, 0.4); transform: scale(1.1); }
+    </style>
+</head>
+<body>
+
+    <!-- 좌측 상단 닫기 버튼 -->
+    <a href="index.html" class="close-btn" title="나가기">✕</a>
+
+    <header>
+        <h1 id="title">아빠에게 5연승 하면<br>상금을 받아요</h1>
+        <div class="score-box">현재 연승: <span id="streak">0</span></div>
+    </header>
+
+    <div class="battle-view">
+        <!-- 컴퓨터 (좌측) -->
+        <div class="hand-container">
+            <span class="label-tag">아빠</span>
+            <div id="computer-hand" class="hand-circle">✋</div>
+        </div>
+
+        <div class="vs-divider">VS</div>
+
+        <!-- 플레이어 (우측) -->
+        <div class="hand-container">
+            <span class="label-tag">나</span>
+            <div id="player-hand" class="hand-circle">?</div>
+        </div>
+
+        <!-- 중앙 결과 메시지 -->
+        <div id="status-message">승리!</div>
+    </div>
+
+    <div class="controls-card">
+        <div class="buttons-group">
+            <button class="btn-choice" onclick="play('✌️')">✌️</button>
+            <button class="btn-choice" onclick="play('✊')">✊</button>
+            <button class="btn-choice" onclick="play('✋')">✋</button>
+        </div>
+        <p class="guide-text">클릭해서 가위바위보 내기</p>
+    </div>
+
+    <!-- 사운드 효과 -->
+    <audio id="clickSound" src="https://cdn.pixabay.com/audio/2022/03/15/audio_c8a1e4c4b3.mp3"></audio>
+    <audio id="winSound" src="https://cdn.pixabay.com/audio/2022/03/15/audio_3b5b3d9f9c.mp3"></audio>
+    <audio id="loseSound" src="https://cdn.pixabay.com/audio/2022/03/15/audio_2d6f4b9c88.mp3"></audio>
+
+    <script>
+        let streak = 0;
+        const computerHandEl = document.getElementById('computer-hand');
+        const playerHandEl = document.getElementById('player-hand');
+        const streakEl = document.getElementById('streak');
+        const statusMsg = document.getElementById('status-message');
+        
+        const clickSound = document.getElementById('clickSound');
+        const winSound = document.getElementById('winSound');
+        const loseSound = document.getElementById('loseSound');
+
+        function play(playerChoice) {
+            // 효과음
+            clickSound.currentTime = 0;
+            clickSound.play();
+
+            // 이전 상태 초기화
+            computerHandEl.classList.remove('win-border');
+            playerHandEl.classList.remove('win-border');
+            statusMsg.classList.remove('show');
+
+            // 양쪽 모두 흔들기 애니메이션 시작
+            computerHandEl.classList.add('animating');
+            playerHandEl.classList.add('animating');
+            
+            // 흔드는 동안은 주먹으로 표시
+            computerHandEl.innerText = '✊';
+            playerHandEl.innerText = '✊';
+            
+            const choices = ['✌️', '✊', '✋'];
+
+            setTimeout(() => {
+                // 애니메이션 중지
+                computerHandEl.classList.remove('animating');
+                playerHandEl.classList.remove('animating');
+
+                // 결과 결정
+                const computerChoice = choices[Math.floor(Math.random() * 3)];
+                
+                // 결과 반영
+                computerHandEl.innerText = computerChoice;
+                playerHandEl.innerText = playerChoice;
+
+                checkResult(playerChoice, computerChoice);
+            }, 800); // 0.8초 동안 흔들기
+        }
+
+        function checkResult(p, c) {
+            let result = "";
+            let statusType = "";
+            
+            if (p === c) {
+                result = "무승부";
+                statusType = "draw";
+            } else if (
+                (p === '✌️' && c === '✋') ||
+                (p === '✊' && c === '✌️') ||
+                (p === '✋' && c === '✊')
+            ) {
+                result = "승리!";
+                statusType = "win";
+                streak++;
+                playerHandEl.classList.add('win-border');
+                winSound.play();
+            } else {
+                result = "패배";
+                statusType = "lose";
+                streak = 0; 
+                computerHandEl.classList.add('win-border');
+                loseSound.play();
+            }
+
+            streakEl.innerText = streak;
+            showStatus(result);
+
+            if (streak >= 5) {
+                setTimeout(() => {
+                    alert("축하합니다! 아빠를 이기고 5연승을 달성했습니다!");
+                    streak = 0;
+                    streakEl.innerText = streak;
+                }, 1000);
+            }
+        }
+
+        function showStatus(text) {
+            statusMsg.innerText = text;
+            statusMsg.classList.add('show');
+            setTimeout(() => {
+                // 메시지 자동 숨김
+            }, 1200);
+        }
+    </script>
+</body>
+</html>
