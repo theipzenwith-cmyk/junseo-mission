@@ -31,9 +31,21 @@
       "active": true
     },
     {
-      "title": "아빠를 이겨라",
-      "desc": "가위바위보",
+      "title": "👀",
+      "desc": "퍼즐 이모지 맞히기",
+      "url": "puzzle.html",
+      "active": true
+    },
+    {
+      "title": "✋",
+      "desc": "아빠를 이겨라",
       "url": "rps.html",
+      "active": true
+    },
+    {
+      "title": "🧐",
+      "desc": "겜겜겜",
+      "url": "soundmatch.html",
       "active": true
     }
   ]
