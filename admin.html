@@ -7,8 +7,7 @@
 
 <style>
 body{
-font-family:-apple-system,BlinkMacSystemFont,"Segoe UI";
-margin:0;
+font-family:-apple-system;
 background:#111;
 color:white;
 padding:30px;
@@ -69,104 +68,92 @@ padding:10px;
 
 <script>
 
-/* 🔥 저장된 데이터 불러오기 */
-let games = JSON.parse(localStorage.getItem("games")) || [
-{
-title:"👁 시력 테스트",
-desc:"숫자를 보고 눈을 테스트해요",
-url:"vision.html",
-active:true
-},
-{
-title:"🎨 색깔 미션",
-desc:"색깔을 맞춰보는 게임",
-url:"color.html",
-active:true
-}
-]
+let games = []
 
-function save(){
-localStorage.setItem("games", JSON.stringify(games))
+/* 🔥 핵심: JSON 불러오기 */
+async function load(){
+  const res = await fetch("missions.json")
+  const data = await res.json()
+  games = data.games || []
+  render()
 }
 
+/* 렌더 */
 function render(){
+  const list=document.getElementById("list")
+  list.innerHTML=""
 
-const list=document.getElementById("list")
-list.innerHTML=""
+  games.forEach((g,i)=>{
 
-games.forEach((g,i)=>{
+    const div=document.createElement("div")
+    div.className="game"
 
-const div=document.createElement("div")
-div.className="game"
+    div.innerHTML=`
+    <input value="${g.title}" onchange="updateTitle(${i},this.value)">
+    <input value="${g.desc}" onchange="updateDesc(${i},this.value)">
+    <input value="${g.url}" onchange="updateUrl(${i},this.value)">
+    <label>ON <input type="checkbox" ${g.active?"checked":""} onchange="toggle(${i})"></label>
+    <button onclick="removeGame(${i})">삭제</button>
+    `
 
-div.innerHTML=`
-<input value="${g.title}" onchange="updateTitle(${i},this.value)">
-<input value="${g.desc}" onchange="updateDesc(${i},this.value)">
-<input value="${g.url}" onchange="updateUrl(${i},this.value)">
-<label>
-ON
-<input type="checkbox" ${g.active?"checked":""} onchange="toggle(${i})">
-</label>
-<button onclick="removeGame(${i})">삭제</button>
-`
+    list.appendChild(div)
+  })
 
-list.appendChild(div)
-
-})
-
-generateJSON()
+  generateJSON()
 }
 
-function updateTitle(i,v){ games[i].title=v; save(); generateJSON(); }
-function updateDesc(i,v){ games[i].desc=v; save(); generateJSON(); }
-function updateUrl(i,v){ games[i].url=v; save(); generateJSON(); }
+/* 수정 */
+function updateTitle(i,v){ games[i].title=v; generateJSON(); }
+function updateDesc(i,v){ games[i].desc=v; generateJSON(); }
+function updateUrl(i,v){ games[i].url=v; generateJSON(); }
 
 function toggle(i){
-games[i].active=!games[i].active
-save()
-generateJSON()
+  games[i].active=!games[i].active
+  generateJSON()
 }
 
 function removeGame(i){
-games.splice(i,1)
-save()
-render()
+  games.splice(i,1)
+  render()
 }
 
+/* 추가 */
 function addGame(){
+  const title=document.getElementById("title").value
+  const desc=document.getElementById("desc").value
+  const url=document.getElementById("url").value
 
-const title=document.getElementById("title").value
-const desc=document.getElementById("desc").value
-const url=document.getElementById("url").value
+  if(!title || !url){
+    alert("제목 / 파일명 입력")
+    return
+  }
 
-if(!title || !url) return alert("제목/url 입력")
+  games.push({
+    title,
+    desc,
+    url,
+    active:true
+  })
 
-games.push({
-title,desc,url,active:true
-})
-
-save()
-
-document.getElementById("title").value=""
-document.getElementById("desc").value=""
-document.getElementById("url").value=""
-
-render()
+  render()
 }
 
+/* JSON 출력 */
 function generateJSON(){
-document.getElementById("output").value =
-JSON.stringify({games:games},null,2)
+  document.getElementById("output").value =
+  JSON.stringify({games:games},null,2)
 }
 
+/* 복사 */
 function copyJSON(){
-const t=document.getElementById("output")
-t.select()
-document.execCommand("copy")
-alert("복사됨 → missions.json에 붙여넣기")
+  const t=document.getElementById("output")
+  t.select()
+  document.execCommand("copy")
+  alert("복사 완료 → missions.json 붙여넣기")
 }
 
-render()
+/* 실행 */
+load()
 
 </script>
 
