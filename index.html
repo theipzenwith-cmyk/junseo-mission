@@ -1,200 +1,161 @@
 <!DOCTYPE html>
 <html lang="ko">
 <head>
-
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
 <title>준서 놀이터</title>
 
-<!-- 공유 이미지 (카톡 / SNS) -->
 <meta property="og:title" content="준서 놀이터">
 <meta property="og:description" content="아이들을 위한 재미있는 게임 놀이터">
-<meta property="og:image" content="og.png">
 <meta property="og:type" content="website">
-
-<meta name="twitter:card" content="summary_large_image">
-<meta name="twitter:image" content="og.png">
 
 <style>
 
 body{
 margin:0;
-background:black;
+background:#000;
 font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto;
 color:white;
+-webkit-tap-highlight-color:transparent;
 }
 
-/* 상단 */
-
 .header{
-padding:60px 30px 20px 30px;
-max-width:900px;
+padding:60px 24px 20px;
+max-width:800px;
 margin:auto;
 }
 
-/* 타이틀 */
-
 .title{
-
-font-size:52px;
+font-size:48px;
 font-weight:900;
-letter-spacing:2px;
+letter-spacing:-1px;
 
-background:linear-gradient(
-90deg,
-#ff6ec4,
-#7873f5,
-#42e695,
-#ff6ec4
-);
-
+background:linear-gradient(90deg,#ff6ec4,#7873f5,#42e695,#ff6ec4);
 background-size:300% 300%;
 
 -webkit-background-clip:text;
 -webkit-text-fill-color:transparent;
 
 animation:gradientMove 6s ease infinite;
-
 }
 
-/* 그라데이션 애니메이션 */
-
 @keyframes gradientMove{
-
 0%{background-position:0% 50%;}
 50%{background-position:100% 50%;}
 100%{background-position:0% 50%;}
-
 }
-
-/* 서브타이틀 */
 
 .subtitle{
 color:#888;
-margin-top:10px;
-font-size:22px;
+margin-top:12px;
+font-size:20px;
 }
-
-/* 리스트 */
 
 .list{
-max-width:900px;
+max-width:800px;
 margin:auto;
-padding:20px 30px 80px 30px;
+padding:20px 24px 100px;
 }
 
-/* 카드 */
-
 .game{
-
 display:flex;
 align-items:center;
-
-gap:26px;
-
-padding:34px 0;
-
+gap:20px;
+padding:24px 0;
 border-bottom:1px solid #222;
-
 text-decoration:none;
 color:white;
-
 transition:0.2s;
+}
 
+.game:hover{
+transform:translateX(6px);
 }
 
 .game:active{
-transform:scale(0.97);
+transform:scale(0.98);
+opacity:0.7;
 }
 
-/* 썸네일 */
-
 .thumb{
-
-width:100px;
-height:100px;
-
-border-radius:24px;
-
+width:80px;
+height:80px;
+min-width:80px;
+border-radius:20px;
 display:flex;
 align-items:center;
 justify-content:center;
-
-font-size:46px;
-
-color:white;
+font-size:40px;
 
 box-shadow:
-0 12px 30px rgba(0,0,0,0.6),
-inset 0 4px 8px rgba(255,255,255,0.25),
-inset 0 -8px 14px rgba(0,0,0,0.25);
-
+0 8px 20px rgba(0,0,0,0.5),
+inset 0 2px 4px rgba(255,255,255,0.2);
 }
-
-/* 텍스트 */
 
 .text{
 flex:1;
 }
 
-/* 제목 */
-
 .game-title{
-font-size:30px;
+font-size:24px;
 font-weight:800;
+display:flex;
+align-items:center;
+gap:8px;
+margin-bottom:4px;
 }
 
-/* 설명 */
+.badge{
+background:#ff3b30;
+font-size:11px;
+padding:2px 6px;
+border-radius:6px;
+font-weight:900;
+}
 
 .game-desc{
-font-size:20px;
+font-size:16px;
 color:#aaa;
-margin-top:6px;
+}
+
+.loading{
+text-align:center;
+padding:50px;
+color:#666;
 }
 
 </style>
-
 </head>
 
 <body>
 
 <div class="header">
-
 <div class="title">준서 놀이터</div>
-
-<div class="subtitle">
-오늘은 이 게임
+<div class="subtitle">오늘은 무슨 게임을 할까? 🎮</div>
 </div>
 
+<div class="list" id="gameList">
+<div class="loading">불러오는 중...</div>
 </div>
-
-<div class="list" id="gameList"></div>
 
 <script>
 
-/* 카드 컬러 */
-
 const colors=[
-
-"#3b82f6",
-"#9333ea",
-"#ef4444",
-"#f97316",
-"#22c55e",
-"#eab308",
-"#06b6d4",
-"#6366f1"
-
+"#3b82f6","#9333ea","#ef4444","#f97316",
+"#22c55e","#eab308","#06b6d4","#6366f1"
 ]
 
-fetch("missions.json")
-.then(res=>res.json())
-.then(data=>{
-
+async function loadGames(){
 const list=document.getElementById("gameList")
 
-data.games.forEach(game=>{
+try{
+const res=await fetch("missions.json")
+const data=await res.json()
+
+list.innerHTML=""
+
+data.games.forEach((game,i)=>{
 
 if(!game.active) return
 
@@ -203,30 +164,38 @@ a.href=game.url
 a.className="game"
 
 /* 썸네일 */
-
 const thumb=document.createElement("div")
 thumb.className="thumb"
+thumb.style.background=colors[i%colors.length]
 
-const color=colors[Math.floor(Math.random()*colors.length)]
-
-thumb.style.background=color
-
-const emoji=game.title.split(" ")[0]
+/* 이모지 추출 */
+let emoji="🎮"
+const first=game.title.trim().split(" ")[0]
+if(first.length<=3) emoji=first
 
 thumb.innerText=emoji
 
 /* 텍스트 */
-
 const text=document.createElement("div")
 text.className="text"
 
 const title=document.createElement("div")
 title.className="game-title"
-title.innerText=game.title.replace(emoji,"").trim()
+
+const cleanTitle=game.title.replace(emoji,"").trim() || game.desc
+title.innerText=cleanTitle
+
+/* NEW */
+if(game.tag==="new"){
+const badge=document.createElement("span")
+badge.className="badge"
+badge.innerText="NEW"
+title.appendChild(badge)
+}
 
 const desc=document.createElement("div")
 desc.className="game-desc"
-desc.innerText=game.desc || ""
+desc.innerText=game.desc||""
 
 text.appendChild(title)
 text.appendChild(desc)
@@ -238,7 +207,12 @@ list.appendChild(a)
 
 })
 
-})
+}catch(e){
+list.innerHTML="<div class='loading'>불러오기 실패</div>"
+}
+}
+
+loadGames()
 
 </script>
 
