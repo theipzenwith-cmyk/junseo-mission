@@ -20,13 +20,13 @@ body {
     display: flex;
     flex-direction: column;
     align-items: center;
-    justify-content: space-between;
+    justify-content: flex-start; /* 변경 */
     min-height: 100vh;
     font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto;
     background: linear-gradient(to bottom, var(--bg-top), var(--bg-bottom));
     color: var(--white);
     text-align: center;
-    overflow: hidden;
+    overflow: auto; /* 핵심 수정 */
 }
 
 /* 닫기 버튼 */
@@ -47,7 +47,7 @@ body {
 
 /* 타이틀 */
 header {
-    margin-top: 70px;
+    margin-top: 80px;
 }
 
 h1 {
@@ -68,8 +68,8 @@ h1 {
     display: flex;
     align-items: flex-start;
     justify-content: center;
-    gap: 50px;
-    margin-top: -30px;
+    gap: 40px;
+    margin-top: 20px; /* 안정적으로 위로 */
 }
 
 /* 이름 */
@@ -81,14 +81,14 @@ h1 {
 
 /* 손 */
 .hand-circle {
-    width: 140px;
-    height: 140px;
+    width: 130px;
+    height: 130px;
     border-radius: 50%;
     background: rgba(255,255,255,0.2);
     display:flex;
     align-items:center;
     justify-content:center;
-    font-size: 80px;
+    font-size: 70px;
     transition: 0.3s;
 }
 
@@ -99,22 +99,23 @@ h1 {
     max-width: 380px;
     border-radius: 30px;
     padding: 20px;
-    margin-bottom: 20px;
-    margin-top: -20px;
+    margin-top: 40px; /* 위로 붙임 */
+    margin-bottom: 30px;
+    box-shadow: 0 10px 25px rgba(0,0,0,0.15);
 }
 
 .buttons-group {
     display: flex;
     justify-content: center;
-    gap: 15px;
+    gap: 12px;
 }
 
 .btn-choice {
-    width: 90px;
-    height: 90px;
+    width: 80px;
+    height: 80px;
     border-radius: 50%;
     border: none;
-    font-size: 40px;
+    font-size: 36px;
     background: var(--bg-top);
     color:white;
     cursor:pointer;
@@ -127,14 +128,14 @@ h1 {
 /* 결과 */
 #status-message {
     position:absolute;
-    top:50%;
+    top:45%;
     left:50%;
     transform:translate(-50%, -50%) scale(0);
     background:white;
     color:#333;
-    padding:18px 40px;
+    padding:16px 36px;
     border-radius:50px;
-    font-size:26px;
+    font-size:24px;
     font-weight:bold;
     transition:0.3s;
 }
@@ -146,7 +147,7 @@ h1 {
 /* 애니메이션 */
 @keyframes shake {
     0% { transform:translateY(0); }
-    50% { transform:translateY(-25px); }
+    50% { transform:translateY(-20px); }
     100% { transform:translateY(0); }
 }
 
