@@ -1,24 +1,17 @@
 <!DOCTYPE html>
 <html lang="ko">
 <head>
-
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-
 <title>준서 놀이터 관리자</title>
 
 <style>
-
 body{
 font-family:-apple-system,BlinkMacSystemFont,"Segoe UI";
 margin:0;
 background:#111;
 color:white;
 padding:30px;
-}
-
-h1{
-margin-bottom:20px;
 }
 
 input{
@@ -41,7 +34,6 @@ font-weight:700;
 .game{
 margin-bottom:10px;
 display:flex;
-align-items:center;
 gap:6px;
 flex-wrap:wrap;
 }
@@ -53,9 +45,7 @@ margin-top:20px;
 border-radius:10px;
 padding:10px;
 }
-
 </style>
-
 </head>
 
 <body>
@@ -64,68 +54,40 @@ padding:10px;
 
 <h3>게임 추가</h3>
 
-<input id="title" placeholder="게임 제목 (예 🎈 숫자 풍선)">
-<input id="desc" placeholder="게임 설명">
-<input id="url" placeholder="파일명 (예 number.html)">
+<input id="title" placeholder="게임 제목">
+<input id="desc" placeholder="설명">
+<input id="url" placeholder="파일명 (rps.html)">
 <button onclick="addGame()">추가</button>
 
 <hr>
 
-<h3>게임 목록</h3>
-
 <div id="list"></div>
 
-<button onclick="moveUp()">⬆ 순서 위로</button>
-<button onclick="moveDown()">⬇ 순서 아래로</button>
-
 <h3>missions.json</h3>
-
 <textarea id="output"></textarea>
-
 <button onclick="copyJSON()">JSON 복사</button>
 
 <script>
 
-let games=[
-
+/* 🔥 저장된 데이터 불러오기 */
+let games = JSON.parse(localStorage.getItem("games")) || [
 {
 title:"👁 시력 테스트",
 desc:"숫자를 보고 눈을 테스트해요",
 url:"vision.html",
 active:true
 },
-
 {
 title:"🎨 색깔 미션",
 desc:"색깔을 맞춰보는 게임",
 url:"color.html",
 active:true
-},
-
-{
-title:"🎈 숫자 풍선 찾기",
-desc:"숨은 숫자를 찾아보세요",
-url:"number.html",
-active:true
-},
-
-{
-title:"💥 이모지 터치 게임",
-desc:"이모지를 빠르게 터치해요",
-url:"emoji.html",
-active:true
-},
-
-{
-title:"✏️ 선따라 그리기",
-desc:"점선을 따라 그림을 완성해요",
-url:"trace.html",
-active:true
 }
-
 ]
 
-let selected=-1
+function save(){
+localStorage.setItem("games", JSON.stringify(games))
+}
 
 function render(){
 
@@ -138,19 +100,14 @@ const div=document.createElement("div")
 div.className="game"
 
 div.innerHTML=`
-
 <input value="${g.title}" onchange="updateTitle(${i},this.value)">
 <input value="${g.desc}" onchange="updateDesc(${i},this.value)">
 <input value="${g.url}" onchange="updateUrl(${i},this.value)">
-
 <label>
 ON
 <input type="checkbox" ${g.active?"checked":""} onchange="toggle(${i})">
 </label>
-
-<button onclick="select(${i})">선택</button>
 <button onclick="removeGame(${i})">삭제</button>
-
 `
 
 list.appendChild(div)
@@ -158,67 +115,22 @@ list.appendChild(div)
 })
 
 generateJSON()
-
 }
 
-function updateTitle(i,v){
-games[i].title=v
-generateJSON()
-}
-
-function updateDesc(i,v){
-games[i].desc=v
-generateJSON()
-}
-
-function updateUrl(i,v){
-games[i].url=v
-generateJSON()
-}
+function updateTitle(i,v){ games[i].title=v; save(); generateJSON(); }
+function updateDesc(i,v){ games[i].desc=v; save(); generateJSON(); }
+function updateUrl(i,v){ games[i].url=v; save(); generateJSON(); }
 
 function toggle(i){
 games[i].active=!games[i].active
+save()
 generateJSON()
 }
 
-function select(i){
-selected=i
-}
-
-function moveUp(){
-
-if(selected<=0) return
-
-let temp=games[selected]
-games[selected]=games[selected-1]
-games[selected-1]=temp
-
-selected--
-
-render()
-
-}
-
-function moveDown(){
-
-if(selected<0 || selected>=games.length-1) return
-
-let temp=games[selected]
-games[selected]=games[selected+1]
-games[selected+1]=temp
-
-selected++
-
-render()
-
-}
-
 function removeGame(i){
-
 games.splice(i,1)
-
+save()
 render()
-
 }
 
 function addGame(){
@@ -227,44 +139,31 @@ const title=document.getElementById("title").value
 const desc=document.getElementById("desc").value
 const url=document.getElementById("url").value
 
-if(!title || !url) return alert("제목과 url 입력")
+if(!title || !url) return alert("제목/url 입력")
 
 games.push({
-title:title,
-desc:desc,
-url:url,
-active:true
+title,desc,url,active:true
 })
+
+save()
 
 document.getElementById("title").value=""
 document.getElementById("desc").value=""
 document.getElementById("url").value=""
 
 render()
-
 }
 
 function generateJSON(){
-
-const json={
-games:games
-}
-
-document.getElementById("output").value=
-JSON.stringify(json,null,2)
-
+document.getElementById("output").value =
+JSON.stringify({games:games},null,2)
 }
 
 function copyJSON(){
-
-const textarea=document.getElementById("output")
-
-textarea.select()
-
+const t=document.getElementById("output")
+t.select()
 document.execCommand("copy")
-
-alert("missions.json 복사됨")
-
+alert("복사됨 → missions.json에 붙여넣기")
 }
 
 render()
