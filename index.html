@@ -1,10 +1,8 @@
 <!DOCTYPE html>
 <html lang="ko">
 <head>
-
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-
 <title>준서 놀이터</title>
 
 <style>
@@ -138,30 +136,58 @@ font-size:18px;
 
 .memo-text{
 font-size:16px;
-line-height:1.4;
 }
 
 .memo-actions{
 margin-top:8px;
 font-size:14px;
 color:#ccc;
-display:flex;
-gap:10px;
 }
 
-/* 좋아요 */
 .like{
 cursor:pointer;
 }
 
-.loading{
-text-align:center;
-padding:60px;
-color:#666;
+/* 💥 귀여운 모달 */
+.modal{
+position:fixed;
+top:0;
+left:0;
+width:100%;
+height:100%;
+background:rgba(0,0,0,0.6);
+display:flex;
+align-items:center;
+justify-content:center;
+z-index:999;
 }
 
-</style>
+.modal-box{
+background:#1a1a1a;
+padding:20px;
+border-radius:16px;
+text-align:center;
+width:260px;
+}
 
+.modal-buttons{
+margin-top:15px;
+display:flex;
+gap:10px;
+}
+
+.modal-buttons button{
+flex:1;
+padding:10px;
+border:none;
+border-radius:10px;
+cursor:pointer;
+}
+
+.cancel{background:#333;}
+.ok{background:#ef4444;}
+
+</style>
 </head>
 
 <body>
@@ -171,12 +197,9 @@ color:#666;
 <div class="subtitle">오늘은 이 게임 🎮</div>
 </div>
 
-<div class="list" id="gameList">
-<div class="loading">불러오는 중...</div>
-</div>
+<div class="list" id="gameList"></div>
 
 <div class="memo-wrap">
-
 <h2>📝 준서에게 한마디</h2>
 
 <div class="memo-input">
@@ -185,78 +208,52 @@ color:#666;
 </div>
 
 <div id="memoList"></div>
-
 </div>
+
+<div id="modalRoot"></div>
 
 <script>
 
 /* 게임 */
-const colors=[
-"#3b82f6","#9333ea","#ef4444","#f97316",
-"#22c55e","#eab308","#06b6d4","#6366f1"
-]
-
 async function loadGames(){
   try{
-    const res = await fetch("missions.json")
-    const data = await res.json()
+    const res=await fetch("missions.json")
+    const data=await res.json()
 
     const list=document.getElementById("gameList")
     list.innerHTML=""
 
-    const games=data.games || []
+    data.games.forEach((g)=>{
+      if(!g.active) return
 
-    games.forEach((game,i)=>{
-
-      if(!game.active) return
-
-      const a=document.createElement("a")
-      a.href=game.url
-      a.className="game"
-
-      const thumb=document.createElement("div")
-      thumb.className="thumb"
-      thumb.style.background=colors[i%colors.length]
-
-      let emoji="🎮"
-      const first=game.title?.split(" ")[0]
-      if(first && first.length<=3) emoji=first
-
-      thumb.innerText=emoji
-
-      const text=document.createElement("div")
-      text.className="text"
-
-      text.innerHTML=`
-        <div class="game-title">${game.title.replace(emoji,"")}</div>
-        <div class="game-desc">${game.desc || ""}</div>
+      const div=document.createElement("div")
+      div.className="game"
+      div.innerHTML=`
+        <div class="thumb">${g.title[0]}</div>
+        <div class="text">
+          <div class="game-title">${g.title}</div>
+          <div class="game-desc">${g.desc}</div>
+        </div>
       `
-
-      a.appendChild(thumb)
-      a.appendChild(text)
-
-      list.appendChild(a)
+      list.appendChild(div)
     })
 
   }catch{
-    document.getElementById("gameList").innerHTML =
-    "<div class='loading'>불러오기 실패</div>"
+    document.getElementById("gameList").innerHTML="불러오기 실패"
   }
 }
 
 /* 프로필 */
 function getProfile(){
-  try{
-    let p = JSON.parse(localStorage.getItem("profile"))
-    if(p) return p
-  }catch{}
+  let p=JSON.parse(localStorage.getItem("profile")||"null")
+  if(p) return p
 
-  const emojis=["🐶","🐱","🐼","🦊","🐰","🐸","🐻","🐯"]
-  const names=["행복한","용감한","귀여운","똑똑한","빠른","웃는"]
+  const emojis=["🐶","🐱","🐼","🦊"]
+  const names=["행복한","귀여운","용감한"]
 
-  const p={
-    emoji: emojis[Math.floor(Math.random()*emojis.length)],
-    name: names[Math.floor(Math.random()*names.length)]+" 친구"
+  p={
+    emoji:emojis[Math.floor(Math.random()*emojis.length)],
+    name:names[Math.floor(Math.random()*names.length)]+" 친구"
   }
 
   localStorage.setItem("profile",JSON.stringify(p))
@@ -265,27 +262,22 @@ function getProfile(){
 
 /* 메모 */
 function loadMemo(){
-  try{
-    const memos = JSON.parse(localStorage.getItem("memos") || "[]")
-    renderMemo(memos)
-  }catch{
-    renderMemo([])
-  }
+  const memos=JSON.parse(localStorage.getItem("memos")||"[]")
+  renderMemo(memos)
 }
 
 function addMemo(){
   const input=document.getElementById("memoInput")
-  const text=input.value.trim()
-  if(!text) return
+  if(!input.value.trim()) return
 
-  let memos = JSON.parse(localStorage.getItem("memos") || "[]")
-  const profile = getProfile()
+  const memos=JSON.parse(localStorage.getItem("memos")||"[]")
+  const p=getProfile()
 
   memos.unshift({
-    text,
+    text:input.value,
     time:new Date().toLocaleString(),
-    emoji:profile.emoji,
-    name:profile.name,
+    emoji:p.emoji,
+    name:p.name,
     likes:0
   })
 
@@ -296,23 +288,49 @@ function addMemo(){
 
 /* 좋아요 */
 function likeMemo(i){
-  let memos = JSON.parse(localStorage.getItem("memos") || "[]")
-  memos[i].likes = (memos[i].likes || 0) + 1
+  const memos=JSON.parse(localStorage.getItem("memos")||"[]")
+  memos[i].likes++
   localStorage.setItem("memos",JSON.stringify(memos))
   renderMemo(memos)
 }
 
-/* 롱탭 삭제 */
-function longPressDelete(el,i){
+/* 💥 모달 */
+function showDeleteConfirm(i){
+
+  const modal=document.createElement("div")
+  modal.className="modal"
+
+  modal.innerHTML=`
+    <div class="modal-box">
+      🐶 정말 지울까?
+      <div class="modal-buttons">
+        <button class="cancel">취소</button>
+        <button class="ok">삭제</button>
+      </div>
+    </div>
+  `
+
+  modal.querySelector(".cancel").onclick=()=>modal.remove()
+
+  modal.querySelector(".ok").onclick=()=>{
+    let memos=JSON.parse(localStorage.getItem("memos")||"[]")
+    memos.splice(i,1)
+    localStorage.setItem("memos",JSON.stringify(memos))
+    modal.remove()
+    renderMemo(memos)
+  }
+
+  document.getElementById("modalRoot").appendChild(modal)
+}
+
+/* 롱탭 */
+function longPress(el,i){
   let timer
 
   el.addEventListener("touchstart",()=>{
     timer=setTimeout(()=>{
-      let memos = JSON.parse(localStorage.getItem("memos") || "[]")
-      memos.splice(i,1)
-      localStorage.setItem("memos",JSON.stringify(memos))
-      renderMemo(memos)
-    },800)
+      showDeleteConfirm(i)
+    },700)
   })
 
   el.addEventListener("touchend",()=>{
@@ -322,12 +340,10 @@ function longPressDelete(el,i){
 
 /* 렌더 */
 function renderMemo(memos){
-
   const list=document.getElementById("memoList")
   list.innerHTML=""
 
   memos.forEach((m,i)=>{
-
     const div=document.createElement("div")
     div.className="memo"
 
@@ -336,15 +352,13 @@ function renderMemo(memos){
         <span>${m.emoji}</span>
         ${m.name} · ${m.time}
       </div>
-
       <div class="memo-text">${m.text}</div>
-
       <div class="memo-actions">
-        <div class="like" onclick="likeMemo(${i})">👍 ${m.likes || 0}</div>
+        <span class="like" onclick="likeMemo(${i})">👍 ${m.likes}</span>
       </div>
     `
 
-    longPressDelete(div,i)
+    longPress(div,i)
 
     list.appendChild(div)
   })
