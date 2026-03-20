@@ -1,50 +1,58 @@
 {
   "games": [
     {
-      "title": "🎈 숫자 풍선 찾기",
+      "title": "숫자 풍선 찾기",
+      "emoji": "🎈",
       "desc": "숨은 숫자를 찾아보세요",
       "url": "number.html",
       "active": true
     },
     {
-      "title": "🧐 같은 이모지 찾기",
+      "title": "같은 이모지 찾기",
+      "emoji": "🧐",
       "desc": "이모지를 찾아라!",
       "url": "soundmatch.html",
       "active": true
     },
     {
-      "title": "👀 이모지 퍼즐",
+      "title": "이모지 퍼즐",
+      "emoji": "👀",
       "desc": "퍼즐 이모지 맞히기",
       "url": "puzzle.html",
       "active": true
     },
     {
-      "title": "🔥 아빠를 이겨라",
+      "title": "아빠를 이겨라",
+      "emoji": "🔥",
       "desc": "가위바위보 5연승 도전",
       "url": "rps.html",
       "active": true,
       "tag": "new"
     },
     {
-      "title": "🎨 색깔 미션",
+      "title": "색깔 미션",
+      "emoji": "🎨",
       "desc": "색깔을 맞춰보는 게임",
       "url": "color.html",
       "active": true
     },
     {
-      "title": "💥 이모지 터치 게임",
+      "title": "이모지 터치 게임",
+      "emoji": "💥",
       "desc": "이모지를 빠르게 터치해요",
       "url": "emoji.html",
       "active": true
     },
     {
-      "title": "👁 시력 테스트",
+      "title": "시력 테스트",
+      "emoji": "👁",
       "desc": "숫자를 보고 눈을 테스트해요",
       "url": "vision.html",
       "active": true
     },
     {
-      "title": "✏️ 선따라 그리기",
+      "title": "선따라 그리기",
+      "emoji": "✏️",
       "desc": "점선을 따라 그림을 완성해요",
       "url": "trace.html",
       "active": true
