@@ -20,6 +20,7 @@ padding:8px;
 border-radius:6px;
 border:none;
 margin-right:6px;
+margin-bottom:6px;
 }
 
 button{
@@ -62,6 +63,7 @@ padding:0 6px;
 
 <h3>게임 추가</h3>
 
+<input id="emoji" placeholder="이모지 🎯">
 <input id="title" placeholder="게임 제목">
 <input id="desc" placeholder="설명">
 <input id="url" placeholder="파일명 (rps.html)">
@@ -84,7 +86,7 @@ padding:0 6px;
 
 let games = []
 
-/* 🔥 최초 로드 */
+/* 최초 로드 */
 async function load(){
 
   const saved = localStorage.getItem("games")
@@ -113,10 +115,14 @@ function render(){
 
     div.innerHTML=`
     <span class="drag">☰</span>
+
+    <input value="${g.emoji || "🎮"}" onchange="updateEmoji(${i},this.value)">
     <input value="${g.title}" onchange="updateTitle(${i},this.value)">
     <input value="${g.desc}" onchange="updateDesc(${i},this.value)">
     <input value="${g.url}" onchange="updateUrl(${i},this.value)">
+
     <label>ON <input type="checkbox" ${g.active?"checked":""} onchange="toggle(${i})"></label>
+
     <button onclick="removeGame(${i})">삭제</button>
     `
 
@@ -138,6 +144,7 @@ function render(){
 }
 
 /* 수정 */
+function updateEmoji(i,v){ games[i].emoji=v||"🎮"; saveLocalSilent(); generateJSON(); }
 function updateTitle(i,v){ games[i].title=v; saveLocalSilent(); generateJSON(); }
 function updateDesc(i,v){ games[i].desc=v; saveLocalSilent(); generateJSON(); }
 function updateUrl(i,v){ games[i].url=v; saveLocalSilent(); generateJSON(); }
@@ -156,6 +163,8 @@ function removeGame(i){
 
 /* 추가 */
 function addGame(){
+
+  const emoji=document.getElementById("emoji").value || "🎮"
   const title=document.getElementById("title").value
   const desc=document.getElementById("desc").value
   const url=document.getElementById("url").value
@@ -167,11 +176,13 @@ function addGame(){
 
   games.push({
     title,
+    emoji,
     desc,
     url,
     active:true
   })
 
+  document.getElementById("emoji").value=""
   document.getElementById("title").value=""
   document.getElementById("desc").value=""
   document.getElementById("url").value=""
@@ -180,13 +191,12 @@ function addGame(){
   render()
 }
 
-/* 🔥 브라우저 저장 */
+/* 저장 */
 function saveLocal(){
   localStorage.setItem("games", JSON.stringify(games))
   alert("저장 완료 (이 브라우저에서 유지됨)")
 }
 
-/* 자동 저장 (알림 없음) */
 function saveLocalSilent(){
   localStorage.setItem("games", JSON.stringify(games))
 }
@@ -210,7 +220,7 @@ function copyJSON(){
   const t=document.getElementById("output")
   t.select()
   document.execCommand("copy")
-  alert("복사 완료 → missions.json에 붙여넣기")
+  alert("복사 완료 → missions.json 붙여넣기")
 }
 
 load()
