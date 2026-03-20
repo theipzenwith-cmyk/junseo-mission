@@ -6,7 +6,6 @@
 <title>준서 놀이터</title>
 
 <style>
-
 body{
 margin:0;
 background:black;
@@ -14,7 +13,6 @@ font-family:-apple-system;
 color:white;
 }
 
-/* 헤더 */
 .header{
 padding:60px 24px 20px;
 max-width:900px;
@@ -35,7 +33,6 @@ margin-top:10px;
 font-size:18px;
 }
 
-/* 리스트 */
 .list{
 max-width:900px;
 margin:auto;
@@ -49,7 +46,6 @@ padding:28px 0;
 border-bottom:1px solid #222;
 text-decoration:none;
 color:white;
-
 align-items:center;
 transition:0.2s;
 }
@@ -86,7 +82,6 @@ color:#aaa;
 margin-top:4px;
 }
 
-/* 메모 */
 .memo-wrap{
 max-width:900px;
 margin:auto;
@@ -159,46 +154,6 @@ color:#ccc;
 .like{
 cursor:pointer;
 }
-
-/* 모달 */
-.modal{
-position:fixed;
-top:0;
-left:0;
-width:100%;
-height:100%;
-background:rgba(0,0,0,0.6);
-display:flex;
-align-items:center;
-justify-content:center;
-z-index:999;
-}
-
-.modal-box{
-background:#1a1a1a;
-padding:20px;
-border-radius:16px;
-text-align:center;
-width:260px;
-}
-
-.modal-buttons{
-margin-top:15px;
-display:flex;
-gap:10px;
-}
-
-.modal-buttons button{
-flex:1;
-padding:10px;
-border:none;
-border-radius:10px;
-cursor:pointer;
-}
-
-.cancel{background:#333;}
-.ok{background:#ef4444;}
-
 </style>
 </head>
 
@@ -222,51 +177,51 @@ cursor:pointer;
 <div id="memoList"></div>
 </div>
 
-<div id="modalRoot"></div>
+<!-- Firebase -->
+<script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-database-compat.js"></script>
 
 <script>
 
+/* 🔥 Firebase 설정 (여기만 바꿔) */
+const firebaseConfig = {
+  apiKey: "YOUR_KEY",
+  authDomain: "YOUR_PROJECT.firebaseapp.com",
+  databaseURL: "https://YOUR_PROJECT.firebaseio.com",
+  projectId: "YOUR_PROJECT"
+};
+
+firebase.initializeApp(firebaseConfig);
+const db = firebase.database();
+
 /* 게임 */
-const colors=[
-"#3b82f6","#9333ea","#ef4444","#f97316",
-"#22c55e","#eab308","#06b6d4","#6366f1"
-]
+const colors=["#3b82f6","#9333ea","#ef4444","#f97316","#22c55e","#eab308","#06b6d4","#6366f1"]
 
 async function loadGames(){
-  try{
-    const res=await fetch("missions.json")
-    const data=await res.json()
+  const res=await fetch("missions.json")
+  const data=await res.json()
+  const list=document.getElementById("gameList")
+  list.innerHTML=""
 
-    const list=document.getElementById("gameList")
-    list.innerHTML=""
+  data.games.forEach((g,i)=>{
+    if(!g.active) return
 
-    data.games.forEach((g,i)=>{
+    const emoji=g.emoji||"🎮"
 
-      if(!g.active) return
+    const a=document.createElement("a")
+    a.className="game"
+    a.href=g.url
 
-      const emoji = g.emoji || "🎮"
+    a.innerHTML=`
+      <div class="thumb" style="background:${colors[i%colors.length]}">${emoji}</div>
+      <div class="text">
+        <div class="game-title">${g.title}</div>
+        <div class="game-desc">${g.desc||""}</div>
+      </div>
+    `
 
-      const a=document.createElement("a")
-      a.className="game"
-      a.href = g.url
-
-      a.innerHTML=`
-        <div class="thumb" style="background:${colors[i%colors.length]}">
-          ${emoji}
-        </div>
-
-        <div class="text">
-          <div class="game-title">${g.title}</div>
-          <div class="game-desc">${g.desc || ""}</div>
-        </div>
-      `
-
-      list.appendChild(a)
-    })
-
-  }catch{
-    document.getElementById("gameList").innerHTML="불러오기 실패"
-  }
+    list.appendChild(a)
+  })
 }
 
 /* 프로필 */
@@ -286,20 +241,14 @@ function getProfile(){
   return p
 }
 
-/* 메모 */
-function loadMemo(){
-  const memos=JSON.parse(localStorage.getItem("memos")||"[]")
-  renderMemo(memos)
-}
-
+/* 댓글 추가 */
 function addMemo(){
   const input=document.getElementById("memoInput")
   if(!input.value.trim()) return
 
-  const memos=JSON.parse(localStorage.getItem("memos")||"[]")
   const p=getProfile()
 
-  memos.unshift({
+  db.ref("memos").push({
     text:input.value,
     time:new Date().toLocaleString(),
     emoji:p.emoji,
@@ -307,69 +256,17 @@ function addMemo(){
     likes:0
   })
 
-  localStorage.setItem("memos",JSON.stringify(memos))
   input.value=""
-  renderMemo(memos)
 }
 
-/* 좋아요 */
-function likeMemo(i){
-  const memos=JSON.parse(localStorage.getItem("memos")||"[]")
-  memos[i].likes++
-  localStorage.setItem("memos",JSON.stringify(memos))
-  renderMemo(memos)
-}
-
-/* 모달 */
-function showDeleteConfirm(i){
-
-  const modal=document.createElement("div")
-  modal.className="modal"
-
-  modal.innerHTML=`
-    <div class="modal-box">
-      🐶 정말 지울까?
-      <div class="modal-buttons">
-        <button class="cancel">취소</button>
-        <button class="ok">삭제</button>
-      </div>
-    </div>
-  `
-
-  modal.querySelector(".cancel").onclick=()=>modal.remove()
-
-  modal.querySelector(".ok").onclick=()=>{
-    let memos=JSON.parse(localStorage.getItem("memos")||"[]")
-    memos.splice(i,1)
-    localStorage.setItem("memos",JSON.stringify(memos))
-    modal.remove()
-    renderMemo(memos)
-  }
-
-  document.getElementById("modalRoot").appendChild(modal)
-}
-
-/* 롱탭 */
-function longPress(el,i){
-  let timer
-
-  el.addEventListener("touchstart",()=>{
-    timer=setTimeout(()=>{
-      showDeleteConfirm(i)
-    },700)
-  })
-
-  el.addEventListener("touchend",()=>{
-    clearTimeout(timer)
-  })
-}
-
-/* 렌더 */
-function renderMemo(memos){
+/* 실시간 렌더 */
+db.ref("memos").on("value",snapshot=>{
+  const data=snapshot.val()||{}
   const list=document.getElementById("memoList")
   list.innerHTML=""
 
-  memos.forEach((m,i)=>{
+  Object.entries(data).reverse().forEach(([key,m])=>{
+
     const div=document.createElement("div")
     div.className="memo"
 
@@ -380,17 +277,22 @@ function renderMemo(memos){
       </div>
       <div class="memo-text">${m.text}</div>
       <div class="memo-actions">
-        <span class="like" onclick="likeMemo(${i})">👍 ${m.likes}</span>
+        <span class="like" onclick="likeMemo('${key}',${m.likes||0})">👍 ${m.likes||0}</span>
       </div>
     `
 
-    longPress(div,i)
     list.appendChild(div)
+  })
+})
+
+/* 좋아요 */
+function likeMemo(key,likes){
+  db.ref("memos/"+key).update({
+    likes:likes+1
   })
 }
 
 loadGames()
-loadMemo()
 
 </script>
 
