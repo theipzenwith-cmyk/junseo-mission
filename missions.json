@@ -1,6 +1,14 @@
 {
   "games": [
     {
+      "title": "개구리 게임",
+      "emoji": "🐸",
+      "desc": "개구리를 점프시켜요",
+      "url": "frog.html",
+      "active": true,
+      "tag": "new"
+    },
+    {
       "title": "숫자 풍선 찾기",
       "emoji": "🎈",
       "desc": "숨은 숫자를 찾아보세요",
