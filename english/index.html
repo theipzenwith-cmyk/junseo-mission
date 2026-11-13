@@ -1,0 +1,489 @@
+<!DOCTYPE html><html lang="ko"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<style>[hidden]{display:none!important}img{max-width:100%}</style>
+<title>준서의 영어 놀이터</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Fredoka:wght@400;500;600;700&family=Jua&display=swap">
+<style>
+/* Layout: one-column tablet app — home grid of 4 week tiles, each week a tabbed play space with huge tap targets */
+:root{
+  --bg:#EEF4FA; --paper:#FFFFFF; --ink:#1F2A44; --soft:#5B6782; --line:#D5DEEA;
+  --w1:#E86A92; --w2:#5FA84A; --w3:#EE8A2B; --w4:#8B63C9;
+  --w1s:#FCE6EE; --w2s:#E5F3DF; --w3s:#FDEBD8; --w4s:#EEE6F8;
+  --good:#2E9E5B; --oops:#D9534F; --star:#F5B700;
+  --en:"Fredoka",ui-rounded,"Arial Rounded MT Bold",system-ui,sans-serif;
+  --ko:"Jua","Apple SD Gothic Neo","Malgun Gothic",system-ui,sans-serif;
+}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){
+  --bg:#141A26; --paper:#1E2636; --ink:#EEF2F8; --soft:#A7B2C8; --line:#323D52;
+  --w1s:#3A2230; --w2s:#223322; --w3s:#3A2A1A; --w4s:#2C2440; color-scheme:dark}}
+:root[data-theme="dark"]{
+  --bg:#141A26; --paper:#1E2636; --ink:#EEF2F8; --soft:#A7B2C8; --line:#323D52;
+  --w1s:#3A2230; --w2s:#223322; --w3s:#3A2A1A; --w4s:#2C2440; color-scheme:dark}
+*{box-sizing:border-box}
+body{background:var(--bg);color:var(--ink);font-family:var(--ko);margin:0;
+  padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px));padding-block:16px 40px;
+  -webkit-tap-highlight-color:transparent;user-select:none;-webkit-user-select:none}
+.wrap{max-width:980px;margin:0 auto;display:flex;flex-direction:column;gap:18px}
+.en{font-family:var(--en)}
+button{font:inherit;color:inherit;border:0;background:none;cursor:pointer;touch-action:manipulation}
+button:focus-visible{outline:3px solid var(--w4);outline-offset:3px}
+h1,h2,h3{margin:0;text-wrap:balance;font-weight:400}
+
+/* header */
+.top{display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap}
+.brand{display:flex;flex-direction:column;gap:2px}
+.brand small{color:var(--soft);font-size:15px}
+.brand h1{font-size:clamp(26px,4vw,38px)}
+.back{background:var(--paper);border:2px solid var(--line);border-radius:999px;padding:10px 18px;font-size:18px}
+.stick{display:flex;gap:6px;align-items:center;background:var(--paper);border-radius:999px;padding:8px 14px;border:2px solid var(--line);font-size:16px}
+.stick span{font-size:26px;opacity:.25;filter:grayscale(1)}
+.stick span.on{opacity:1;filter:none}
+
+/* home */
+.hello{background:var(--paper);border-radius:24px;padding:18px 22px;display:flex;gap:16px;align-items:center;border:2px solid var(--line)}
+.hello .big{font-size:56px}
+.hello p{margin:0;font-size:18px;line-height:1.5;color:var(--soft)}
+.hello b{color:var(--ink);font-weight:400}
+.weeks{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:16px}
+@media (max-width:620px){.weeks{grid-template-columns:1fr}}
+.wk{border-radius:28px;padding:20px;text-align:left;display:flex;flex-direction:column;gap:10px;min-height:190px;position:relative;border:3px solid transparent;transition:transform .15s}
+.wk:active{transform:scale(.97)}
+.wk .tag{font-family:var(--en);font-weight:600;color:#fff;border-radius:999px;padding:4px 14px;align-self:flex-start;font-size:16px;letter-spacing:.04em}
+.wk h2{font-family:var(--en);font-weight:600;font-size:clamp(24px,3.4vw,32px);line-height:1.1}
+.wk .ko{color:var(--soft);font-size:17px}
+.wk .pics{font-size:42px;letter-spacing:4px;margin-top:auto}
+.wk .done{position:absolute;top:14px;right:16px;font-size:34px}
+
+/* week view */
+.whead{border-radius:28px;padding:18px 22px;display:flex;align-items:center;gap:16px;flex-wrap:wrap}
+.whead .pics{font-size:44px}
+.whead h2{font-family:var(--en);font-weight:600;font-size:clamp(26px,4vw,36px)}
+.whead p{margin:2px 0 0;color:var(--soft);font-size:17px}
+.tabs{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:10px}
+.tab{background:var(--paper);border:3px solid var(--line);border-radius:20px;padding:12px 6px;display:flex;flex-direction:column;align-items:center;gap:2px;font-size:16px}
+.tab .i{font-size:34px}
+.tab[aria-selected="true"]{border-color:var(--c);background:var(--cs)}
+.panel{background:var(--paper);border-radius:28px;padding:20px;border:2px solid var(--line);display:flex;flex-direction:column;gap:16px}
+.hint{color:var(--soft);font-size:17px;margin:0;display:flex;align-items:center;gap:8px;flex-wrap:wrap}
+.sub{font-size:20px;color:var(--ink)}
+
+/* word cards */
+.cards{display:grid;grid-template-columns:repeat(auto-fill,minmax(150px,1fr));gap:12px}
+.card{background:var(--cs);border-radius:22px;padding:14px 8px 12px;display:flex;flex-direction:column;align-items:center;gap:4px;border:3px solid transparent;transition:transform .12s}
+.card:active,.card.say{transform:scale(.94);border-color:var(--c)}
+.card .p{font-size:64px;line-height:1.1}
+.card .w{font-family:var(--en);font-weight:600;font-size:24px}
+.card .k{font-size:15px;color:var(--soft)}
+.group{font-family:var(--en);font-weight:600;font-size:20px;color:var(--c)}
+
+/* sentences */
+.sents{display:flex;flex-direction:column;gap:10px}
+.sent{display:flex;align-items:center;gap:12px;background:var(--cs);border-radius:20px;padding:12px 14px;text-align:left}
+.sent .p{font-size:40px;flex:none}
+.sent .t{display:flex;flex-direction:column;min-width:0;flex:1}
+.sent .t b{font-family:var(--en);font-weight:600;font-size:clamp(20px,3vw,26px)}
+.sent .t span{color:var(--soft);font-size:15px}
+.sent .sp{flex:none;display:flex;gap:6px}
+.chip{background:var(--paper);border:2px solid var(--line);border-radius:14px;padding:8px 10px;font-size:22px;line-height:1}
+.chip small{display:block;font-size:11px;color:var(--soft);margin-top:2px;font-family:var(--ko)}
+.talk{border:3px dashed var(--c);border-radius:22px;padding:14px;display:flex;flex-direction:column;gap:10px}
+.talk .row{display:flex;gap:10px;align-items:center}
+.talk .who{font-size:30px;flex:none}
+.talk .bub{background:var(--cs);border-radius:16px;padding:10px 14px;font-family:var(--en);font-size:21px;font-weight:500}
+
+/* games */
+.stage{display:flex;flex-direction:column;align-items:center;gap:14px;text-align:center}
+.bigpic{font-size:110px;line-height:1}
+.prompt{font-family:var(--en);font-weight:600;font-size:clamp(24px,3.6vw,32px)}
+.opts{display:flex;gap:12px;flex-wrap:wrap;justify-content:center}
+.opt{background:var(--cs);border:4px solid transparent;border-radius:24px;padding:14px 18px;min-width:130px;display:flex;flex-direction:column;align-items:center;gap:4px;font-size:18px}
+.opt .p{font-size:70px;line-height:1.1}
+.opt .w{font-family:var(--en);font-weight:600;font-size:20px}
+.opt.right{border-color:var(--good);animation:pop .4s}
+.opt.wrong{border-color:var(--oops);animation:shake .35s}
+.btn{background:var(--c);color:#fff;border-radius:999px;padding:14px 26px;font-size:20px;font-family:var(--en);font-weight:600;display:inline-flex;gap:8px;align-items:center}
+.btn.ghost{background:var(--paper);color:var(--ink);border:3px solid var(--c)}
+.btn .ko{font-family:var(--ko);font-weight:400;font-size:16px;opacity:.9}
+.feedback{min-height:40px;font-family:var(--en);font-size:26px;font-weight:600}
+.feedback.good{color:var(--good)} .feedback.oops{color:var(--oops)}
+.stars{font-size:34px;letter-spacing:4px;min-height:40px}
+.mode{display:flex;gap:10px;flex-wrap:wrap;justify-content:center}
+.mode .btn{padding:10px 18px;font-size:17px}
+
+/* face (week 1) */
+.face{width:min(240px,60vw);height:auto}
+.feelbar{display:flex;gap:10px;flex-wrap:wrap;justify-content:center}
+.feelbar button{font-size:54px;background:var(--cs);border-radius:20px;padding:6px 12px;border:3px solid transparent}
+.feelbar button[aria-pressed="true"]{border-color:var(--c)}
+
+/* plate (week 2) */
+.plate{width:min(300px,76vw);aspect-ratio:1;max-width:100%;border-radius:50%;background:var(--paper);border:12px solid var(--cs);box-shadow:inset 0 0 0 3px var(--line);display:flex;flex-wrap:wrap;align-content:center;justify-content:center;gap:4px;padding:30px;font-size:46px}
+.pick{display:flex;flex-wrap:wrap;gap:8px;justify-content:center}
+.pick button{font-size:44px;background:var(--cs);border-radius:16px;padding:4px 10px}
+.baskets{display:grid;grid-template-columns:1fr 1fr;gap:12px;width:100%;max-width:560px}
+.basket{border-radius:24px;padding:16px 8px;display:flex;flex-direction:column;align-items:center;gap:2px;border:4px solid}
+.basket .p{font-size:52px}
+.basket b{font-family:var(--en);font-weight:600;font-size:21px}
+.basket span{font-size:15px;color:var(--soft)}
+.b-day{background:var(--w2s);border-color:var(--w2)}
+.b-some{background:var(--w3s);border-color:var(--w3)}
+
+/* tree (week 4) */
+.tree{position:relative;width:min(340px,82vw);max-width:100%;aspect-ratio:1}
+.tree svg{width:100%;height:100%}
+.leaf{position:absolute;font-size:38px;transform:translate(-50%,-50%);animation:pop .4s}
+.cookies{display:flex;gap:18px;flex-wrap:wrap;justify-content:center;width:100%}
+.pile{background:var(--cs);border-radius:22px;padding:12px;min-width:150px;min-height:120px;display:flex;flex-direction:column;align-items:center;gap:6px;flex:1;max-width:260px}
+.pile .who{font-size:44px}
+.pile .c{font-size:34px;min-height:40px;word-break:break-all}
+
+.guide{background:var(--paper);border:2px dashed var(--line);border-radius:22px;padding:4px 18px}
+.guide summary{cursor:pointer;font-size:18px;padding:12px 0;color:var(--soft)}
+.guide ul{margin:0 0 14px;padding-left:20px;line-height:1.7;font-size:16px}
+.guide b{font-family:var(--en);font-weight:600}
+.notts{background:var(--w3s);border-radius:14px;padding:10px 14px;font-size:15px}
+
+.miso{display:flex;align-items:center;gap:10px;min-width:0}
+.bun{width:76px;flex:none}
+.bun svg{width:100%;height:auto;display:block}
+.bun.hop{animation:hop .5s}
+.bubble{background:var(--paper);border:3px solid var(--line);border-radius:20px;padding:10px 16px;font-size:clamp(18px,2.6vw,24px);font-weight:600;position:relative;min-width:0;overflow-wrap:anywhere}
+.bubble::before{content:"";position:absolute;left:-11px;top:50%;width:16px;height:16px;background:inherit;border-left:3px solid var(--line);border-bottom:3px solid var(--line);transform:translateY(-50%) rotate(45deg)}
+.hello .miso{flex:1}
+.whead .miso{margin-left:auto}
+@media (max-width:620px){.whead .miso{margin-left:0;width:100%}}
+.confetti{position:fixed;inset:0;pointer-events:none;z-index:50}
+@keyframes hop{0%,100%{transform:translateY(0)}40%{transform:translateY(-14px) rotate(-6deg)}70%{transform:translateY(0) rotate(4deg)}}
+@keyframes pop{0%{transform:scale(.7)}60%{transform:scale(1.12)}100%{transform:scale(1)}}
+@keyframes shake{0%,100%{transform:translateX(0)}25%{transform:translateX(-8px)}75%{transform:translateX(8px)}}
+.leaf{animation-name:leafpop}
+@keyframes leafpop{0%{transform:translate(-50%,-50%) scale(.3)}100%{transform:translate(-50%,-50%) scale(1)}}
+@media (prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important}}
+</style>
+
+<div class="wrap" id="app"></div>
+
+<script>
+const WEEKS=[
+ {id:1,c:'--w1',cs:'--w1s',title:'My Body & Feelings',ko:'내 몸과 감정',pics:'🙋‍♂️😊💪',
+  groups:[
+   {name:'My Body',items:[['eyes','눈','👀'],['nose','코','👃'],['mouth','입','👄'],['ears','귀','👂'],['hands','손','🖐️'],['feet','발','🦶'],['head','머리','🙆‍♂️'],['tummy','배','🫃']]},
+   {name:'Feelings',items:[['happy','기뻐요','😊'],['sad','슬퍼요','😢'],['angry','화나요','😠'],['sleepy','졸려요','😴'],['scared','무서워요','😨'],['surprised','깜짝 놀라요','😲']]}],
+  sents:[['👃','This is my nose.','이건 내 코야.'],['🖐️','These are my hands.','이건 내 손이야.'],['😊',"I'm happy!",'나는 기뻐!'],['😢',"I'm sad.",'나는 슬퍼.'],['😴',"I'm sleepy.",'나는 졸려.'],['🤔','How do you feel?','기분이 어때?'],['😊','I feel happy.','나는 기분이 좋아.']],
+  talk:[['👩','How do you feel today?'],['🧒',"I'm happy!"],['👩','Touch your nose!'],['🧒','This is my nose!']],
+  guide:['아침에 일어나면 <b>How do you feel?</b> 하고 물어봐 주세요. 표정 카드 중 하나를 고르게만 해도 충분해요.','씻을 때 <b>Wash your hands! Wash your face!</b>처럼 몸 단어를 생활 속에서 써 주세요.','"Simon says" 놀이에서 엄마가 일부러 귀를 만지며 "nose!" 하면 준서가 고쳐 주게 해 보세요.']},
+ {id:2,c:'--w2',cs:'--w2s',title:'Food & Healthy Habits',ko:'음식과 건강한 습관',pics:'🍎🥦🥛',
+  groups:[
+   {name:'Fruits',items:[['apple','사과','🍎','apples'],['banana','바나나','🍌','bananas'],['strawberry','딸기','🍓','strawberries'],['grapes','포도','🍇','grapes'],['orange','오렌지','🍊','oranges'],['watermelon','수박','🍉','watermelon']]},
+   {name:'Vegetables',items:[['carrot','당근','🥕','carrots'],['broccoli','브로콜리','🥦','broccoli'],['tomato','토마토','🍅','tomatoes'],['corn','옥수수','🌽','corn'],['cucumber','오이','🥒','cucumbers']]},
+   {name:'Other Food',items:[['milk','우유','🥛','milk'],['egg','달걀','🥚','eggs'],['bread','빵','🍞','bread'],['rice','밥','🍚','rice'],['fish','생선','🐟','fish'],['candy','사탕','🍬','candy'],['pizza','피자','🍕','pizza'],['ice cream','아이스크림','🍦','ice cream'],['french fries','감자튀김','🍟','french fries']]}],
+  sents:[['🍎','I like apples.','나는 사과를 좋아해.'],['🥕',"I don't like carrots.",'나는 당근을 안 좋아해.'],['🥦','This is healthy.','이건 건강에 좋아.'],['🍬','Candy is a sometimes food.','사탕은 가끔 먹는 음식이야.'],['🥛','I want some milk.','우유 먹고 싶어.'],['😋',"It's yummy!",'맛있어!'],['🍽️',"Let's eat together.",'같이 먹자.']],
+  talk:[['👩','Do you like bananas?'],['🧒','Yes, I do!'],['👩','Do you like broccoli?'],['🧒',"No, I don't!"],['👩','What do you want?'],['🧒','I want an apple, please.']],
+  guide:['간식 시간에 <b>Do you like ___?</b> → <b>Yes, I do / No, I don\'t</b>를 매일 한 번씩 해 보세요.','사탕·피자는 "나쁜 음식"이 아니라 <b>sometimes food</b>(가끔 먹는 음식)로 알려 주세요.','식판 놀이 후 실제 저녁 식판으로 <b>This is my healthy plate!</b> 발표하게 해 보세요.']},
+ {id:3,c:'--w3',cs:'--w3s',title:'My Town & Community Helpers',ko:'우리 동네와 직업',pics:'🧑‍⚕️🧑‍🚒🏫',
+  groups:[
+   {name:'Helpers',items:[['doctor','의사','🧑‍⚕️'],['teacher','선생님','🧑‍🏫'],['firefighter','소방관','🧑‍🚒'],['police officer','경찰관','👮'],['chef','요리사','🧑‍🍳'],['farmer','농부','🧑‍🌾'],['bus driver','버스 기사','🚌'],['baker','제빵사','🥐']]},
+   {name:'Places',items:[['hospital','병원','🏥'],['school','학교','🏫'],['fire station','소방서','🚒'],['police station','경찰서','🚓'],['restaurant','식당','🍽️'],['farm','농장','🚜'],['bakery','빵집','🧁'],['park','공원','🌳']]}],
+  sents:[['🧑‍⚕️','He is a doctor.','그는 의사야.'],['🧑‍🏫','She is a teacher.','그녀는 선생님이야.'],['🧑‍🚒','I want to be a firefighter.','나는 소방관이 되고 싶어.'],['🏥','The doctor works at the hospital.','의사는 병원에서 일해.'],['🤒','I feel sick.','나 아파요.'],['🚒','Help! Fire!','도와주세요! 불이야!']],
+  talk:[['👩','Who is he?'],['🧒','He is a firefighter!'],['👩','What do you want to be?'],['🧒','I want to be a doctor!']],
+  guide:['동네 산책할 때 건물을 가리키며 <b>What is this? — It\'s a school!</b> 해 보세요.','"Who works here?" 놀이에서 틀려도 괜찮아요. 정답을 영어로 다시 들려주는 게 핵심이에요.','병원놀이 장난감이 있다면 <b>I feel sick. — Let me see.</b>로 역할극을 해 보세요.']},
+ {id:4,c:'--w4',cs:'--w4s',title:'Thanksgiving & Sharing',ko:'감사와 나눔',pics:'🦃🍂💜',
+  groups:[
+   {name:'Thanksgiving',items:[['turkey','칠면조','🦃'],['pumpkin','호박','🎃'],['leaf','나뭇잎','🍂'],['pie','파이','🥧'],['corn','옥수수','🌽'],['tree','나무','🌳']]},
+   {name:'I am thankful for…',items:[['my family','우리 가족','👨‍👩‍👦'],['my mom','엄마','👩'],['my dad','아빠','👨'],['my friends','친구들','🧒'],['my teacher','선생님','🧑‍🏫'],['my toys','장난감','🧸'],['food','음식','🍚'],['my home','우리 집','🏠']]}],
+  sents:[['🙏','Thank you.','고마워요.'],['👨‍👩‍👦','I am thankful for my family.','나는 우리 가족에게 감사해요.'],['🍪',"Let's share.",'같이 나눠 먹자.'],['🍪','One for you, one for me.','하나는 너, 하나는 나.'],['😊',"You're welcome.",'천만에요.'],['🦃','Happy Thanksgiving!','즐거운 추수감사절!']],
+  talk:[['👩','Here you are.'],['🧒','Thank you!'],['👩',"You're welcome."],['🧒',"Let's share, Mom!"]],
+  guide:['잠들기 전 <b>I am thankful for ___</b> 하나씩 말하기를 습관으로 만들어 보세요.','과자를 나눌 때 <b>One for you, one for me</b>를 꼭 함께 말해 주세요.','감사 나무에 고른 것을 종이 나뭇잎에 그려서 실제 벽에 붙이면 수업 활동과 연결돼요.']}
+];
+
+// ---------- speech ----------
+let voice=null, ttsOK='speechSynthesis' in window;
+function pickVoice(){ if(!ttsOK) return; const v=speechSynthesis.getVoices();
+  voice=v.find(x=>/en-US/i.test(x.lang)&&/Samantha|Google US|Aria|Jenny/i.test(x.name))||v.find(x=>/en-US/i.test(x.lang))||v.find(x=>/^en/i.test(x.lang))||null;}
+if(ttsOK){pickVoice(); speechSynthesis.onvoiceschanged=pickVoice;}
+// Recorded voice: files at audio/<slug>.mp3 (Typecast). Lines without a file fall back to the device voice.
+const AUDIO_READY=new Set(/*AUDIO*/["angry", "apple", "awesome", "baker", "bakery", "banana", "bread", "broccoli", "bus-driver", "candy", "candy-is-a-sometimes-food", "carrot", "chef", "choose-some-food", "corn", "cucumber", "do-you-like-bananas", "do-you-like-broccoli", "doctor", "ears", "egg", "eyes", "farm", "farmer", "feet", "fire-station", "firefighter", "fish", "food", "food-healthy-habits", "french-fries", "french-fries-are-a-sometimes-food", "good-job", "grapes", "great-job", "great-sorting-junseo", "hands", "happy", "happy-thanksgiving", "he-is-a-doctor", "he-is-a-firefighter", "head", "help-fire", "here-you-are", "hi-junseo-im-miso-lets-play", "hmm-try-again", "hospital", "how-do-you-feel", "how-do-you-feel-today", "i-am-thankful-for-food", "i-am-thankful-for-my-dad", "i-am-thankful-for-my-family", "i-am-thankful-for-my-friends", "i-am-thankful-for-my-home", "i-am-thankful-for-my-mom", "i-am-thankful-for-my-teacher", "i-am-thankful-for-my-toys", "i-dont-like-carrots", "i-feel-happy", "i-feel-sick", "i-have-apples", "i-have-bananas", "i-have-bread", "i-have-broccoli", "i-have-candy", "i-have-carrots", "i-have-corn", "i-have-cucumbers", "i-have-eggs", "i-have-fish", "i-have-french-fries", "i-have-grapes", "i-have-ice-cream", "i-have-milk", "i-have-oranges", "i-have-pizza", "i-have-rice", "i-have-strawberries", "i-have-tomatoes", "i-have-watermelon", "i-like-apples", "i-want-an-apple-please", "i-want-some-milk", "i-want-to-be-a-baker", "i-want-to-be-a-bus-driver", "i-want-to-be-a-chef", "i-want-to-be-a-doctor", "i-want-to-be-a-farmer", "i-want-to-be-a-firefighter", "i-want-to-be-a-police-officer", "i-want-to-be-a-teacher", "ice-cream", "ice-cream-is-a-sometimes-food", "im-angry", "im-happy", "im-sad", "im-scared", "im-sleepy", "im-surprised", "its-healthy", "its-yummy", "leaf", "lets-eat-together", "lets-share", "lets-share-mom", "milk", "mouth", "my-body-feelings", "my-dad", "my-family", "my-friends", "my-home", "my-mom", "my-plate-is-full", "my-teacher", "my-town-community-helpers", "my-toys", "no-i-dont", "nose", "one-for-me", "one-for-you", "one-for-you-one-for-me", "orange", "park", "pie", "pizza", "pizza-is-a-sometimes-food", "police-officer", "police-station", "pumpkin", "restaurant", "rice", "sad", "scared", "school", "she-is-a-teacher", "sleepy", "some-are-sometimes-food", "strawberry", "surprised", "teacher", "thank-you", "thanksgiving-sharing", "the-baker-works-at-the-bakery", "the-chef-works-at-the-restaurant", "the-doctor-works-at-the-hospital", "the-farmer-works-at-the-farm", "the-firefighter-works-at-the-fire-station", "the-police-officer-works-at-the-police-station", "the-teacher-works-at-the-school", "these-are-my-hands", "this-is-healthy", "this-is-my-healthy-plate", "this-is-my-nose", "tomato", "touch-your-ears", "touch-your-eyes", "touch-your-feet", "touch-your-hands", "touch-your-head", "touch-your-mouth", "touch-your-nose", "touch-your-tummy", "tree", "try-again", "tummy", "turkey", "watermelon", "we-have-three-each-yay-lets-eat-together", "what-do-you-want", "what-do-you-want-to-be", "where-are-my-friends", "where-are-my-toys", "where-are-the-french-fries", "where-are-the-grapes", "where-are-your-ears", "where-are-your-eyes", "where-are-your-feet", "where-are-your-hands", "where-is-my-dad", "where-is-my-family", "where-is-my-home", "where-is-my-mom", "where-is-my-teacher", "where-is-the-apple", "where-is-the-baker", "where-is-the-bakery", "where-is-the-banana", "where-is-the-bread", "where-is-the-broccoli", "where-is-the-bus-driver", "where-is-the-candy", "where-is-the-carrot", "where-is-the-chef", "where-is-the-corn", "where-is-the-cucumber", "where-is-the-doctor", "where-is-the-egg", "where-is-the-farm", "where-is-the-farmer", "where-is-the-fire-station", "where-is-the-firefighter", "where-is-the-fish", "where-is-the-food", "where-is-the-hospital", "where-is-the-ice-cream", "where-is-the-leaf", "where-is-the-milk", "where-is-the-orange", "where-is-the-park", "where-is-the-pie", "where-is-the-pizza", "where-is-the-police-officer", "where-is-the-police-station", "where-is-the-pumpkin", "where-is-the-restaurant", "where-is-the-rice", "where-is-the-school", "where-is-the-strawberry", "where-is-the-teacher", "where-is-the-tomato", "where-is-the-tree", "where-is-the-turkey", "where-is-the-watermelon", "where-is-your-head", "where-is-your-mouth", "where-is-your-nose", "where-is-your-tummy", "who-is-angry", "who-is-happy", "who-is-he", "who-is-sad", "who-is-scared", "who-is-sleepy", "who-is-surprised", "who-works-at-the-bakery", "who-works-at-the-farm", "who-works-at-the-fire-station", "who-works-at-the-hospital", "who-works-at-the-police-station", "who-works-at-the-restaurant", "who-works-at-the-school", "wow-you-know-my-town", "yes-i-do", "yes-this-is-healthy", "you-did-it-junseo-here-is-your-sticker", "you-got-it", "youre-welcome"]/*END*/);
+const slug=t=>t.toLowerCase().replace(/[’']/g,'').replace(/[^a-z0-9]+/g,'-').replace(/^-|-$/g,'');
+let player=null, queueId=0;
+function speakTTS(t,slow){return new Promise(res=>{ if(!ttsOK) return res(); try{const u=new SpeechSynthesisUtterance(t);
+  u.lang='en-US'; if(voice) u.voice=voice; u.rate=slow?0.6:0.85; u.pitch=1.1; u.onend=u.onerror=()=>res(); speechSynthesis.speak(u); setTimeout(res,6000);}catch(e){res()} })}
+function playFile(t,slow){return new Promise(res=>{ try{ player=new Audio('audio/'+slug(t)+'.mp3'); player.playbackRate=slow?0.75:1; player.preservesPitch=true;
+  player.onended=player.onerror=()=>res(); player.play().catch(()=>speakTTS(t,slow).then(res)); }catch(e){res()} })}
+async function say(lines,slow){ const id=++queueId; lines=[].concat(lines);
+  try{ if(player){player.pause();player=null} if(ttsOK) speechSynthesis.cancel(); }catch(e){}
+  for(const t of lines){ if(id!==queueId) return; mascotSay(t); await (AUDIO_READY.has(slug(t))?playFile(t,slow):speakTTS(t,slow)); } }
+
+// ---------- mascot "Miso" ----------
+const MISO=`<svg viewBox="0 0 120 120" aria-hidden="true"><ellipse cx="38" cy="22" rx="12" ry="24" fill="#FFF" stroke="#E7A3BA" stroke-width="4"/><ellipse cx="82" cy="22" rx="12" ry="24" fill="#FFF" stroke="#E7A3BA" stroke-width="4"/><ellipse cx="38" cy="24" rx="5" ry="15" fill="#F7B9CC"/><ellipse cx="82" cy="24" rx="5" ry="15" fill="#F7B9CC"/><circle cx="60" cy="70" r="44" fill="#FFF" stroke="#E7A3BA" stroke-width="4"/><circle cx="44" cy="66" r="6" fill="#2B2B3A"/><circle cx="76" cy="66" r="6" fill="#2B2B3A"/><circle cx="46" cy="64" r="2" fill="#FFF"/><circle cx="78" cy="64" r="2" fill="#FFF"/><circle cx="34" cy="80" r="7" fill="#F7B9CC" opacity=".8"/><circle cx="86" cy="80" r="7" fill="#F7B9CC" opacity=".8"/><path d="M50 82 Q60 92 70 82" stroke="#C0486E" stroke-width="4" fill="none" stroke-linecap="round"/></svg>`;
+function mascotSay(t){ const m=document.querySelector('.miso'); if(!m) return; m.querySelector('.bubble').textContent=t; const b=m.querySelector('.bun'); b.classList.remove('hop'); void b.offsetWidth; b.classList.add('hop'); }
+const misoHTML=t=>`<div class="miso"><div class="bun">${MISO}</div><div class="bubble en">${t}</div></div>`;
+
+// ---------- fun: sound effects + confetti ----------
+let actx=null;
+function sfx(kind){ try{ actx=actx||new (window.AudioContext||window.webkitAudioContext)(); const now=actx.currentTime;
+  const notes=kind==='good'?[660,880,1320]:kind==='win'?[523,659,784,1046,1318]:[300,220];
+  notes.forEach((f,i)=>{const o=actx.createOscillator(),g=actx.createGain();o.type=kind==='oops'?'triangle':'sine';o.frequency.value=f;
+    const s=now+i*(kind==='win'?0.12:0.09);g.gain.setValueAtTime(0.0001,s);g.gain.exponentialRampToValueAtTime(0.18,s+0.02);g.gain.exponentialRampToValueAtTime(0.0001,s+0.25);
+    o.connect(g).connect(actx.destination);o.start(s);o.stop(s+0.3)}); }catch(e){} }
+function confetti(n=60){ if(matchMedia('(prefers-reduced-motion: reduce)').matches) return;
+  const c=document.createElement('canvas');c.className='confetti';document.body.append(c);const x=c.getContext('2d');
+  const W=c.width=innerWidth,H=c.height=innerHeight;const cols=['#E86A92','#5FA84A','#EE8A2B','#8B63C9','#F5B700','#4AA3DF'];
+  const ps=Array.from({length:n},()=>({x:W/2+(Math.random()-.5)*W*.3,y:H*.45,vx:(Math.random()-.5)*12,vy:-Math.random()*14-4,r:Math.random()*6+4,c:cols[Math.floor(Math.random()*6)],a:Math.random()*6}));
+  let f=0;(function loop(){x.clearRect(0,0,W,H);ps.forEach(p=>{p.vy+=.45;p.x+=p.vx;p.y+=p.vy;p.a+=.2;x.save();x.translate(p.x,p.y);x.rotate(p.a);x.fillStyle=p.c;x.fillRect(-p.r/2,-p.r/2,p.r,p.r*1.6);x.restore()});
+    if(++f<90)requestAnimationFrame(loop);else c.remove()})(); }
+const PRAISE=['Great job!','Good job!','Awesome!','You got it!'];
+const praise=()=>PRAISE[Math.floor(Math.random()*PRAISE.length)];
+
+// ---------- stickers ----------
+const STK=['🌟','🍎','🚒','🦃'];
+function getDone(){try{return JSON.parse(localStorage.getItem('junseo-done')||'[]')}catch(e){return[]}}
+function setDone(id){try{const d=getDone(); if(!d.includes(id)){d.push(id); localStorage.setItem('junseo-done',JSON.stringify(d));}}catch(e){}}
+
+const app=document.getElementById('app');
+const $=(h)=>{const t=document.createElement('template');t.innerHTML=h.trim();return t.content.firstElementChild};
+const shuffle=a=>{a=[...a];for(let i=a.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[a[i],a[j]]=[a[j],a[i]]}return a};
+const allItems=w=>w.groups.flatMap(g=>g.items);
+const art=w=>/^(my|food)/.test(w)?w:((/^[aeiou]/.test(w)?'an ':'a ')+w);
+
+function stickerBar(){const d=getDone();return `<div class="stick" aria-label="받은 스티커">${STK.map((s,i)=>`<span class="${d.includes(i+1)?'on':''}">${s}</span>`).join('')}</div>`}
+
+function home(){
+  const d=getDone();
+  app.innerHTML=`
+  <div class="top"><a class="back" href="../index.html" style="text-decoration:none">← 준서 미션</a><div class="brand"><small>미소학원 11월 토요 원어민 수업 예습</small><h1>준서의 영어 놀이터</h1></div>${stickerBar()}</div>
+  <div class="hello">${misoHTML("Hi, Junseo! I'm Miso. Let's play!")}</div>
+  <p class="hint">토끼 미소를 누르면 인사해요. 그림을 누르면 영어로 말해 줘요. 퀴즈를 다 풀면 그 주의 스티커를 받아요.</p>
+  ${ttsOK?'':'<div class="notts">이 화면에서는 소리가 나오지 않아요. 사파리나 크롬에서 열면 영어 소리가 나와요.</div>'}
+  <div class="weeks">${WEEKS.map(w=>`
+    <button class="wk" style="background:var(${w.cs});border-color:var(${w.c})" data-w="${w.id}">
+      <span class="tag" style="background:var(${w.c})">WEEK ${w.id}</span>
+      <h2>${w.title}</h2><span class="ko">${w.ko}</span>
+      <span class="pics">${w.pics}</span>
+      ${d.includes(w.id)?`<span class="done">${STK[w.id-1]}</span>`:''}
+    </button>`).join('')}</div>`;
+  app.querySelectorAll('.wk').forEach(b=>b.onclick=()=>{say(WEEKS[b.dataset.w-1].title);location.hash='week'+b.dataset.w});
+  app.querySelector('.bun').onclick=()=>say("Hi, Junseo! I'm Miso. Let's play!");
+}
+
+const TABS=[['words','🔤','단어'],['say','💬','말하기'],['play','🎲','놀이'],['quiz','⭐','퀴즈']];
+let curTab='words';
+function week(id,tab){
+  const w=WEEKS[id-1]; curTab=tab||'words';
+  app.style.setProperty('--c',`var(${w.c})`); app.style.setProperty('--cs',`var(${w.cs})`);
+  app.innerHTML=`
+  <div class="top"><button class="back" id="back">← 처음으로</button>${stickerBar()}</div>
+  <div class="whead" style="background:var(${w.cs})"><span class="pics">${w.pics}</span>
+    <div><h2>${w.title}</h2><p>WEEK ${w.id} · ${w.ko}</p></div>${misoHTML(w.title)}</div>
+  <div class="tabs" role="tablist">${TABS.map(t=>`<button class="tab" role="tab" data-t="${t[0]}" aria-selected="${t[0]===curTab}"><span class="i">${t[1]}</span>${t[2]}</button>`).join('')}</div>
+  <div class="panel" id="panel"></div>
+  <details class="guide"><summary>엄마·아빠 가이드 (WEEK ${w.id})</summary><ul>${w.guide.map(g=>`<li>${g}</li>`).join('')}</ul></details>`;
+  document.getElementById('back').onclick=()=>{location.hash=''};
+  app.querySelector('.bun').onclick=()=>say(w.title);
+  app.querySelectorAll('.tab').forEach(b=>b.onclick=()=>{app.querySelectorAll('.tab').forEach(x=>x.setAttribute('aria-selected',x===b));renderTab(w,b.dataset.t)});
+  renderTab(w,curTab);
+}
+function renderTab(w,t){curTab=t;const p=document.getElementById('panel');p.innerHTML='';
+  ({words:tabWords,say:tabSay,play:[null,playFeel,playFood,playTown,playThanks][w.id],quiz:tabQuiz})[t](w,p);}
+
+function tabWords(w,p){
+  p.append($(`<p class="hint">👆 그림을 눌러 소리를 들어 보세요. 따라 말해 봐요!</p>`));
+  w.groups.forEach(g=>{
+    p.append($(`<h3 class="group">${g.name}</h3>`));
+    const c=$(`<div class="cards"></div>`);
+    g.items.forEach(([en,ko,e])=>{const b=$(`<button class="card"><span class="p">${e}</span><span class="w">${en}</span><span class="k">${ko}</span></button>`);
+      b.onclick=()=>{say(en);b.classList.add('say');setTimeout(()=>b.classList.remove('say'),300)};c.append(b)});
+    p.append(c);
+  });
+}
+function tabSay(w,p){
+  p.append($(`<p class="hint">🔊 보통 속도, 🐢 천천히. 듣고 따라 말해요.</p>`));
+  const s=$(`<div class="sents"></div>`);
+  w.sents.forEach(([e,en,ko])=>{const r=$(`<div class="sent"><span class="p">${e}</span><span class="t"><b>${en}</b><span>${ko}</span></span>
+    <span class="sp"><button class="chip" aria-label="듣기">🔊</button><button class="chip" aria-label="천천히 듣기">🐢</button></span></div>`);
+    const [a,b]=r.querySelectorAll('button'); a.onclick=()=>say(en); b.onclick=()=>say(en,true); s.append(r)});
+  p.append(s);
+  const t=$(`<div class="talk"><p class="hint sub">엄마랑 대화 놀이 (말풍선을 눌러요)</p></div>`);
+  w.talk.forEach(([who,line])=>{const r=$(`<button class="row"><span class="who">${who}</span><span class="bub">${line}</span></button>`);r.onclick=()=>say(line);t.append(r)});
+  p.append(t);
+}
+
+// ---------- quiz (listen & tap) ----------
+const FEEL=['happy','sad','angry','sleepy','scared','surprised'], BODY=['eyes','nose','mouth','ears','hands','feet','head','tummy'], PLURAL=['eyes','ears','hands','feet','grapes','french fries','my friends','my toys'];
+const whereQ=n=>{ if(FEEL.includes(n)) return `Who is ${n}?`; const be=PLURAL.includes(n)?'are':'is';
+  if(BODY.includes(n)) return `Where ${be} your ${n}?`; if(/^my /.test(n)) return `Where ${be} ${n}?`; return `Where ${be} the ${n}?`; };
+function tabQuiz(w,p){
+  const pool=allItems(w); let q=0, score=0; const N=5, qs=shuffle(pool).slice(0,N);
+  p.innerHTML=`<div class="stage"><p class="hint sub">듣고 맞는 그림을 눌러요!</p>
+    <div class="stars" id="stars"></div><div class="prompt" id="pr"></div>
+    <button class="btn ghost" id="again">🔊 다시 듣기</button><div class="opts" id="opts"></div><div class="feedback" id="fb"></div></div>`;
+  const pr=p.querySelector('#pr'),opts=p.querySelector('#opts'),fb=p.querySelector('#fb'),st=p.querySelector('#stars');
+  p.querySelector('#again').onclick=()=>say(pr.textContent);
+  function ask(){
+    if(q>=N) return finish();
+    const ans=qs[q]; const set=shuffle([ans,...shuffle(pool.filter(x=>x!==ans)).slice(0,2)]);
+    pr.textContent=whereQ(ans[0]); fb.textContent=''; fb.className='feedback';
+    st.textContent='⭐'.repeat(score)+'☆'.repeat(N-q);
+    opts.innerHTML=''; let locked=false, tries=0;
+    set.forEach(it=>{const b=$(`<button class="opt"><span class="p">${it[2]}</span></button>`);
+      b.onclick=()=>{ if(locked) return;
+        if(it===ans){locked=true;b.classList.add('right');b.append($(`<span class="w">${it[0]}</span>`));
+          if(tries===0)score++; const pz=praise(); fb.textContent=pz; fb.classList.add('good'); sfx('good'); confetti(30);
+          say([pz,it[0]]); st.textContent='⭐'.repeat(score)+'☆'.repeat(N-q-1); q++; setTimeout(ask,2000);}
+        else{tries++;b.classList.remove('wrong');void b.offsetWidth;b.classList.add('wrong');sfx('oops');fb.textContent='Try again!';fb.className='feedback oops';say([it[0],'Try again!']);}
+      }; opts.append(b)});
+    setTimeout(()=>say(pr.textContent),300);
+  }
+  function finish(){
+    setDone(w.id); sfx('win'); confetti(140);
+    p.innerHTML=`<div class="stage"><div class="bigpic">${STK[w.id-1]}</div><div class="prompt">You did it, Junseo!</div>
+      <p class="hint sub">${score} / ${N} 첫 번에 맞혔어요. WEEK ${w.id} 스티커를 받았어요!</p>
+      <button class="btn" id="re">한 번 더 하기</button></div>`;
+    say('You did it, Junseo! Here is your sticker!');
+    document.querySelector('.stick').outerHTML=stickerBar();
+    p.querySelector('#re').onclick=()=>tabQuiz(w,p);
+  }
+  ask();
+}
+function modes(p,a,b,fa,fb){
+  p.innerHTML=`<div class="mode"><button class="btn">${a}</button><button class="btn ghost">${b}</button></div><div id="g"></div>`;
+  const ms=p.querySelectorAll('.mode button');
+  ms.forEach((x,i)=>x.onclick=()=>{ms.forEach(y=>y.className='btn ghost');x.className='btn';(i?fb:fa)()});
+  return p.querySelector('#g');
+}
+
+// ---------- WEEK 1 play ----------
+const FACES={happy:{e:'😊',eye:'M-4 0a4 4 0 0 1 8 0',m:'M-30 0 Q0 30 30 0'},sad:{e:'😢',eye:'M-4 0a4 4 0 0 0 8 0',m:'M-28 16 Q0 -8 28 16'},
+ angry:{e:'😠',eye:'M-6 -4 L6 2',m:'M-24 10 Q0 -6 24 10'},sleepy:{e:'😴',eye:'M-6 0 L6 0',m:'M-10 8 Q0 14 10 8'},
+ scared:{e:'😨',eye:'M0 0m-6 0a6 6 0 1 0 12 0a6 6 0 1 0 -12 0',m:'M-18 10 Q-9 0 0 10 Q9 0 18 10'},surprised:{e:'😲',eye:'M0 0m-6 0a6 6 0 1 0 12 0a6 6 0 1 0 -12 0',m:'M0 8m-12 0a12 12 0 1 0 24 0a12 12 0 1 0 -24 0'}};
+function faceSVG(k){const f=FACES[k];return `<svg class="face" viewBox="-100 -100 200 200" role="img" aria-label="${k} face">
+ <circle r="90" fill="#FFD9A8" stroke="#E0A867" stroke-width="5"/><circle cx="-62" cy="22" r="13" fill="#F7A6B8" opacity=".7"/><circle cx="62" cy="22" r="13" fill="#F7A6B8" opacity=".7"/>
+ <path d="M-60 -70 Q0 -110 60 -70 Q30 -88 0 -84 Q-30 -88 -60 -70Z" fill="#5A3A22"/>
+ <g transform="translate(-34 -18)"><path d="${f.eye}" fill="#2B1B10" stroke="#2B1B10" stroke-width="5" stroke-linecap="round"/></g>
+ <g transform="translate(34 -18) ${k==='angry'?'scale(-1 1)':''}"><path d="${f.eye}" fill="#2B1B10" stroke="#2B1B10" stroke-width="5" stroke-linecap="round"/></g>
+ <g transform="translate(0 32)"><path d="${f.m}" fill="${/surprised|scared/.test(k)?'#8A2C2C':'none'}" stroke="#8A2C2C" stroke-width="6" stroke-linecap="round"/></g>
+ ${k==='sad'?'<path d="M-36 -4 q-6 14 0 18 q6 -4 0 -18z" fill="#7EC8F2"/>':''}${k==='sleepy'?'<text x="52" y="-50" font-size="30" fill="#5B6782" font-family="Fredoka">z z</text>':''}</svg>`}
+function playFeel(w,p){
+  const g=modes(p,'😊 Feeling Mask','🙆‍♂️ Simon Says',feel,simon);
+  function feel(){let k='happy';
+    g.innerHTML=`<div class="stage"><p class="hint sub">기분을 고르면 얼굴이 바뀌어요. 준서도 같은 표정을 지어 봐요!</p>
+      <div id="fc">${faceSVG(k)}</div><div class="prompt" id="fl">I'm happy!</div>
+      <div class="feelbar">${Object.entries(FACES).map(([n,f])=>`<button data-k="${n}" aria-pressed="${n===k}" aria-label="${n}">${f.e}</button>`).join('')}</div>
+      <button class="btn ghost" id="ask">🤔 How do you feel?</button></div>`;
+    g.querySelectorAll('.feelbar button').forEach(b=>b.onclick=()=>{k=b.dataset.k;g.querySelectorAll('.feelbar button').forEach(x=>x.setAttribute('aria-pressed',x===b));
+      g.querySelector('#fc').innerHTML=faceSVG(k);g.querySelector('#fl').textContent=`I'm ${k}!`;say(`I'm ${k}!`)});
+    g.querySelector('#ask').onclick=()=>say('How do you feel?');}
+  function simon(){const parts=WEEKS[0].groups[0].items;
+    g.innerHTML=`<div class="stage"><p class="hint sub">듣고 몸을 만져요! 만졌으면 ✅를 눌러요.</p><div class="bigpic" id="sp">🙆‍♂️</div>
+      <div class="prompt" id="st">Ready?</div><div class="opts"><button class="btn" id="go">▶ Start</button><button class="btn ghost" id="ok" hidden>✅ I did it!</button></div><div class="stars" id="fb"></div></div>`;
+    let n=0;const go=g.querySelector('#go'),ok=g.querySelector('#ok');
+    function next(){const it=parts[Math.floor(Math.random()*parts.length)];const t=`Touch your ${it[0]}!`;
+      g.querySelector('#sp').textContent=it[2];g.querySelector('#st').textContent=t;say(t);go.hidden=true;ok.hidden=false;}
+    go.onclick=next; ok.onclick=()=>{n++;g.querySelector('#fb').textContent='⭐'.repeat(Math.min(n,10));sfx('good');if(n%5===0)confetti(60);say(praise());setTimeout(next,1500)};}
+  feel();
+}
+
+// ---------- WEEK 2 play ----------
+const SOMETIMES=['candy','pizza','ice cream','french fries'];
+function playFood(w,p){
+  const items=allItems(w); const g=modes(p,'🧺 Every day or Sometimes?','🍽️ My Healthy Plate',sort,plate);
+  function sort(){
+    const deck=shuffle([...items.filter(i=>SOMETIMES.includes(i[0])),...shuffle(items.filter(i=>!SOMETIMES.includes(i[0]))).slice(0,6)]);let i=0,ok=0;
+    g.innerHTML=`<div class="stage"><p class="hint sub">매일 먹어도 좋은 음식일까, 가끔 먹는 음식일까?</p>
+      <div class="bigpic" id="fd"></div><div class="prompt" id="fn"></div>
+      <div class="baskets"><button class="basket b-day" data-a="d"><span class="p">💪</span><b>Every day</b><span>매일 먹어요</span></button>
+      <button class="basket b-some" data-a="s"><span class="p">🎈</span><b>Sometimes</b><span>가끔 먹어요</span></button></div>
+      <div class="feedback" id="fb"></div><div class="stars" id="sc"></div></div>`;
+    function show(){ if(i>=deck.length){sfx('win');confetti(120);g.querySelector('.stage').innerHTML=`<div class="bigpic">🥗</div><div class="prompt">Great sorting!</div><p class="hint sub">${ok}개 맞혔어요!</p><button class="btn" id="r">다시 하기</button>`;say('Great sorting, Junseo!');g.querySelector('#r').onclick=sort;return;}
+      const it=deck[i];g.querySelector('#fd').textContent=it[2];g.querySelector('#fn').textContent=it[0];g.querySelector('#fb').textContent='';say(it[0]);}
+    g.querySelectorAll('.basket').forEach(b=>b.onclick=()=>{const it=deck[i];if(!it)return;const some=SOMETIMES.includes(it[0]);const fb=g.querySelector('#fb');
+      if((b.dataset.a==='s')===some){ok++;sfx('good');fb.className='feedback good';const t=some?sometimesLine(it[0]):'Yes! This is healthy!';fb.textContent=t;
+        say(t);g.querySelector('#sc').textContent='⭐'.repeat(ok);i++;setTimeout(show,2000);}
+      else{sfx('oops');fb.className='feedback oops';fb.textContent='Hmm, try again!';say('Hmm, try again!');}});
+    show();}
+  function plate(){const on=[];
+    g.innerHTML=`<div class="stage"><p class="hint sub">좋아하는 건강한 음식을 골라 식판을 채워요 (최대 6개)</p>
+      <div class="plate" id="pl"></div><div class="pick">${items.map((it,ix)=>`<button data-i="${ix}" aria-label="${it[0]}">${it[2]}</button>`).join('')}</div>
+      <div class="opts"><button class="btn" id="read">📣 This is my plate!</button><button class="btn ghost" id="clr">비우기</button></div><div class="feedback" id="fb"></div></div>`;
+    const pl=g.querySelector('#pl'),fb=g.querySelector('#fb');
+    g.querySelectorAll('.pick button').forEach(b=>b.onclick=()=>{const it=items[b.dataset.i];
+      if(on.length>=6){fb.className='feedback oops';fb.textContent='My plate is full!';say('My plate is full!');return;}
+      on.push(it);pl.append($(`<span>${it[2]}</span>`));say(`I have ${it[3]}.`);fb.textContent='';});
+    g.querySelector('#clr').onclick=()=>{on.length=0;pl.innerHTML='';fb.textContent=''};
+    g.querySelector('#read').onclick=()=>{if(!on.length){say('Choose some food!');return;}
+      const names=[...new Set(on.map(x=>x[3]))]; const some=on.some(x=>SOMETIMES.includes(x[0]));const end=some?'Some are sometimes food!':"It's healthy!";
+      fb.className='feedback good';fb.textContent=end;sfx('win');confetti(80);say(['This is my healthy plate.',...names.map(n=>`I have ${n}.`),end]);};}
+  sort();
+}
+const cap=s=>s[0].toUpperCase()+s.slice(1);
+const sometimesLine=n=>`${cap(n)} ${PLURAL.includes(n)?'are':'is'} a sometimes food.`;
+
+// ---------- WEEK 3 play ----------
+const WORKS=[['doctor','hospital'],['teacher','school'],['firefighter','fire station'],['police officer','police station'],['chef','restaurant'],['farmer','farm'],['baker','bakery']];
+function playTown(w,p){
+  const H=Object.fromEntries(w.groups[0].items.map(i=>[i[0],i])),P=Object.fromEntries(w.groups[1].items.map(i=>[i[0],i]));
+  const g=modes(p,'🏘️ Who works here?','🌟 I want to be…',who,be);
+  function who(){const deck=shuffle(WORKS).slice(0,5);let i=0,ok=0;
+    g.innerHTML=`<div class="stage"><p class="hint sub">이곳에서 일하는 사람은 누구일까요?</p><div class="bigpic" id="pc"></div><div class="prompt" id="pq"></div>
+      <div class="opts" id="op"></div><div class="feedback" id="fb"></div><div class="stars" id="sc"></div></div>`;
+    function show(){if(i>=deck.length){sfx('win');confetti(120);g.querySelector('.stage').innerHTML=`<div class="bigpic">🏘️</div><div class="prompt">You know my town!</div><button class="btn" id="r">다시 하기</button>`;say('Wow! You know my town!');g.querySelector('#r').onclick=who;return;}
+      const [h,pl]=deck[i];const q=`Who works at the ${pl}?`;g.querySelector('#pc').textContent=P[pl][2];g.querySelector('#pq').textContent=q;g.querySelector('#fb').textContent='';say(q);
+      const op=g.querySelector('#op');op.innerHTML='';let locked=false;
+      shuffle([h,...shuffle(WORKS.map(x=>x[0]).filter(x=>x!==h)).slice(0,2)]).forEach(n=>{const b=$(`<button class="opt"><span class="p">${H[n][2]}</span><span class="w">${n}</span></button>`);
+        b.onclick=()=>{if(locked)return;const fb=g.querySelector('#fb');if(n===h){locked=true;b.classList.add('right');ok++;sfx('good');fb.className='feedback good';const ans=`The ${h} works at the ${pl}!`;fb.textContent=ans;say(ans);g.querySelector('#sc').textContent='⭐'.repeat(ok);i++;setTimeout(show,2600);}
+          else{b.classList.add('wrong');sfx('oops');fb.className='feedback oops';fb.textContent='Try again!';say([n,'Try again!']);}};op.append(b)});}
+    show();}
+  function be(){g.innerHTML=`<div class="stage"><p class="hint sub">커서 무엇이 되고 싶어? 눌러서 말해 봐요!</p><div class="bigpic" id="me">🧒</div><div class="prompt" id="mt">What do you want to be?</div>
+      <div class="opts">${w.groups[0].items.map((it,ix)=>`<button class="opt" data-i="${ix}"><span class="p">${it[2]}</span><span class="w">${it[0]}</span></button>`).join('')}</div></div>`;
+    say('What do you want to be?');
+    g.querySelectorAll('.opt').forEach(b=>b.onclick=()=>{const it=w.groups[0].items[b.dataset.i];const t=`I want to be ${art(it[0])}!`;g.querySelector('#me').textContent=it[2];g.querySelector('#mt').textContent=t;say(t)});}
+  who();
+}
+
+// ---------- WEEK 4 play ----------
+const SPOTS=[[50,22],[30,30],[70,30],[20,46],[42,40],[60,42],[80,48],[33,56],[67,58],[50,54]];
+const NUM=['zero','one','two','three'];
+function playThanks(w,p){
+  const g=modes(p,'🌳 Thankful Tree',"🍪 Let's Share",tree,share);
+  function tree(){const list=w.groups[1].items;let n=0;
+    g.innerHTML=`<div class="stage"><p class="hint sub">고마운 것을 누르면 감사 나무에 나뭇잎이 달려요</p>
+      <div class="tree" id="tr"><svg viewBox="0 0 100 100" aria-hidden="true"><path d="M46 96 L47 62 Q38 54 28 50 M47 62 Q52 50 50 38 M48 70 Q60 60 72 54" stroke="#8B5A2B" stroke-width="5" fill="none" stroke-linecap="round"/><path d="M42 96 L58 96 L54 60 L46 60 Z" fill="#8B5A2B"/></svg></div>
+      <div class="prompt" id="tt">I am thankful for…</div>
+      <div class="opts">${list.map((it,ix)=>`<button class="opt" data-i="${ix}"><span class="p">${it[2]}</span><span class="w">${it[0]}</span></button>`).join('')}</div>
+      <button class="btn ghost" id="cl">나무 비우기</button></div>`;
+    const tr=g.querySelector('#tr');
+    g.querySelectorAll('.opt').forEach(b=>b.onclick=()=>{const it=list[b.dataset.i];const t=`I am thankful for ${it[0]}.`;g.querySelector('#tt').textContent=t;say(t);sfx('good');
+      if(n<SPOTS.length){const [x,y]=SPOTS[n++];const l=$(`<span class="leaf">${['🍂','🍁','🍃'][n%3]}</span>`);l.style.left=x+'%';l.style.top=y+'%';tr.append(l);
+        const m=$(`<span class="leaf" style="font-size:22px">${it[2]}</span>`);m.style.left=x+'%';m.style.top=(y+7)+'%';tr.append(m);if(n===SPOTS.length)confetti(100);}});
+    g.querySelector('#cl').onclick=tree;}
+  function share(){let left=6,you=0,me=0,turn=0;
+    g.innerHTML=`<div class="stage"><p class="hint sub">쿠키를 눌러서 친구랑 사이좋게 나눠요</p><div class="prompt" id="sh">Let's share!</div>
+      <div class="pile" style="max-width:none;width:100%"><div class="c" id="jar"></div></div>
+      <div class="cookies"><div class="pile"><span class="who">🧒</span><span>Friend</span><div class="c" id="y"></div></div><div class="pile"><span class="who">😊</span><span>Junseo</span><div class="c" id="m"></div></div></div>
+      <button class="btn ghost" id="r">다시 하기</button></div>`;
+    const jar=g.querySelector('#jar');function draw(){jar.innerHTML='';for(let k=0;k<left;k++){const b=$(`<button style="font-size:48px" aria-label="cookie">🍪</button>`);b.onclick=give;jar.append(b)}
+      g.querySelector('#y').textContent='🍪'.repeat(you);g.querySelector('#m').textContent='🍪'.repeat(me);}
+    function give(){left--;let t;if(turn%2===0){you++;t='One for you!'}else{me++;t='One for me!'}turn++;sfx('good');
+      const lines=[t]; if(left===0){lines.push("We have three each. Yay! Let's eat together!");sfx('win');confetti(100);}
+      g.querySelector('#sh').textContent=left?t:'Same, same! 😊';say(lines);draw();}
+    say("Let's share!");g.querySelector('#r').onclick=share;draw();}
+  tree();
+}
+
+// ---------- every line the page can say (for the recording script) ----------
+function lineList(){const L=new Set(["Hi, Junseo! I'm Miso. Let's play!",'You did it, Junseo! Here is your sticker!','Try again!','Hmm, try again!',...PRAISE]);
+  WEEKS.forEach(w=>{L.add(w.title);allItems(w).forEach(i=>{L.add(i[0]);L.add(whereQ(i[0]))});w.sents.forEach(s=>L.add(s[1]));w.talk.forEach(t=>L.add(t[1]));});
+  Object.keys(FACES).forEach(k=>L.add(`I'm ${k}!`));L.add('How do you feel?');
+  WEEKS[0].groups[0].items.forEach(i=>L.add(`Touch your ${i[0]}!`));
+  const f=allItems(WEEKS[1]);SOMETIMES.forEach(s=>L.add(sometimesLine(s)));f.forEach(i=>L.add(`I have ${i[3]}.`));
+  ['Yes! This is healthy!','Great sorting, Junseo!','My plate is full!','Choose some food!','This is my healthy plate.','Some are sometimes food!',"It's healthy!"].forEach(x=>L.add(x));
+  WORKS.forEach(([h,p])=>{L.add(`Who works at the ${p}?`);L.add(`The ${h} works at the ${p}!`)});['Wow! You know my town!','What do you want to be?'].forEach(x=>L.add(x));
+  WEEKS[2].groups[0].items.forEach(i=>L.add(`I want to be ${art(i[0])}!`));
+  WEEKS[3].groups[1].items.forEach(i=>L.add(`I am thankful for ${i[0]}.`));["Let's share!",'One for you!','One for me!',"We have three each. Yay! Let's eat together!"].forEach(x=>L.add(x));
+  return [...L];}
+window.voiceLines=()=>lineList().map(t=>({file:slug(t)+'.mp3',text:t}));
+
+function route(){const m=location.hash.match(/^#week([1-4])$/);window.scrollTo(0,0);m?week(+m[1]):(app.removeAttribute('style'),home());}
+window.addEventListener('hashchange',route);route();
+</script>
+</html>
