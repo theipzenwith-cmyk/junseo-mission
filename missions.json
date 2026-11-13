@@ -1,6 +1,14 @@
 {
   "games": [
     {
+      "title": "영어 놀이터",
+      "emoji": "🐰",
+      "desc": "11월 원어민 수업 예습 (4주)",
+      "url": "english/index.html",
+      "active": true,
+      "tag": "new"
+    },
+    {
       "title": "개구리 게임",
       "emoji": "🐸",
       "desc": "개구리를 점프시켜요",
